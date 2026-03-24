@@ -9,3 +9,15 @@ data/docs_selected.jsonl
 .mypy_cache/
 .venv
 logs/
+
+# Parameter Golf research workspace runtime artifacts
+research_lab_pg/projects/parameter_golf_science/artifacts/
+research_lab_pg/projects/parameter_golf_science/logs/
+research_lab_pg/projects/parameter_golf_science/runs/
+research_lab_pg/projects/parameter_golf_science/tmp/
+research_lab_pg/projects/parameter_golf_science/inputs/proposal.md
+research_lab_pg/projects/parameter_golf_science/context/*.json
+research_lab_pg/projects/parameter_golf_science/context/reference_materials_index.json
+research_lab_pg/projects/parameter_golf_science/planning/review_notes/
+research_lab_pg/projects/parameter_golf_science/planning/round_instructions/
+research_lab_pg/projects/parameter_golf_science/reports/round_summaries/

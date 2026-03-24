@@ -1,0 +1,2126 @@
+{
+  "generated_at_utc": "2026-03-24T09:50:41Z",
+  "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
+  "repo_root": "/newcpfs/lxh/parameter-golf",
+  "external_sota_bpb": 1.1228,
+  "latest_sota": {
+    "source": "https://raw.githubusercontent.com/openai/parameter-golf/main/README.md",
+    "top_run": "11L EMA + GPTQ-lite + warmdown3500",
+    "top_author": "signalrush",
+    "top_score": 1.1228,
+    "entries": [
+      "1. `11L EMA + GPTQ-lite + warmdown3500` | score `1.1228` | signalrush | 2026-03-22 | On PR #374: GPTQ-lite clip search + EMA, plus warmdown3500 and QAT@0.15",
+      "2. `11L Partial RoPE + LN Scale + EMA + XSA4` | score `1.1248` | jfprincz | 2026-03-21 | On PR #287: Partial RoPE (16/64) + layerwise LN scale",
+      "3. `11L XSA4 + EMA + Int6 MLP3x` | score `1.1271` | jfprincz | 2026-03-20 | On PR #198: XSA on the last 4 layers + EMA replacing SWA",
+      "4. `11L Efficient Partial XSA` | score `1.1307` | unnir | 2026-03-20 | On PR #198: Efficient Partial XSA on the deepest 3 layers"
+    ],
+    "motifs": [
+      "`Int6 quantization` appears in 5 of the current top 8 leaderboard entries.",
+      "`BigramHash` appears in 3 of the current top 8 leaderboard entries.",
+      "`EMA` appears in 3 of the current top 8 leaderboard entries.",
+      "`MLP3x` appears in 3 of the current top 8 leaderboard entries."
+    ]
+  },
+  "local_best_bpb": {
+    "val_bpb": 1.20227788,
+    "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
+    "matched_text": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002` | Candidate: `1.20227788`"
+  },
+  "gap_to_sota": 0.079478,
+  "latest_status_sections": {
+    "Current Best Evidence": "- External SOTA review indicates the main repo baseline is behind on evaluation and export protocol, not just on architecture.\n- The root `train_gpt.py` now supports explicit `non_overlapping` and `sliding_window` evaluation modes, plus `both` for direct comparison, with stride and wall-clock time logged for both pre-export and post-export evaluation.\n- The real local `eval_001` comparison is now measured on one fresh baseline checkpoint plus its matching `int8+zlib` artifact, and the result is decision-quality: `sliding_window stride=64` improved the same pair by about `-0.0316` pre-export and `-0.0318` post-export.\n- The real local `export_001` comparison is now measured on that same checkpoint with a fixed `int8` payload, and the result is also decision-quality: `zstd-22` reduced artifact bytes by `37362` (`-0.2367%`) versus `zlib-9` with exact roundtrip tensor equality and identical post-export `val_bpb`.\n- The real local `export_002` comparison is now measured on that same locked checkpoint with fixed `zstd-22`, and it rules out broad lower-bit export on this checkpoint: `uniform int6` cut artifact bytes by `3365248` (`-21.3692%`) versus regenerated `uniform int8`, but post-export `val_bpb` worsened by `+0.07313349`, far beyond the allowed `+0.003`.\n- The real local `export_003` comparison is now measured on that same locked checkpoint with fixed `zstd-22`, and it shows that selective export remains viable: `mlp_int6_else_int8` cut artifact bytes by `1801491` (`-11.4392%`) versus regenerated `uniform int8`, while post-export `val_bpb` worsened by only `+0.00263128`.\n- The real local `export_004` comparison is now measured on that same locked checkpoint with fixed `zstd-22`, and it suggests the selective export frontier is near saturation: adding `blocks.*.attn.proj.weight -> int6` on top of `MLP-only int6` cut artifact bytes by `2270838` (`-14.4195%`) versus regenerated `uniform int8`, but post-export `val_bpb` worsened by `+0.00300190`, just beyond the explicit guardrail.\n- The real local `opt_001` comparison is now measured on one retrain that changed only `WARMDOWN_ITERS` from `1200` to `3000`, and it modestly improves export robustness under the locked readout: fixed `mlp_int6_else_int8 + zstd-22` improved from `1.22768330` to `1.22696259` and its quantization gap fell from `+0.00762931` to `+0.00682063`, although checkpoint `val_bpb` was essentially flat at `1.22014196` versus `1.22005399`.\n- The real local `export_005` retest is now measured on the warmdown-3000 checkpoint with all three regenerated readouts in one run, and it closes the open export question cleanly: `mlp_int6_plus_attn_proj_int6_else_int8` improved to `1.22740875` from the historical `1.22805392`, but it still regressed by `+0.00313158` versus regenerated `uniform int8`, so the guardrail still fails.\n- The real local `opt_002` comparison is now measured on one retrain that changed only `MUON_MOMENTUM_WARMUP_STEPS` from `500` to `1500` on top of `WARMDOWN_ITERS=3000`, and it gives another modest export-robustness gain under the locked readout: regenerated `mlp_int6_else_int8 + zstd-22` improved from `1.22696259` to `1.22676204` and its quantization gap fell from `+0.00682063` to `+0.00614561`, while checkpoint `val_bpb` worsened from `1.22014196` to `1.22061644` and regenerated `uniform int8 + zstd-22` stayed essentially flat at `1.22429451` versus `1.22427718`.\n- The real local `arch_001` comparison is now measured on one retrain that changed only `MLP_MULT` from `2` to `3` on top of the locked `opt_002` recipe, and it gives a large quality gain on checkpoint and both exported readouts: checkpoint `val_bpb` improved from `1.22061644` to `1.20227788`, regenerated `uniform int8 + zstd-22` improved from `1.22429451` to `1.20534335`, and regenerated `mlp_int6_else_int8 + zstd-22` improved from `1.22676204` to `1.20764933`; however, both exported artifacts exceeded the 16 MB cap at totals `19989838` and `17326746`, so this exact configuration is negative for the submission objective.",
+    "Most Important Open Question": "After `MLP3x` proved quality-positive but byte-negative, which single architecture lever can recover some of that gain while staying inside the 16 MB cap under the locked export protocol?",
+    "Active Experiment ID": "`arch_001_mlp_3x_capacity_under_locked_export_protocol`",
+    "Latest Result Summary": "- Ran one controlled architecture-only retrain in `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_001_mlp_3x_capacity_under_locked_export_protocol` using:\n  - baseline checkpoint lineage `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/opt_002_longer_muon_momentum_warmup_for_selective_export_robustness`\n  - real tokenizer `/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model`\n  - real validation shard `/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_val_000000.bin`\n  - fixed comparison standard `EVAL_MODE=sliding_window EVAL_STRIDE=64`\n  - distributed launch on 8 local L20Z GPUs via `tools/gpu_experiment_runner.py`\n  - fixed training recipe `WARMDOWN_ITERS=3000`, `MUON_MOMENTUM_WARMUP_STEPS=1500`\n  - changed only one architecture variable: `MLP_MULT=2 -> 3`\n- The retrain preserved the same wallclock-limited launch shape and stopped at step `5600`; final checkpoint metrics were:\n  - `non_overlapping`: `val_bpb=1.2336`, `eval_time=4239ms`\n  - `sliding_window stride=64`: `val_bpb=1.20227788`, `eval_time=71964ms`\n- The fixed export comparison runner then regenerated exactly two readouts on that checkpoint and checked exact roundtrip equality for each serialized payload. Because the comparison tool defaults to `MLP_MULT=2`, the successful scored run explicitly set `MLP_MULT=3` during export loading so the model shape matched the checkpoint:\n  - `roundtrip_raw_bytes_equal=True`\n  - `roundtrip_quantized_tensor_equal=True`\n  - `roundtrip_exact=True`\n  - `uniform int8+zstd-22`: `19928545` bytes, total `19989838`, post-export `val_bpb=1.20534335`, quantization gap `+0.00306546`, export `2633.16ms`, load `149.29ms`\n  - `mlp_int6_else_int8+zstd-22`: `17265453` bytes, total `17326746`, post-export `val_bpb=1.20764933`, quantization gap `+0.00537144`, export `2100.34ms`, load `1225.48ms`\n  - delta `mlp_int6_else_int8 - regenerated uniform int8`: `-2663092` artifact bytes (`-13.3632%`), `+0.00230598 val_bpb`, and `+0.00230598` quantization gap\n  - delta versus `opt_002` for regenerated `mlp_int6_else_int8`: `+3326199` artifact bytes, `-0.01911272 val_bpb`, and `-0.00077417` quantization gap\n  - delta versus `opt_002` for regenerated `uniform int8`: `+4187828` artifact bytes, `-0.01895116 val_bpb`, and `-0.00061261` quantization gap\n- Decision:\n  - `MLP3x` is a much stronger quality lever than the recent schedule micro-tuning rounds in this recipe family, but it is not admissible under the current locked export protocol because both fixed exported artifacts miss the byte cap by a wide margin",
+    "Recommended Next Step": "Keep `WARMDOWN_ITERS=3000`, `MUON_MOMENTUM_WARMUP_STEPS=1500`, `sliding_window stride=64`, `zstd-22`, and the fixed export readouts, then run one single-variable architecture experiment such as `NUM_LAYERS=10` with `MLP_MULT=2` to test whether depth buys a better quality-per-byte trade than `MLP3x`."
+  },
+  "next_experiment_sections": {
+    "Experiment ID": "`arch_002_depth_10l_under_locked_export_protocol`",
+    "Category": "- architecture",
+    "Baseline / Comparison": "Locked local optimization/export baseline after the completed negative `arch_001_mlp_3x_capacity_under_locked_export_protocol` result:\n- byte-safe baseline checkpoint lineage `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/opt_002_longer_muon_momentum_warmup_for_selective_export_robustness`\n- fixed local evaluation standard `EVAL_MODE=sliding_window EVAL_STRIDE=64`\n- fixed export container `zstd-22`\n- fixed export readouts for scoring: regenerated `uniform int8 + zstd-22` and regenerated `mlp_int6_else_int8 + zstd-22`\n- most relevant locked numbers from `opt_002`:\n  - checkpoint `val_bpb=1.22061644`\n  - regenerated `uniform int8 + zstd-22` post-export `val_bpb=1.22429451`\n  - regenerated `mlp_int6_else_int8 + zstd-22` post-export `val_bpb=1.22676204`\n  - regenerated `uniform int8 + zstd-22` total submission bytes `15802010`\n  - regenerated `mlp_int6_else_int8 + zstd-22` total submission bytes `14000547`\n\nCandidate:\n- keep the improved optimization/export protocol fixed\n- retrain once with only `NUM_LAYERS: 9 -> 10`",
+    "Hypothesis": "If the remaining gap is better addressed by a more export-efficient form of capacity than `MLP 3x`, then adding one layer while keeping `MLP_MULT=2` should recover some of the architecture-side quality gain while staying within the fixed byte cap.",
+    "Why It Might Work": "`arch_001` showed that extra capacity clearly helps quality on this recipe family, but the `MLP 3x` form overshot the byte cap by a large margin even after fixed selective export. A single extra layer is the next clean architecture-side lever from the current SOTA motif list, and it may spend bytes more efficiently than tripling every block MLP.",
+    "Minimal Intervention": "Run one retrain that changes only `NUM_LAYERS`, then score the resulting checkpoint with regenerated `uniform int8 + zstd-22` and regenerated `mlp_int6_else_int8 + zstd-22`. Do not change evaluation protocol, container, export policy, `MLP_MULT`, or the already-tested warmdown and Muon warmup settings in the same round.",
+    "Variables To Change": "- `NUM_LAYERS`: `9 -> 10`",
+    "Variables To Hold Fixed": "- tokenizer\n- dataset and validation shard pattern\n- optimizer family and optimizer hyperparameters\n- `WARMDOWN_ITERS=3000`\n- `MUON_MOMENTUM_WARMUP_STEPS=1500`\n- `MLP_MULT=2`\n- total wallclock-limited training setup\n- distributed launch shape\n- evaluation mode: `sliding_window`\n- evaluation stride: `64`\n- export container: `zstd-22`\n- export schema\n- export readouts used for scoring: regenerated `uniform int8 + zstd-22` and regenerated `mlp_int6_else_int8 + zstd-22`\n- metric definitions and reporting fields",
+    "Success Metric": "Primary:\n- improve regenerated `mlp_int6_else_int8 + zstd-22` post-export `val_bpb` versus `1.22676204` while keeping total submission bytes within the 16 MB cap\n- improve regenerated `uniform int8 + zstd-22` post-export `val_bpb` versus `1.22429451` while keeping total submission bytes within the 16 MB cap\n\nSecondary:\n- improve checkpoint `val_bpb` versus `1.22061644`\n- avoid materially worsening the `mlp_int6_else_int8` quantization gap versus `+0.00614561`\n- preserve exact export roundtrip/load correctness",
+    "Failure Interpretation": "If `10L / MLP2x` still misses the byte cap or fails to improve exported readouts, then the remaining architecture-side progress likely requires stronger export machinery rather than another simple capacity reallocation within the current clean recipe.",
+    "Redundancy Check": "- This is not redundant with `opt_001`, which changed only `WARMDOWN_ITERS`.\n- This is not redundant with `opt_002`, which changed only `MUON_MOMENTUM_WARMUP_STEPS`.\n- This is not redundant with `arch_001`, which changed only `MLP_MULT` and improved quality but failed the byte cap.\n- This does not reopen closed export-subset search; it keeps the export policy fixed and asks one different architecture-side question.",
+    "Execution Plan": "1. Reuse the locked `opt_002` recipe and change only `NUM_LAYERS` from `9` to `10`.\n2. Retrain once under the same wallclock-limited distributed setup.\n3. Evaluate the resulting checkpoint under `EVAL_MODE=sliding_window EVAL_STRIDE=64`.\n4. Regenerate and score `uniform int8 + zstd-22` on that checkpoint.\n5. Regenerate and score `mlp_int6_else_int8 + zstd-22` on that checkpoint.\n6. Validate roundtrip/load correctness for both exported artifacts.\n7. Compare checkpoint `val_bpb`, post-export `val_bpb`, quantization gap, bytes, export time, and load time against `opt_002`.",
+    "Expected Effect": "If `MLP 3x` was the right direction but the wrong byte trade, one extra layer should deliver a smaller quality gain than `arch_001` but may do so with materially better byte efficiency and therefore a better chance of being admissible under the fixed export protocol."
+  },
+  "experiment_rows": [
+    {
+      "Date (UTC)": "2026-03-23",
+      "ID": "`eval_001_sliding_window_lockin_smoke`",
+      "Category": "evaluation",
+      "Baseline / Comparison": "Same tiny synthetic checkpoint and same int8+zlib artifact scored with `non_overlapping` vs `sliding_window` in updated root `train_gpt.py`",
+      "Hypothesis": "If the new evaluation selector is wired correctly, both modes should run on the same weights and exported bytes and produce sane, directly comparable metrics",
+      "Mechanism / Rationale": "The implementation adds a separate sliding-window token-accounting path while leaving export and model state untouched",
+      "Changed Variables": "`EVAL_MODE=both`; `EVAL_STRIDE=64`; tiny synthetic tokenizer/shards; smoke launcher bypassed `torch.compile` only to avoid local env issues",
+      "Held Fixed": "Weights, exported artifact bytes, architecture, export path, tokenizer within the fixture, dataset split within the fixture, metric definition",
+      "Expected Effect": "Successful execution of both modes pre-export and post-export; synthetic delta may be small or zero",
+      "Actual Result": "Pre-export: `3.96925568 -> 3.96925571` `val_bpb` (`+0.00000003`) with runtime `467ms -> 168ms`; post-export: `3.96925568 -> 3.96925571` (`+0.00000003`) with runtime `68ms -> 160ms`; real FineWeb comparison blocked because this workspace lacks the intended dataset/tokenizer assets",
+      "Interpretation": "Implementation is working and preserves apples-to-apples comparison on the same weights/artifact, but the smoke fixture is not informative about the real hypothesis; no protocol lock-in decision should be made from it",
+      "Next Step": "Re-run the same comparison on the actual FineWeb validation assets and a real checkpoint/artifact, then decide whether to lock sliding-window as the local standard"
+    },
+    {
+      "Date (UTC)": "2026-03-23",
+      "ID": "`eval_001_sliding_window_lockin_followup_asset_audit`",
+      "Category": "evaluation",
+      "Baseline / Comparison": "Reviewed-brief real-asset comparison on one existing checkpoint and one matching exported artifact under `non_overlapping` vs `sliding_window stride=64`",
+      "Hypothesis": "If the repo already contains a reusable real checkpoint/artifact pair, the real FineWeb evaluation delta can be measured without changing training or export",
+      "Mechanism / Rationale": "The local evaluation script, tokenizer, and FineWeb validation shard are already present; only model artifacts are needed for a clean evaluation-only test",
+      "Changed Variables": "Narrowed scope to asset discovery only after confirming the reviewed brief required an existing checkpoint/artifact pair",
+      "Held Fixed": "Evaluation code, tokenizer, validation shard, metric path, stride target, and no fresh training/export generation",
+      "Expected Effect": "Either locate a real reusable checkpoint/artifact pair and run the comparison, or prove the assets are unavailable",
+      "Actual Result": "Found root `train_gpt.py`, tokenizer `/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model`, and validation shard `/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_val_000000.bin`; found no preexisting real `final_model.pt`, no matching exported artifact such as `final_model.int8.ptz`, and no other checkpoint files under `/newcpfs/lxh/parameter-golf` or the research workspace except the synthetic smoke fixture in `tmp/eval_001_smoke`",
+      "Interpretation": "The reviewed experiment is blocked by missing reusable real model artifacts; running a fresh training job would change the intervention from evaluation-only to retraining-plus-evaluation and would no longer answer the brief as written",
+      "Next Step": "Recover a saved real checkpoint/export pair from prior run storage, or explicitly approve a fresh controlled retrain that generates one pair before repeating the comparison"
+    },
+    {
+      "Date (UTC)": "2026-03-23",
+      "ID": "`eval_001_asset_recovery_expanded_storage_audit`",
+      "Category": "infra",
+      "Baseline / Comparison": "Baseline blocker state after the prior workspace audit vs one more bounded search across additional accessible prior-run storage on this machine",
+      "Hypothesis": "If a reusable real checkpoint/export pair exists outside the repo workspace, a bounded storage audit should recover it and unblock the real FineWeb evaluation-only comparison without retraining",
+      "Mechanism / Rationale": "The evaluation code, tokenizer, and validation shard are already confirmed; only prior-run storage discovery could satisfy the brief without changing the intervention",
+      "Changed Variables": "Storage search scope only: `/newcpfs/lxh/physicslm_backups`, `/newcpfs/lxh/.cache`, `/newcpfs/lxh/.codex/tmp`, `/newcpfs/lxh/.qwen/tmp`, and a bounded filename sweep across the remaining non-`parameter-golf` roots under `/newcpfs/lxh`",
+      "Held Fixed": "Evaluation script, tokenizer path, FineWeb validation shard path, metric definition, export expectations, no training, no export, no code changes",
+      "Expected Effect": "Either recover one real matching pair with exact provenance or produce a definitive negative result for all additionally accessible storage",
+      "Actual Result": "No candidate `final_model.pt`, exported `.ptz`, or other plausible checkpoint/export pair was found in any newly searched location; the only experiment-like backup was `/newcpfs/lxh/physicslm_backups/hardtok_analysis_20260306_040545`, whose metadata points to `/tmp/physicslm_hardtok_analysis` and whose `landscape_probe.json` references `/tmp/physicslm_hardtok_demo/checkpoints/0000000050`, not accessible persistent storage for this repo",
+      "Interpretation": "The evaluation-only brief remains blocked after expanding the search beyond the repo workspace; another recovery-only round would be redundant unless a genuinely new storage location is identified",
+      "Next Step": "Explicitly authorize a fresh controlled retrain-plus-evaluation round if the goal is still to measure the local `non_overlapping` vs `sliding_window stride=64` delta"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`eval_001_retrain_then_compare_real_pair`",
+      "Category": "evaluation",
+      "Baseline / Comparison": "Fresh real baseline checkpoint/export pair from one baseline `train_gpt.py` run; compare `non_overlapping` vs `sliding_window stride=64` on that same checkpoint and same exported artifact",
+      "Hypothesis": "On the same real checkpoint and matching exported artifact, `sliding_window stride=64` should materially reduce measured pre-export and post-export `val_bpb` enough to justify adopting it as the local standard",
+      "Mechanism / Rationale": "Sliding-window scoring restores left context that `non_overlapping` scoring discards; the synthetic smoke already validated correctness, so the remaining question was the real FineWeb effect size",
+      "Changed Variables": "Fresh baseline asset generation only; evaluation mode `non_overlapping` vs `sliding_window`; `EVAL_STRIDE=64`; operationally narrowed execution from 1 GPU to the same baseline recipe on 8 GPUs because full real-asset dual-mode eval was impractical on one local L20Z",
+      "Held Fixed": "Code version, tokenizer, validation shard, architecture, sequence length, training hyperparameters, checkpoint weights, exported artifact bytes, quantization/export path, metric definition",
+      "Expected Effect": "Produce one real checkpoint plus one matching exported artifact and measure a clear `val_bpb` delta in both pre-export and post-export comparisons",
+      "Actual Result": "Baseline completed in `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_001_retrain_then_compare`; final pre-export at step `6180`: `1.2515` non-overlapping vs `1.2199` sliding-window (`-0.0316`) with runtimes `3825ms` vs `64626ms`; final post-export: `1.25689044` vs `1.22505202` (`-0.03183842`) with runtimes `3838ms` vs `64635ms`; artifact bytes `15785852`, total submission size `15840891`",
+      "Interpretation": "The real local effect matches published evidence and is large enough to lock `sliding_window stride=64` as the local evaluation standard; runtime is much slower than `non_overlapping` but still practical on 8 GPUs, so the next bottleneck shifts to export/compression rather than evaluation",
+      "Next Step": "Keep `sliding_window stride=64` fixed in future local comparisons and run a controlled export-only compression experiment such as `zlib` vs `zstd` on the same checkpoint"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`export_001_zstd_only_after_eval_lockin`",
+      "Category": "export",
+      "Baseline / Comparison": "Same real checkpoint and same `int8` quantized payload under fixed `sliding_window stride=64`; compare outer container `zlib-9` vs `zstd-22`",
+      "Hypothesis": "If only the outer container changes, `zstd-22` should reduce artifact bytes while leaving post-export `val_bpb` unchanged because decompression reconstructs the same quantized tensors bit-for-bit",
+      "Mechanism / Rationale": "Container compression is the lowest-risk post-eval export lever and can be isolated without retraining or changing precision policy",
+      "Changed Variables": "Added backend-selectable export/load helpers in root `train_gpt.py`; exported once with `zlib-9` and once with `zstd-22` via an export-only runner",
+      "Held Fixed": "Checkpoint weights, architecture, tokenizer, validation shard, eval mode/stride, quantization rule, tensor selection, metric definition, and runtime environment as much as practical",
+      "Expected Effect": "Smaller artifact bytes at zero quality cost; exact quantized-tensor roundtrip equality; measured export/load timings",
+      "Actual Result": "In `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/export_001_zstd_only_after_eval_lockin`, checkpoint eval was `1.22005399` `val_bpb`; `zlib-9` artifact was `15785852` bytes and `zstd-22` artifact was `15748490` bytes (`-37362`, `-0.2367%`); both roundtripped exactly and both scored `1.22505202` post-export with identical quantization gap `+0.00499803`; `zstd-22` export was slower (`1935ms` vs `554ms`) but load was faster (`66ms` vs `162ms`)",
+      "Interpretation": "`zstd-22` is a trustworthy replacement for `zlib-9` in the local export baseline because it saves bytes with zero measured quality cost, but the gain is small, so container compression alone is not the main remaining bottleneck",
+      "Next Step": "Keep `sliding_window stride=64` and `zstd-22` fixed, then test precision allocation such as pure `int6` or mixed `int6/int8` on the same checkpoint"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`export_002_uniform_int6_after_zstd_lockin`",
+      "Category": "export",
+      "Baseline / Comparison": "Same locked checkpoint under fixed `sliding_window stride=64` and fixed `zstd-22`; compare regenerated `uniform int8` baseline vs `uniform int6` candidate",
+      "Hypothesis": "On the locked checkpoint, changing export precision from `uniform int8` to `uniform int6` should save more bytes than the prior container-only gain while worsening post-export `val_bpb` by no more than `+0.003` relative to `int8 + zstd-22`",
+      "Mechanism / Rationale": "With evaluation and container already locked, pure lower precision is the smallest falsifiable export-only test of whether quantization precision is the next real byte lever",
+      "Changed Variables": "Added minimum root export/load support for bit-packed `uniform int6` beside the existing uniform `int8` path and ran one managed precision comparison runner",
+      "Held Fixed": "Checkpoint weights, architecture, tokenizer, validation shard pattern, tensor selection, export schema, compression backend/level `zstd-22`, eval mode `sliding_window`, eval stride `64`, metric definition, runtime environment as much as practical",
+      "Expected Effect": "Large byte reduction with acceptable roundtrip quality if broad lower-bit export is viable",
+      "Actual Result": "In `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/export_002_uniform_int6_after_zstd_lockin`, checkpoint eval was `1.22005399` `val_bpb`; regenerated `uniform int8 + zstd-22` scored `1.22505202` with artifact `15748155` bytes and quantization gap `+0.00499803`; `uniform int6 + zstd-22` scored `1.29818551` with artifact `12382907` bytes and quantization gap `+0.07813152`; both artifacts roundtripped exactly and loaded correctly; `int6` saved `3365248` artifact bytes (`-21.3692%`) but worsened `val_bpb` by `+0.07313349`; export/load times were `1946.59ms/99.67ms` for `int8` vs `1402.75ms/1373.97ms` for `int6`",
+      "Interpretation": "Pure `uniform int6` is not promising on this checkpoint: the byte win is large, but the quality loss is far beyond the allowed band, so broad lower-bit export should be deprioritized in its current form",
+      "Next Step": "Pivot away from broad uniform lower-bit export and test either selective sensitive-tensor retention / mixed precision or training-side quantization-robustness changes"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`export_003_selective_precision_retention_after_uniform_int6_failure`",
+      "Category": "export",
+      "Baseline / Comparison": "Same locked checkpoint under fixed `sliding_window stride=64` and fixed `zstd-22`; compare regenerated `uniform int8` baseline vs `mlp_int6_else_int8` candidate",
+      "Hypothesis": "If most of the `uniform int6` damage came from non-MLP tensors, lowering only `blocks.*.mlp.fc.weight` and `blocks.*.mlp.proj.weight` to `int6` should recover meaningful bytes with a much smaller post-export `val_bpb` penalty than broad `uniform int6`",
+      "Mechanism / Rationale": "MLP matrices are a large parameter share and the cleanest first selective subset; this isolates whether selective export remains viable without mixing training or evaluation changes",
+      "Changed Variables": "Added minimal per-name mixed-precision export support in root `train_gpt.py`, implemented one dedicated runner policy `mlp_int6_else_int8`, and ran one managed 8-GPU comparison",
+      "Held Fixed": "Checkpoint weights, architecture, tokenizer, validation shard pattern, eval mode `sliding_window`, eval stride `64`, compression backend/level `zstd-22`, tensor inclusion rules, metric definition, and runtime environment as much as practical",
+      "Expected Effect": "Save a meaningful fraction of the `uniform int6` bytes while keeping the post-export regression near or under the `+0.003` band relative to regenerated `uniform int8`",
+      "Actual Result": "In `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/export_003_selective_precision_retention_after_uniform_int6_failure`, checkpoint eval was `1.22005399` `val_bpb`; regenerated `uniform int8 + zstd-22` scored `1.22505202` with artifact `15748335` bytes and quantization gap `+0.00499803`; `mlp_int6_else_int8 + zstd-22` scored `1.22768330` with artifact `13946844` bytes and quantization gap `+0.00762931`; both artifacts roundtripped exactly and loaded correctly; the candidate saved `1801491` artifact bytes (`-11.4392%`) and `1801491` total bytes while worsening `val_bpb` by only `+0.00263128`; export/load times were `1886.32ms/121.09ms` for `uniform int8` vs `1528.43ms/794.22ms` for `mlp_int6_else_int8`",
+      "Interpretation": "Selective export is still viable on this checkpoint: MLP-only `int6` recovered about half of the broad `uniform int6` byte win with only a small quality penalty, far smaller than the failed `+0.07313349` broad regression",
+      "Next Step": "Continue selective export search with one additional narrow subset layered on top of the safe MLP policy; only pivot to training-side robustness if the next added subset breaks the quality guardrail"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`export_004_expand_selective_int6_beyond_safe_mlp_subset`",
+      "Category": "export",
+      "Baseline / Comparison": "Same locked checkpoint under fixed `sliding_window stride=64` and fixed `zstd-22`; compare regenerated `uniform int8` baseline vs `mlp_int6_plus_attn_proj_int6_else_int8` candidate, with explicit reference to prior `mlp_int6_else_int8`",
+      "Hypothesis": "If some export-only headroom remains beyond the safe MLP subset, adding only `blocks.*.attn.proj.weight -> int6` should save extra bytes while keeping total regression versus regenerated `uniform int8` at or under the `+0.003` guardrail",
+      "Mechanism / Rationale": "`attn.proj.weight` is a single interpretable next subset: narrower than broad attention quantization but large enough to matter for bytes, making it a clean test of whether selective export is near saturation",
+      "Changed Variables": "Added one dedicated `export_004` comparison runner that reused the existing mixed-precision export path and changed only the candidate precision map to include `blocks.*.attn.proj.weight -> int6` on top of the established MLP rule",
+      "Held Fixed": "Checkpoint weights, architecture, tokenizer, validation shard pattern, eval mode `sliding_window`, eval stride `64`, compression backend/level `zstd-22`, tensor inclusion rules, export schema, metric definition, and runtime environment as much as practical",
+      "Expected Effect": "Save more bytes than `MLP-only int6` while keeping total regression versus regenerated `uniform int8` interpretable and within the explicit guardrail",
+      "Actual Result": "In `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/export_004_expand_selective_int6_beyond_safe_mlp_subset`, checkpoint eval was `1.22005399` `val_bpb`; regenerated `uniform int8 + zstd-22` scored `1.22505202` with artifact `15748335` bytes and quantization gap `+0.00499803`; `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` scored `1.22805392` with artifact `13477497` bytes and quantization gap `+0.00799993`; both artifacts roundtripped exactly and loaded correctly; the candidate saved `2270838` artifact bytes (`-14.4195%`) vs regenerated `uniform int8` and `469347` artifact bytes (`-3.3653%`) vs prior `MLP-only int6`, but worsened `val_bpb` by `+0.00300190` vs regenerated `uniform int8` and `+0.00037062` vs prior `MLP-only int6`; export/load times were `1934.98ms/109.53ms` for `uniform int8` vs `1483.63ms/1053.59ms` for the candidate",
+      "Interpretation": "The added `attn.proj` subset still buys bytes, but it pushes the total regression just past the explicit `+0.003` guardrail, so this checkpoint appears near the practical export-only selective limit",
+      "Next Step": "Pivot next to quantization-friendly optimization, keeping the current `MLP-only int6` selective export as the readout policy instead of adding more export subsets"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`opt_001_longer_warmdown_for_selective_export_robustness`",
+      "Category": "optimization",
+      "Baseline / Comparison": "Locked baseline recipe from `eval_001_retrain_then_compare` and locked export readout from `export_003`; compare baseline `WARMDOWN_ITERS=1200` vs one retrain with `WARMDOWN_ITERS=3000`",
+      "Hypothesis": "Increasing warmdown to `3000` will reduce quantization damage enough to improve post-export `val_bpb` and quantization gap under fixed `mlp_int6_else_int8 + zstd-22`",
+      "Mechanism / Rationale": "Longer warmdown is a plausible compression-friendly schedule change and the smallest training-side robustness lever after export-only search neared saturation",
+      "Changed Variables": "Retrained once with only `WARMDOWN_ITERS=3000`; operationally kept the baseline training launch shape, including `EVAL_MODE=both`, to preserve the same wallclock-limited recipe, then scored the resulting checkpoint under fixed `sliding_window stride=64` with regenerated `uniform int8` and fixed `mlp_int6_else_int8` exports",
+      "Held Fixed": "Architecture, tokenizer, dataset/shard pattern, optimizer family and hyperparameters other than `WARMDOWN_ITERS`, total wallclock budget, distributed launch shape, evaluation readout for comparison `sliding_window stride=64`, export container `zstd-22`, export readout policy `mlp_int6_else_int8`, metric definitions",
+      "Expected Effect": "Lower post-export `val_bpb` and smaller quantization gap for `mlp_int6_else_int8` than the locked baseline, with little byte change",
+      "Actual Result": "In `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/opt_001_longer_warmdown_for_selective_export_robustness`, the retrain finished at step `6194` versus baseline `6180`; checkpoint `sliding_window` `val_bpb` was `1.22014196` vs baseline `1.22005399` (`+0.00008797`); regenerated `uniform int8 + zstd-22` scored `1.22427718` with quantization gap `+0.00413521` and artifact `15743260` bytes versus baseline `1.22505202`, `+0.00499803`, and `15748335` bytes; fixed `mlp_int6_else_int8 + zstd-22` scored `1.22696259` with quantization gap `+0.00682063` and artifact `13943970` bytes versus baseline `1.22768330`, `+0.00762931`, and `13946844` bytes; both artifacts roundtripped exactly and loaded correctly",
+      "Interpretation": "Longer warmdown modestly improved export robustness on this recipe even though the raw checkpoint metric did not improve: the fixed `MLP-only int6` post-export score improved by `-0.00072070` and its quantization gap shrank by `-0.00080867`, which is positive but not large",
+      "Next Step": "Re-test the prior `attn.proj.weight -> int6` near-miss on this warmdown-3000 checkpoint to see whether the modest robustness gain reopens a little selective-export headroom"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`export_005_retest_attn_proj_subset_after_warmdown_gain`",
+      "Category": "export",
+      "Baseline / Comparison": "Warmdown-3000 checkpoint from `opt_001` under fixed `sliding_window stride=64` and fixed `zstd-22`; regenerate `uniform int8`, `mlp_int6_else_int8`, and `mlp_int6_plus_attn_proj_int6_else_int8` on the same improved checkpoint",
+      "Hypothesis": "If the modest `opt_001` robustness gain is operationally meaningful, then adding only `blocks.*.attn.proj.weight -> int6` on top of the safe `MLP-only int6` policy should now stay at or under `+0.003` post-export regression versus regenerated `uniform int8`",
+      "Mechanism / Rationale": "`export_004` was only a near-miss on the old checkpoint, so re-running the same narrow subset on the improved warmdown checkpoint is the cleanest falsifiable export-only retest",
+      "Changed Variables": "Added one dedicated `export_005` comparison runner that reuses the existing mixed-precision export path but regenerates all three required readouts in one managed run on the warmdown checkpoint",
+      "Held Fixed": "Checkpoint weights from `opt_001`, architecture, tokenizer, dataset/shard pattern, eval mode `sliding_window`, eval stride `64`, compression backend/level `zstd-22`, export schema, metric definition, and all non-`attn.proj` tensor precision rules",
+      "Expected Effect": "Candidate should save bytes versus `MLP-only int6` and, if warmdown really reopened the frontier, fall back under the `+0.003` guardrail versus regenerated `uniform int8`",
+      "Actual Result": "In `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/export_005_retest_attn_proj_subset_after_warmdown_gain`, checkpoint eval was `1.22014196` `val_bpb`; regenerated `uniform int8 + zstd-22` scored `1.22427718` with artifact `15743260` bytes and quantization gap `+0.00413521`; regenerated `mlp_int6_else_int8 + zstd-22` scored `1.22696259` with artifact `13943970` bytes and quantization gap `+0.00682063`; `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` scored `1.22740875` with artifact `13473753` bytes and quantization gap `+0.00726679`; all three artifacts roundtripped exactly and loaded correctly; the candidate saved `2269507` artifact bytes (`-14.4157%`) versus regenerated `uniform int8` and `470217` artifact bytes (`-3.3722%`) versus regenerated `MLP-only int6`, but worsened `val_bpb` by `+0.00313158` versus regenerated `uniform int8` and `+0.00044616` versus regenerated `MLP-only int6`; versus historical `export_004`, the same candidate improved by `-0.00064517 val_bpb` and `-0.00073314` quantization gap while using the same packed payload bytes",
+      "Interpretation": "The warmdown gain was real but still too small to reopen this export frontier: the retest improved materially relative to historical `export_004`, yet it missed the explicit `+0.003` guardrail by a wider absolute margin on the new checkpoint because the regenerated `uniform int8` baseline also improved",
+      "Next Step": "Pivot to a different single-variable optimization lever, keeping `WARMDOWN_ITERS=3000`, `sliding_window stride=64`, `zstd-22`, and `mlp_int6_else_int8` fixed while testing the optimizer schedule rather than extending export subsets"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`opt_002_longer_muon_momentum_warmup_for_selective_export_robustness`",
+      "Category": "optimization",
+      "Baseline / Comparison": "Locked local baseline after `opt_001` and the negative `export_005` retest; compare warmdown-3000 recipe with `MUON_MOMENTUM_WARMUP_STEPS=500` vs one retrain with `MUON_MOMENTUM_WARMUP_STEPS=1500`",
+      "Hypothesis": "If export robustness is still limited by early optimizer dynamics, increasing Muon momentum warmup should reduce post-export quantization damage on the fixed `mlp_int6_else_int8 + zstd-22` readout",
+      "Mechanism / Rationale": "Local evidence already showed warmdown helped exported behavior more than raw checkpoint quality, so Muon momentum warmup was the next smallest schedule-only ablation already exposed in `train_gpt.py`",
+      "Changed Variables": "Retrained once with only `MUON_MOMENTUM_WARMUP_STEPS=1500`; kept architecture, tokenizer, dataset, optimizer family, `WARMDOWN_ITERS=3000`, wallclock-limited launch shape, and training launch mode `EVAL_MODE=both`; then scored the resulting checkpoint under fixed `sliding_window stride=64` with regenerated `uniform int8 + zstd-22` and regenerated `mlp_int6_else_int8 + zstd-22`",
+      "Held Fixed": "Architecture, tokenizer, dataset/shard pattern, optimizer family and all other optimizer hyperparameters, `WARMDOWN_ITERS=3000`, total wallclock budget, distributed launch shape, evaluation standard `sliding_window stride=64` for comparison, export container `zstd-22`, export schema, export readouts used for scoring, and metric definitions",
+      "Expected Effect": "Improve fixed `mlp_int6_else_int8 + zstd-22` post-export `val_bpb` and shrink its quantization gap versus `opt_001` without materially harming checkpoint quality",
+      "Actual Result": "In `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/opt_002_longer_muon_momentum_warmup_for_selective_export_robustness`, the retrain finished at step `6196`; checkpoint `sliding_window` `val_bpb` was `1.22061644` versus `1.22014196` for `opt_001` (`+0.00047447`); regenerated `uniform int8 + zstd-22` scored `1.22429451` with quantization gap `+0.00367807` and artifact `15740717` bytes versus `1.22427718`, `+0.00413521`, and `15743260` bytes in `opt_001`; regenerated `mlp_int6_else_int8 + zstd-22` scored `1.22676204` with quantization gap `+0.00614561` and artifact `13939254` bytes versus `1.22696259`, `+0.00682063`, and `13943970` bytes in `opt_001`; both artifacts roundtripped exactly and loaded correctly",
+      "Interpretation": "The longer Muon warmup improved the primary fixed exported readout and its quantization gap, but only modestly, and it did so while slightly worsening raw checkpoint quality and leaving regenerated `uniform int8` effectively flat-to-slightly worse on `val_bpb`",
+      "Next Step": "Stop spending more rounds on small optimizer schedule tweaks in this architecture family for now; keep the improved protocol fixed and test a single architecture-capacity lever such as `MLP_MULT=3`"
+    },
+    {
+      "Date (UTC)": "2026-03-24",
+      "ID": "`arch_001_mlp_3x_capacity_under_locked_export_protocol`",
+      "Category": "architecture",
+      "Baseline / Comparison": "Locked local optimization/export baseline after `opt_002`; compare `MLP_MULT=2` vs one retrain with `MLP_MULT=3` under fixed `sliding_window stride=64`, `zstd-22`, and regenerated `uniform int8` / `mlp_int6_else_int8` scoring",
+      "Hypothesis": "If the current recipe is more bottlenecked by under-capacity MLP blocks than by schedule details, then changing only `MLP_MULT` from `2` to `3` should improve checkpoint and exported `val_bpb` under the locked protocol",
+      "Mechanism / Rationale": "`MLP3x` is a recurring current leaderboard motif, and local schedule-only gains had become modest, so a single architecture-side capacity increase was the cleanest next test",
+      "Changed Variables": "Retrained once with only `MLP_MULT=3`; kept depth, width, tokenizer, dataset, optimizer family, optimizer hyperparameters, `WARMDOWN_ITERS=3000`, `MUON_MOMENTUM_WARMUP_STEPS=1500`, total wallclock budget, distributed launch shape, evaluation protocol, export container, export schema, and scored readouts fixed; export scoring required rerunning the fixed comparison tool with `MLP_MULT=3` in the environment so the model shape matched the checkpoint",
+      "Held Fixed": "Depth, width, tokenizer, dataset/shard pattern, optimizer family and hyperparameters, `WARMDOWN_ITERS=3000`, `MUON_MOMENTUM_WARMUP_STEPS=1500`, total wallclock-limited launch shape, evaluation standard `sliding_window stride=64`, export container `zstd-22`, export schema, scored readouts, and metric definitions",
+      "Expected Effect": "Improve exported `val_bpb`, ideally especially `mlp_int6_else_int8 + zstd-22`, without violating the byte cap",
+      "Actual Result": "In `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_001_mlp_3x_capacity_under_locked_export_protocol`, the retrain stopped at step `5600` under the same 600s cap; checkpoint `sliding_window` `val_bpb` improved to `1.20227788` versus `1.22061644` in `opt_002` (`-0.01833855`); regenerated `uniform int8 + zstd-22` scored `1.20534335` with quantization gap `+0.00306546` and artifact `19928545` bytes versus `1.22429451`, `+0.00367807`, and `15740717` bytes in `opt_002`; regenerated `mlp_int6_else_int8 + zstd-22` scored `1.20764933` with quantization gap `+0.00537144` and artifact `17265453` bytes versus `1.22676204`, `+0.00614561`, and `13939254` bytes in `opt_002`; both regenerated artifacts roundtripped exactly and loaded correctly, but total submission bytes were `19989838` and `17326746`, both above the 16 MB cap",
+      "Interpretation": "`MLP3x` is a real quality lever in this recipe family and improved both exported readouts more than the recent schedule micro-tuning rounds, but this exact configuration is negative for the submission objective because both fixed exported artifacts exceed the byte cap by a wide margin",
+      "Next Step": "Return to a different single-variable architecture lever with a better byte trade, such as `NUM_LAYERS=10` while keeping `MLP_MULT=2`, rather than adopting `MLP3x` directly under the current export recipe"
+    }
+  ],
+  "comparison_rows": [
+    {
+      "Comparison": "Local optimization locked recipe: baseline `MUON_MOMENTUM_WARMUP_STEPS=500` vs candidate `1500` on top of `WARMDOWN_ITERS=3000`",
+      "Metric": "`mlp_int6_else_int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22696259`",
+      "Candidate": "`1.22676204`",
+      "Delta": "`-0.00020055`",
+      "Notes": "This is the primary readout from `opt_002`; the export policy stayed fixed and only Muon momentum warmup changed."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `MUON_MOMENTUM_WARMUP_STEPS=500` vs candidate `1500` on top of `WARMDOWN_ITERS=3000`",
+      "Metric": "`mlp_int6_else_int8` quantization gap",
+      "Baseline": "`+0.00682063`",
+      "Candidate": "`+0.00614561`",
+      "Delta": "`-0.00067503`",
+      "Notes": "The fixed selective export became safer again, but the gain is smaller than the accompanying checkpoint regression."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "checkpoint `val_bpb`",
+      "Baseline": "`1.22061644`",
+      "Candidate": "`1.20227788`",
+      "Delta": "`-0.01833855`",
+      "Notes": "Same warmdown-3000 and Muon-warmup-1500 recipe lineage, same `sliding_window stride=64`, and same wallclock-limited 8-GPU launch shape; `MLP3x` substantially improved raw checkpoint quality."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "regenerated `uniform int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22429451`",
+      "Candidate": "`1.20534335`",
+      "Delta": "`-0.01895116`",
+      "Notes": "Quality improved strongly and the quantization gap also shrank from `+0.00367807` to `+0.00306546`, but total submission bytes rose from `15802010` to `19989838`, which is over the cap."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "`mlp_int6_else_int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22676204`",
+      "Candidate": "`1.20764933`",
+      "Delta": "`-0.01911272`",
+      "Notes": "This is the decisive exported readout for `arch_001`; the quantization gap also improved from `+0.00614561` to `+0.00537144`, but total submission bytes rose from `14000547` to `17326746`, also over the cap."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "regenerated `uniform int8+zstd-22` artifact bytes",
+      "Baseline": "`15740717`",
+      "Candidate": "`19928545`",
+      "Delta": "`+4187828`",
+      "Notes": "The quality gain is real, but the byte increase is too large for this exact configuration to be submission-viable."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "`mlp_int6_else_int8+zstd-22` artifact bytes",
+      "Baseline": "`13939254`",
+      "Candidate": "`17265453`",
+      "Delta": "`+3326199`",
+      "Notes": "Even the stronger fixed selective export remains above the cap after the MLP expansion, so `MLP3x` needs a different byte strategy or a different architecture trade."
+    },
+    {
+      "Comparison": "Local export-only warmdown checkpoint: regenerated `uniform int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`15743260`",
+      "Candidate": "`13473753`",
+      "Delta": "`-2269507`",
+      "Notes": "Same `opt_001` checkpoint, same `sliding_window stride=64` eval, same `zstd-22`; all three regenerated artifacts roundtripped exactly and loaded correctly in one run."
+    },
+    {
+      "Comparison": "Local export-only warmdown checkpoint: regenerated `uniform int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22427718`",
+      "Candidate": "`1.22740875`",
+      "Delta": "`+0.00313158`",
+      "Notes": "The retested candidate improved versus historical `export_004`, but it still misses the explicit `+0.003` guardrail on the improved checkpoint."
+    },
+    {
+      "Comparison": "Local selective-export warmdown frontier: regenerated `mlp_int6_else_int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`13943970`",
+      "Candidate": "`13473753`",
+      "Delta": "`-470217`",
+      "Notes": "Adding `blocks.*.attn.proj.weight -> int6` still buys a modest extra `3.3722%` artifact-byte reduction over the warmdown checkpoint’s safe `MLP-only int6` frontier."
+    },
+    {
+      "Comparison": "Local selective-export warmdown frontier: regenerated `mlp_int6_else_int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22696259`",
+      "Candidate": "`1.22740875`",
+      "Delta": "`+0.00044616`",
+      "Notes": "The incremental quality cost stayed small, but not small enough relative to regenerated `uniform int8` to make the candidate acceptable."
+    },
+    {
+      "Comparison": "Historical `attn.proj` candidate: `export_004` old checkpoint vs `export_005` warmdown checkpoint",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22805392`",
+      "Candidate": "`1.22740875`",
+      "Delta": "`-0.00064517`",
+      "Notes": "The same export policy improved on the warmdown checkpoint, confirming the optimization gain was real even though the guardrail still failed."
+    }
+  ],
+  "comparison_rows_all": [
+    {
+      "Comparison": "External reference: naive baseline vs sliding-window eval record",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.2244`",
+      "Candidate": "`1.1925`",
+      "Delta": "`-0.0319`",
+      "Notes": "Published repo evidence suggests evaluation is the cleanest first local gap to close."
+    },
+    {
+      "Comparison": "External reference: root-style baseline vs current frontier",
+      "Metric": "leaderboard `val_bpb`",
+      "Baseline": "`1.2244`",
+      "Candidate": "`1.1428`",
+      "Delta": "`-0.0816`",
+      "Notes": "The frontier gap is too large for a bundled first leap; local protocol lock-in is required first."
+    },
+    {
+      "Comparison": "Local smoke fixture: pre-export non-overlapping vs sliding-window",
+      "Metric": "`val_bpb`",
+      "Baseline": "`3.96925568`",
+      "Candidate": "`3.96925571`",
+      "Delta": "`+0.00000003`",
+      "Notes": "Same synthetic weights and same synthetic validation split; confirms implementation only, not contest-relevant effect."
+    },
+    {
+      "Comparison": "Local smoke fixture: post-export non-overlapping vs sliding-window",
+      "Metric": "`val_bpb`",
+      "Baseline": "`3.96925568`",
+      "Candidate": "`3.96925571`",
+      "Delta": "`+0.00000003`",
+      "Notes": "Same synthetic int8+zlib artifact bytes; runtime changed from `68ms` to `160ms`."
+    },
+    {
+      "Comparison": "Local real-asset follow-up: availability audit",
+      "Metric": "required asset pair",
+      "Baseline": "none found",
+      "Candidate": "none found",
+      "Delta": "n/a",
+      "Notes": "Real tokenizer and FineWeb validation shard exist in `/newcpfs/lxh/parameter-golf/data`, but no reusable real checkpoint plus matching exported artifact were found; no apples-to-apples real comparison could be run this round."
+    },
+    {
+      "Comparison": "Expanded accessible-storage audit: prior blocker state vs additional `/newcpfs/lxh` storage",
+      "Metric": "required asset pair",
+      "Baseline": "none found in prior workspace audit",
+      "Candidate": "none found in any additionally accessible storage",
+      "Delta": "n/a",
+      "Notes": "Newly searched `/newcpfs/lxh/physicslm_backups`, `/newcpfs/lxh/.cache`, `/newcpfs/lxh/.codex/tmp`, `/newcpfs/lxh/.qwen/tmp`, and a bounded sweep of the remaining non-`parameter-golf` roots; no recoverable matching pair was present, so evaluation-only remains blocked."
+    },
+    {
+      "Comparison": "Local real pair final checkpoint: pre-export non-overlapping vs sliding-window",
+      "Metric": "`val_bpb`",
+      "Baseline": "`1.2515`",
+      "Candidate": "`1.2199`",
+      "Delta": "`-0.0316`",
+      "Notes": "Same real checkpoint from the fresh baseline run at step `6180`; runtimes `3825ms` vs `64626ms` on the full FineWeb validation split."
+    },
+    {
+      "Comparison": "Local real pair final artifact: post-export non-overlapping vs sliding-window",
+      "Metric": "`val_bpb`",
+      "Baseline": "`1.25689044`",
+      "Candidate": "`1.22505202`",
+      "Delta": "`-0.03183842`",
+      "Notes": "Same real `final_model.int8.ptz` bytes; runtimes `3838ms` vs `64635ms`; artifact bytes `15785852`, total submission size `15840891`."
+    },
+    {
+      "Comparison": "Local export-only real pair: `int8+zlib-9` vs `int8+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`15785852`",
+      "Candidate": "`15748490`",
+      "Delta": "`-37362`",
+      "Notes": "Same checkpoint, same quantized payload, same `sliding_window stride=64` eval, and exact roundtrip quantized-tensor equality; post-export `val_bpb` stayed exactly `1.22505202` in both cases."
+    },
+    {
+      "Comparison": "Local export-only locked checkpoint: regenerated `uniform int8+zstd-22` vs `uniform int6+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`15748155`",
+      "Candidate": "`12382907`",
+      "Delta": "`-3365248`",
+      "Notes": "Same checkpoint, same tensor selection, same `sliding_window stride=64` eval, same `zstd-22`; both artifacts roundtripped exactly and loaded correctly."
+    },
+    {
+      "Comparison": "Local export-only locked checkpoint: regenerated `uniform int8+zstd-22` vs `uniform int6+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22505202`",
+      "Candidate": "`1.29818551`",
+      "Delta": "`+0.07313349`",
+      "Notes": "The byte win is large, but the quality loss is far beyond the `+0.003` decision threshold, so broad `uniform int6` is not promising on this checkpoint."
+    },
+    {
+      "Comparison": "Local export-only locked checkpoint: regenerated `uniform int8+zstd-22` vs `mlp_int6_else_int8+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`15748335`",
+      "Candidate": "`13946844`",
+      "Delta": "`-1801491`",
+      "Notes": "Same checkpoint, same `sliding_window stride=64` eval, same `zstd-22`; only `blocks.*.mlp.fc.weight` and `blocks.*.mlp.proj.weight` moved to `int6`; both artifacts roundtripped exactly and loaded correctly."
+    },
+    {
+      "Comparison": "Local export-only locked checkpoint: regenerated `uniform int8+zstd-22` vs `mlp_int6_else_int8+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22505202`",
+      "Candidate": "`1.22768330`",
+      "Delta": "`+0.00263128`",
+      "Notes": "This selective policy recovered a meaningful byte win while staying near the quality guardrail, so selective export remains viable on this checkpoint."
+    },
+    {
+      "Comparison": "Local export-only locked checkpoint: failed `uniform int6+zstd-22` vs selective `mlp_int6_else_int8+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.29818551`",
+      "Candidate": "`1.22768330`",
+      "Delta": "`-0.07050222`",
+      "Notes": "`MLP-only int6` is dramatically safer than broad `uniform int6` while still recovering about half of its artifact-byte savings."
+    },
+    {
+      "Comparison": "Local export-only locked checkpoint: regenerated `uniform int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`15748335`",
+      "Candidate": "`13477497`",
+      "Delta": "`-2270838`",
+      "Notes": "Same checkpoint, same `sliding_window stride=64` eval, same `zstd-22`; only `blocks.*.attn.proj.weight` was added to the previously safe MLP-only `int6` subset; both artifacts roundtripped exactly and loaded correctly."
+    },
+    {
+      "Comparison": "Local export-only locked checkpoint: regenerated `uniform int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22505202`",
+      "Candidate": "`1.22805392`",
+      "Delta": "`+0.00300190`",
+      "Notes": "The byte win is larger than `MLP-only int6`, but the total regression lands just beyond the explicit `+0.003` guardrail, so this is not a clear new frontier."
+    },
+    {
+      "Comparison": "Local selective-export frontier: prior `mlp_int6_else_int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`13946844`",
+      "Candidate": "`13477497`",
+      "Delta": "`-469347`",
+      "Notes": "The added `attn.proj.weight -> int6` rule buys a modest extra `3.3653%` artifact-byte reduction over the prior selective frontier."
+    },
+    {
+      "Comparison": "Local selective-export frontier: prior `mlp_int6_else_int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22768330`",
+      "Candidate": "`1.22805392`",
+      "Delta": "`+0.00037062`",
+      "Notes": "The extra quality cost versus `MLP-only int6` is small in isolation, but it is enough to push the total regression over the round’s guardrail versus regenerated `uniform int8`."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `WARMDOWN_ITERS=1200` vs candidate `WARMDOWN_ITERS=3000`",
+      "Metric": "checkpoint `val_bpb`",
+      "Baseline": "`1.22005399`",
+      "Candidate": "`1.22014196`",
+      "Delta": "`+0.00008797`",
+      "Notes": "Same baseline recipe lineage and same scored comparison protocol `sliding_window stride=64`; the retrain preserved the same wallclock-limited launch shape and finished at step `6194` vs baseline `6180`."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `WARMDOWN_ITERS=1200` vs candidate `WARMDOWN_ITERS=3000`",
+      "Metric": "regenerated `uniform int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22505202`",
+      "Candidate": "`1.22427718`",
+      "Delta": "`-0.00077484`",
+      "Notes": "Longer warmdown slightly improved the regenerated export baseline even though the raw checkpoint metric did not improve."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `WARMDOWN_ITERS=1200` vs candidate `WARMDOWN_ITERS=3000`",
+      "Metric": "`mlp_int6_else_int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22768330`",
+      "Candidate": "`1.22696259`",
+      "Delta": "`-0.00072070`",
+      "Notes": "This is the primary readout from `opt_001`; the export policy stayed fixed and only training warmdown changed."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `WARMDOWN_ITERS=1200` vs candidate `WARMDOWN_ITERS=3000`",
+      "Metric": "`mlp_int6_else_int8` quantization gap",
+      "Baseline": "`+0.00762931`",
+      "Candidate": "`+0.00682063`",
+      "Delta": "`-0.00080867`",
+      "Notes": "The gain is modest but directionally clean: longer warmdown made the same selective export safer."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `MUON_MOMENTUM_WARMUP_STEPS=500` vs candidate `1500` on top of `WARMDOWN_ITERS=3000`",
+      "Metric": "checkpoint `val_bpb`",
+      "Baseline": "`1.22014196`",
+      "Candidate": "`1.22061644`",
+      "Delta": "`+0.00047447`",
+      "Notes": "Same warmdown-3000 recipe lineage and same scored comparison protocol `sliding_window stride=64`; the retrain preserved the same wallclock-limited launch shape and finished at step `6196` vs `6194`."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `MUON_MOMENTUM_WARMUP_STEPS=500` vs candidate `1500` on top of `WARMDOWN_ITERS=3000`",
+      "Metric": "regenerated `uniform int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22427718`",
+      "Candidate": "`1.22429451`",
+      "Delta": "`+0.00001733`",
+      "Notes": "The regenerated export baseline stayed effectively flat on quality while artifact bytes fell slightly."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `MUON_MOMENTUM_WARMUP_STEPS=500` vs candidate `1500` on top of `WARMDOWN_ITERS=3000`",
+      "Metric": "regenerated `uniform int8+zstd-22` quantization gap",
+      "Baseline": "`+0.00413521`",
+      "Candidate": "`+0.00367807`",
+      "Delta": "`-0.00045714`",
+      "Notes": "The checkpoint got a bit worse, so the smaller gap does not translate into a better exported `uniform int8` score."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `MUON_MOMENTUM_WARMUP_STEPS=500` vs candidate `1500` on top of `WARMDOWN_ITERS=3000`",
+      "Metric": "`mlp_int6_else_int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22696259`",
+      "Candidate": "`1.22676204`",
+      "Delta": "`-0.00020055`",
+      "Notes": "This is the primary readout from `opt_002`; the export policy stayed fixed and only Muon momentum warmup changed."
+    },
+    {
+      "Comparison": "Local optimization locked recipe: baseline `MUON_MOMENTUM_WARMUP_STEPS=500` vs candidate `1500` on top of `WARMDOWN_ITERS=3000`",
+      "Metric": "`mlp_int6_else_int8` quantization gap",
+      "Baseline": "`+0.00682063`",
+      "Candidate": "`+0.00614561`",
+      "Delta": "`-0.00067503`",
+      "Notes": "The fixed selective export became safer again, but the gain is smaller than the accompanying checkpoint regression."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "checkpoint `val_bpb`",
+      "Baseline": "`1.22061644`",
+      "Candidate": "`1.20227788`",
+      "Delta": "`-0.01833855`",
+      "Notes": "Same warmdown-3000 and Muon-warmup-1500 recipe lineage, same `sliding_window stride=64`, and same wallclock-limited 8-GPU launch shape; `MLP3x` substantially improved raw checkpoint quality."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "regenerated `uniform int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22429451`",
+      "Candidate": "`1.20534335`",
+      "Delta": "`-0.01895116`",
+      "Notes": "Quality improved strongly and the quantization gap also shrank from `+0.00367807` to `+0.00306546`, but total submission bytes rose from `15802010` to `19989838`, which is over the cap."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "`mlp_int6_else_int8+zstd-22` post-export `val_bpb`",
+      "Baseline": "`1.22676204`",
+      "Candidate": "`1.20764933`",
+      "Delta": "`-0.01911272`",
+      "Notes": "This is the decisive exported readout for `arch_001`; the quantization gap also improved from `+0.00614561` to `+0.00537144`, but total submission bytes rose from `14000547` to `17326746`, also over the cap."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "regenerated `uniform int8+zstd-22` artifact bytes",
+      "Baseline": "`15740717`",
+      "Candidate": "`19928545`",
+      "Delta": "`+4187828`",
+      "Notes": "The quality gain is real, but the byte increase is too large for this exact configuration to be submission-viable."
+    },
+    {
+      "Comparison": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002`",
+      "Metric": "`mlp_int6_else_int8+zstd-22` artifact bytes",
+      "Baseline": "`13939254`",
+      "Candidate": "`17265453`",
+      "Delta": "`+3326199`",
+      "Notes": "Even the stronger fixed selective export remains above the cap after the MLP expansion, so `MLP3x` needs a different byte strategy or a different architecture trade."
+    },
+    {
+      "Comparison": "Local export-only warmdown checkpoint: regenerated `uniform int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`15743260`",
+      "Candidate": "`13473753`",
+      "Delta": "`-2269507`",
+      "Notes": "Same `opt_001` checkpoint, same `sliding_window stride=64` eval, same `zstd-22`; all three regenerated artifacts roundtripped exactly and loaded correctly in one run."
+    },
+    {
+      "Comparison": "Local export-only warmdown checkpoint: regenerated `uniform int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22427718`",
+      "Candidate": "`1.22740875`",
+      "Delta": "`+0.00313158`",
+      "Notes": "The retested candidate improved versus historical `export_004`, but it still misses the explicit `+0.003` guardrail on the improved checkpoint."
+    },
+    {
+      "Comparison": "Local selective-export warmdown frontier: regenerated `mlp_int6_else_int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "artifact bytes",
+      "Baseline": "`13943970`",
+      "Candidate": "`13473753`",
+      "Delta": "`-470217`",
+      "Notes": "Adding `blocks.*.attn.proj.weight -> int6` still buys a modest extra `3.3722%` artifact-byte reduction over the warmdown checkpoint’s safe `MLP-only int6` frontier."
+    },
+    {
+      "Comparison": "Local selective-export warmdown frontier: regenerated `mlp_int6_else_int8+zstd-22` vs `mlp_int6_plus_attn_proj_int6_else_int8+zstd-22`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22696259`",
+      "Candidate": "`1.22740875`",
+      "Delta": "`+0.00044616`",
+      "Notes": "The incremental quality cost stayed small, but not small enough relative to regenerated `uniform int8` to make the candidate acceptable."
+    },
+    {
+      "Comparison": "Historical `attn.proj` candidate: `export_004` old checkpoint vs `export_005` warmdown checkpoint",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.22805392`",
+      "Candidate": "`1.22740875`",
+      "Delta": "`-0.00064517`",
+      "Notes": "The same export policy improved on the warmdown checkpoint, confirming the optimization gain was real even though the guardrail still failed."
+    }
+  ],
+  "latest_run": {
+    "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z",
+    "round_summary": {
+      "round_001.meta": {
+        "round": "1",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_001.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_001.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_001.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_001.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_001.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_001.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_002.meta": {
+        "round": "2",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_002.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_002.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_002.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_002.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_002.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_002.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_003.meta": {
+        "round": "3",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_003.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_003.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_003.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_003.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_003.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_003.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_004.meta": {
+        "round": "4",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_004.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_004.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_004.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_004.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_004.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_004.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_005.meta": {
+        "round": "5",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_005.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_005.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_005.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_005.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_005.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_005.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_006.meta": {
+        "round": "6",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_006.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_006.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_006.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_006.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_006.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_006.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_007.meta": {
+        "round": "7",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_007.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_007.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_007.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_007.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_007.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_007.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_008.meta": {
+        "round": "8",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.worker.final.txt",
+        "worker_exit_code": "0"
+      }
+    },
+    "phase_meta": {
+      "planner": {
+        "phase": "planner",
+        "round": "9",
+        "start_time": "2026-03-24T09:42:38Z",
+        "end_time": "2026-03-24T09:43:24Z",
+        "exit_code": "0",
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_009.planner.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_009.planner.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_009.planner.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_009.planner.final.txt"
+      },
+      "review": {
+        "phase": "review",
+        "round": "9",
+        "start_time": "2026-03-24T09:43:24Z",
+        "end_time": "2026-03-24T09:44:17Z",
+        "exit_code": "0",
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_009.review.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_009.review.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_009.review.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_009.review.final.txt"
+      },
+      "worker": {
+        "phase": "worker",
+        "round": "8",
+        "start_time": "2026-03-24T09:11:52Z",
+        "end_time": "2026-03-24T09:42:35Z",
+        "exit_code": "0",
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.worker.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.worker.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.worker.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z/round_008.worker.final.txt"
+      }
+    }
+  },
+  "run_batches": [
+    {
+      "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z",
+      "configured_rounds": 10,
+      "completed_rounds": 8,
+      "latest_round": "9",
+      "latest_phase": "review",
+      "state": "in progress",
+      "latest_timestamp": "2026-03-24T09:44:17Z"
+    },
+    {
+      "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T035545Z",
+      "configured_rounds": 1,
+      "completed_rounds": 1,
+      "latest_round": "1",
+      "latest_phase": "worker",
+      "state": "complete",
+      "latest_timestamp": "2026-03-24T04:30:12Z"
+    },
+    {
+      "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260323T120052Z",
+      "configured_rounds": 2,
+      "completed_rounds": 2,
+      "latest_round": "2",
+      "latest_phase": "worker",
+      "state": "complete",
+      "latest_timestamp": "2026-03-23T12:11:24Z"
+    },
+    {
+      "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260323T102447Z",
+      "configured_rounds": 1,
+      "completed_rounds": 1,
+      "latest_round": "1",
+      "latest_phase": "worker",
+      "state": "complete",
+      "latest_timestamp": "2026-03-23T10:36:36Z"
+    }
+  ],
+  "training_runs": [
+    {
+      "name": "arch_002_depth_10l_under_locked_export_protocol",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_002_depth_10l_under_locked_export_protocol/logs/arch_002_depth_10l_under_locked_export_protocol.txt",
+      "updated_at_utc": "2026-03-24T09:50:28Z",
+      "latest_step": 1000,
+      "total_steps": 20000,
+      "is_complete": false,
+      "stop_reason": "",
+      "train_points": [
+        {
+          "step": 1,
+          "value": 6.9355
+        },
+        {
+          "step": 2,
+          "value": 16.802
+        },
+        {
+          "step": 3,
+          "value": 8.4793
+        },
+        {
+          "step": 4,
+          "value": 6.6338
+        },
+        {
+          "step": 5,
+          "value": 6.7053
+        },
+        {
+          "step": 6,
+          "value": 7.4426
+        },
+        {
+          "step": 7,
+          "value": 6.315
+        },
+        {
+          "step": 8,
+          "value": 6.1253
+        },
+        {
+          "step": 9,
+          "value": 6.0312
+        },
+        {
+          "step": 10,
+          "value": 5.9503
+        },
+        {
+          "step": 200,
+          "value": 2.9236
+        },
+        {
+          "step": 400,
+          "value": 2.3954
+        },
+        {
+          "step": 600,
+          "value": 2.5886
+        },
+        {
+          "step": 800,
+          "value": 2.3301
+        },
+        {
+          "step": 1000,
+          "value": 2.4014
+        }
+      ],
+      "val_by_mode": {
+        "non_overlapping": [
+          {
+            "step": 0,
+            "val_loss": 6.9363,
+            "val_bpb": 4.1081
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3733,
+            "val_bpb": 1.4056
+          }
+        ],
+        "sliding_window": [
+          {
+            "step": 0,
+            "val_loss": 6.9363,
+            "val_bpb": 4.1081
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3238,
+            "val_bpb": 1.3763
+          }
+        ]
+      },
+      "latest_metrics": {
+        "non_overlapping": {
+          "val_loss": 2.3733,
+          "val_bpb": 1.4056,
+          "step": 1000
+        },
+        "sliding_window": {
+          "val_loss": 2.3238,
+          "val_bpb": 1.3763,
+          "step": 1000
+        }
+      }
+    },
+    {
+      "name": "arch_001_mlp_3x_capacity_under_locked_export_protocol",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_001_mlp_3x_capacity_under_locked_export_protocol/logs/arch_001_mlp_3x_capacity_under_locked_export_protocol.txt",
+      "updated_at_utc": "2026-03-24T09:33:33Z",
+      "latest_step": 5600,
+      "total_steps": 20000,
+      "is_complete": false,
+      "stop_reason": "wallclock cap",
+      "train_points": [
+        {
+          "step": 1,
+          "value": 6.9364
+        },
+        {
+          "step": 2,
+          "value": 17.2247
+        },
+        {
+          "step": 3,
+          "value": 9.0285
+        },
+        {
+          "step": 4,
+          "value": 6.59
+        },
+        {
+          "step": 5,
+          "value": 6.6747
+        },
+        {
+          "step": 6,
+          "value": 7.4539
+        },
+        {
+          "step": 7,
+          "value": 6.3839
+        },
+        {
+          "step": 8,
+          "value": 6.1587
+        },
+        {
+          "step": 9,
+          "value": 6.045
+        },
+        {
+          "step": 10,
+          "value": 5.9562
+        },
+        {
+          "step": 200,
+          "value": 2.9141
+        },
+        {
+          "step": 400,
+          "value": 2.3967
+        },
+        {
+          "step": 600,
+          "value": 2.5737
+        },
+        {
+          "step": 800,
+          "value": 2.3195
+        },
+        {
+          "step": 1000,
+          "value": 2.3945
+        },
+        {
+          "step": 1200,
+          "value": 2.409
+        },
+        {
+          "step": 1400,
+          "value": 2.4502
+        },
+        {
+          "step": 1600,
+          "value": 2.1191
+        },
+        {
+          "step": 1800,
+          "value": 2.2103
+        },
+        {
+          "step": 2000,
+          "value": 2.2584
+        },
+        {
+          "step": 2200,
+          "value": 2.0749
+        },
+        {
+          "step": 2400,
+          "value": 2.196
+        },
+        {
+          "step": 2600,
+          "value": 2.4163
+        },
+        {
+          "step": 2800,
+          "value": 2.2268
+        },
+        {
+          "step": 3000,
+          "value": 2.2129
+        },
+        {
+          "step": 3200,
+          "value": 2.1679
+        },
+        {
+          "step": 3400,
+          "value": 2.1329
+        },
+        {
+          "step": 3600,
+          "value": 2.0805
+        },
+        {
+          "step": 3800,
+          "value": 2.1872
+        },
+        {
+          "step": 4000,
+          "value": 2.1249
+        },
+        {
+          "step": 4200,
+          "value": 2.1366
+        },
+        {
+          "step": 4400,
+          "value": 2.0635
+        },
+        {
+          "step": 4600,
+          "value": 1.9221
+        },
+        {
+          "step": 4800,
+          "value": 2.2158
+        },
+        {
+          "step": 5000,
+          "value": 1.9785
+        },
+        {
+          "step": 5200,
+          "value": 2.1151
+        },
+        {
+          "step": 5400,
+          "value": 2.1235
+        },
+        {
+          "step": 5600,
+          "value": 2.1172
+        }
+      ],
+      "val_by_mode": {
+        "non_overlapping": [
+          {
+            "step": 0,
+            "val_loss": 6.9378,
+            "val_bpb": 4.109
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3602,
+            "val_bpb": 1.3979
+          },
+          {
+            "step": 2000,
+            "val_loss": 2.2445,
+            "val_bpb": 1.3293
+          },
+          {
+            "step": 3000,
+            "val_loss": 2.1793,
+            "val_bpb": 1.2907
+          },
+          {
+            "step": 4000,
+            "val_loss": 2.1323,
+            "val_bpb": 1.2629
+          },
+          {
+            "step": 5000,
+            "val_loss": 2.0972,
+            "val_bpb": 1.2421
+          },
+          {
+            "step": 5600,
+            "val_loss": 2.0829,
+            "val_bpb": 1.2336
+          }
+        ],
+        "sliding_window": [
+          {
+            "step": 0,
+            "val_loss": 6.9378,
+            "val_bpb": 4.109
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3101,
+            "val_bpb": 1.3682
+          },
+          {
+            "step": 2000,
+            "val_loss": 2.1919,
+            "val_bpb": 1.2982
+          },
+          {
+            "step": 3000,
+            "val_loss": 2.126,
+            "val_bpb": 1.2591
+          },
+          {
+            "step": 4000,
+            "val_loss": 2.0786,
+            "val_bpb": 1.2311
+          },
+          {
+            "step": 5000,
+            "val_loss": 2.0439,
+            "val_bpb": 1.2105
+          },
+          {
+            "step": 5600,
+            "val_loss": 2.0296,
+            "val_bpb": 1.2021
+          }
+        ]
+      },
+      "latest_metrics": {
+        "non_overlapping": {
+          "val_loss": 2.0829,
+          "val_bpb": 1.2336,
+          "step": 5600
+        },
+        "sliding_window": {
+          "val_loss": 2.0296,
+          "val_bpb": 1.2021,
+          "step": 5600
+        }
+      }
+    },
+    {
+      "name": "opt_002_longer_muon_momentum_warmup_for_selective_export_robustness",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/opt_002_longer_muon_momentum_warmup_for_selective_export_robustness/logs/opt_002_longer_muon_momentum_warmup_for_selective_export_robustness.txt",
+      "updated_at_utc": "2026-03-24T09:01:46Z",
+      "latest_step": 6196,
+      "total_steps": 20000,
+      "is_complete": false,
+      "stop_reason": "wallclock cap",
+      "train_points": [
+        {
+          "step": 1,
+          "value": 6.9371
+        },
+        {
+          "step": 2,
+          "value": 16.9367
+        },
+        {
+          "step": 3,
+          "value": 8.7534
+        },
+        {
+          "step": 4,
+          "value": 6.6395
+        },
+        {
+          "step": 5,
+          "value": 6.6182
+        },
+        {
+          "step": 6,
+          "value": 7.4181
+        },
+        {
+          "step": 7,
+          "value": 6.3453
+        },
+        {
+          "step": 8,
+          "value": 6.1499
+        },
+        {
+          "step": 9,
+          "value": 6.0607
+        },
+        {
+          "step": 10,
+          "value": 5.9696
+        },
+        {
+          "step": 200,
+          "value": 2.9275
+        },
+        {
+          "step": 400,
+          "value": 2.4167
+        },
+        {
+          "step": 600,
+          "value": 2.5916
+        },
+        {
+          "step": 800,
+          "value": 2.3417
+        },
+        {
+          "step": 1000,
+          "value": 2.4162
+        },
+        {
+          "step": 1200,
+          "value": 2.4304
+        },
+        {
+          "step": 1400,
+          "value": 2.4806
+        },
+        {
+          "step": 1600,
+          "value": 2.1423
+        },
+        {
+          "step": 1800,
+          "value": 2.2374
+        },
+        {
+          "step": 2000,
+          "value": 2.2873
+        },
+        {
+          "step": 2200,
+          "value": 2.1088
+        },
+        {
+          "step": 2400,
+          "value": 2.2278
+        },
+        {
+          "step": 2600,
+          "value": 2.4394
+        },
+        {
+          "step": 2800,
+          "value": 2.2661
+        },
+        {
+          "step": 3000,
+          "value": 2.2552
+        },
+        {
+          "step": 3200,
+          "value": 2.2127
+        },
+        {
+          "step": 3400,
+          "value": 2.1802
+        },
+        {
+          "step": 3600,
+          "value": 2.1326
+        },
+        {
+          "step": 3800,
+          "value": 2.2309
+        },
+        {
+          "step": 4000,
+          "value": 2.1683
+        },
+        {
+          "step": 4200,
+          "value": 2.1849
+        },
+        {
+          "step": 4400,
+          "value": 2.1138
+        },
+        {
+          "step": 4600,
+          "value": 1.9702
+        },
+        {
+          "step": 4800,
+          "value": 2.258
+        },
+        {
+          "step": 5000,
+          "value": 2.0203
+        },
+        {
+          "step": 5200,
+          "value": 2.1611
+        },
+        {
+          "step": 5400,
+          "value": 2.1699
+        },
+        {
+          "step": 5600,
+          "value": 2.1615
+        },
+        {
+          "step": 5800,
+          "value": 2.1183
+        },
+        {
+          "step": 6000,
+          "value": 2.1952
+        }
+      ],
+      "val_by_mode": {
+        "non_overlapping": [
+          {
+            "step": 0,
+            "val_loss": 6.9357,
+            "val_bpb": 4.1077
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3821,
+            "val_bpb": 1.4108
+          },
+          {
+            "step": 2000,
+            "val_loss": 2.2728,
+            "val_bpb": 1.3461
+          },
+          {
+            "step": 3000,
+            "val_loss": 2.2205,
+            "val_bpb": 1.3151
+          },
+          {
+            "step": 4000,
+            "val_loss": 2.1775,
+            "val_bpb": 1.2896
+          },
+          {
+            "step": 5000,
+            "val_loss": 2.1433,
+            "val_bpb": 1.2694
+          },
+          {
+            "step": 6000,
+            "val_loss": 2.1163,
+            "val_bpb": 1.2534
+          },
+          {
+            "step": 6196,
+            "val_loss": 2.1133,
+            "val_bpb": 1.2516
+          }
+        ],
+        "sliding_window": [
+          {
+            "step": 0,
+            "val_loss": 6.9357,
+            "val_bpb": 4.1077
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3327,
+            "val_bpb": 1.3815
+          },
+          {
+            "step": 2000,
+            "val_loss": 2.2209,
+            "val_bpb": 1.3153
+          },
+          {
+            "step": 3000,
+            "val_loss": 2.1677,
+            "val_bpb": 1.2838
+          },
+          {
+            "step": 4000,
+            "val_loss": 2.1241,
+            "val_bpb": 1.258
+          },
+          {
+            "step": 5000,
+            "val_loss": 2.0901,
+            "val_bpb": 1.2379
+          },
+          {
+            "step": 6000,
+            "val_loss": 2.0633,
+            "val_bpb": 1.222
+          },
+          {
+            "step": 6196,
+            "val_loss": 2.0604,
+            "val_bpb": 1.2203
+          }
+        ]
+      },
+      "latest_metrics": {
+        "non_overlapping": {
+          "val_loss": 2.1133,
+          "val_bpb": 1.2516,
+          "step": 6196
+        },
+        "sliding_window": {
+          "val_loss": 2.0604,
+          "val_bpb": 1.2203,
+          "step": 6196
+        }
+      }
+    },
+    {
+      "name": "opt_001_longer_warmdown_for_selective_export_robustness",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/opt_001_longer_warmdown_for_selective_export_robustness/logs/opt_001_longer_warmdown_for_selective_export_robustness.txt",
+      "updated_at_utc": "2026-03-24T08:17:58Z",
+      "latest_step": 6194,
+      "total_steps": 20000,
+      "is_complete": false,
+      "stop_reason": "wallclock cap",
+      "train_points": [
+        {
+          "step": 1,
+          "value": 6.9371
+        },
+        {
+          "step": 2,
+          "value": 16.9367
+        },
+        {
+          "step": 3,
+          "value": 8.7532
+        },
+        {
+          "step": 4,
+          "value": 6.6397
+        },
+        {
+          "step": 5,
+          "value": 6.6183
+        },
+        {
+          "step": 6,
+          "value": 7.418
+        },
+        {
+          "step": 7,
+          "value": 6.3453
+        },
+        {
+          "step": 8,
+          "value": 6.1502
+        },
+        {
+          "step": 9,
+          "value": 6.0609
+        },
+        {
+          "step": 10,
+          "value": 5.9697
+        },
+        {
+          "step": 200,
+          "value": 2.9244
+        },
+        {
+          "step": 400,
+          "value": 2.3992
+        },
+        {
+          "step": 600,
+          "value": 2.5814
+        },
+        {
+          "step": 800,
+          "value": 2.3188
+        },
+        {
+          "step": 1000,
+          "value": 2.392
+        },
+        {
+          "step": 1200,
+          "value": 2.4093
+        },
+        {
+          "step": 1400,
+          "value": 2.4518
+        },
+        {
+          "step": 1600,
+          "value": 2.1173
+        },
+        {
+          "step": 1800,
+          "value": 2.2189
+        },
+        {
+          "step": 2000,
+          "value": 2.2676
+        },
+        {
+          "step": 2200,
+          "value": 2.0905
+        },
+        {
+          "step": 2400,
+          "value": 2.2204
+        },
+        {
+          "step": 2600,
+          "value": 2.4322
+        },
+        {
+          "step": 2800,
+          "value": 2.2558
+        },
+        {
+          "step": 3000,
+          "value": 2.2501
+        },
+        {
+          "step": 3200,
+          "value": 2.2086
+        },
+        {
+          "step": 3400,
+          "value": 2.1729
+        },
+        {
+          "step": 3600,
+          "value": 2.123
+        },
+        {
+          "step": 3800,
+          "value": 2.2289
+        },
+        {
+          "step": 4000,
+          "value": 2.1646
+        },
+        {
+          "step": 4200,
+          "value": 2.18
+        },
+        {
+          "step": 4400,
+          "value": 2.1148
+        },
+        {
+          "step": 4600,
+          "value": 1.9668
+        },
+        {
+          "step": 4800,
+          "value": 2.2555
+        },
+        {
+          "step": 5000,
+          "value": 2.0164
+        },
+        {
+          "step": 5200,
+          "value": 2.1602
+        },
+        {
+          "step": 5400,
+          "value": 2.1681
+        },
+        {
+          "step": 5600,
+          "value": 2.1596
+        },
+        {
+          "step": 5800,
+          "value": 2.1176
+        },
+        {
+          "step": 6000,
+          "value": 2.1975
+        }
+      ],
+      "val_by_mode": {
+        "non_overlapping": [
+          {
+            "step": 0,
+            "val_loss": 6.9357,
+            "val_bpb": 4.1077
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3581,
+            "val_bpb": 1.3966
+          },
+          {
+            "step": 2000,
+            "val_loss": 2.2544,
+            "val_bpb": 1.3352
+          },
+          {
+            "step": 3000,
+            "val_loss": 2.213,
+            "val_bpb": 1.3106
+          },
+          {
+            "step": 4000,
+            "val_loss": 2.1741,
+            "val_bpb": 1.2876
+          },
+          {
+            "step": 5000,
+            "val_loss": 2.1416,
+            "val_bpb": 1.2684
+          },
+          {
+            "step": 6000,
+            "val_loss": 2.1158,
+            "val_bpb": 1.2531
+          },
+          {
+            "step": 6194,
+            "val_loss": 2.113,
+            "val_bpb": 1.2514
+          }
+        ],
+        "sliding_window": [
+          {
+            "step": 0,
+            "val_loss": 6.9357,
+            "val_bpb": 4.1077
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3064,
+            "val_bpb": 1.366
+          },
+          {
+            "step": 2000,
+            "val_loss": 2.2018,
+            "val_bpb": 1.304
+          },
+          {
+            "step": 3000,
+            "val_loss": 2.1597,
+            "val_bpb": 1.2791
+          },
+          {
+            "step": 4000,
+            "val_loss": 2.1204,
+            "val_bpb": 1.2558
+          },
+          {
+            "step": 5000,
+            "val_loss": 2.0882,
+            "val_bpb": 1.2367
+          },
+          {
+            "step": 6000,
+            "val_loss": 2.0626,
+            "val_bpb": 1.2216
+          },
+          {
+            "step": 6194,
+            "val_loss": 2.0599,
+            "val_bpb": 1.22
+          }
+        ]
+      },
+      "latest_metrics": {
+        "non_overlapping": {
+          "val_loss": 2.113,
+          "val_bpb": 1.2514,
+          "step": 6194
+        },
+        "sliding_window": {
+          "val_loss": 2.0599,
+          "val_bpb": 1.22,
+          "step": 6194
+        }
+      }
+    },
+    {
+      "name": "eval_001_retrain_then_compare",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_001_retrain_then_compare/logs/eval_001_retrain_then_compare.txt",
+      "updated_at_utc": "2026-03-24T04:27:04Z",
+      "latest_step": 6180,
+      "total_steps": 20000,
+      "is_complete": true,
+      "stop_reason": "wallclock cap",
+      "train_points": [
+        {
+          "step": 1,
+          "value": 6.9371
+        },
+        {
+          "step": 2,
+          "value": 16.9367
+        },
+        {
+          "step": 3,
+          "value": 8.7532
+        },
+        {
+          "step": 4,
+          "value": 6.6397
+        },
+        {
+          "step": 5,
+          "value": 6.6182
+        },
+        {
+          "step": 6,
+          "value": 7.4182
+        },
+        {
+          "step": 7,
+          "value": 6.3455
+        },
+        {
+          "step": 8,
+          "value": 6.1498
+        },
+        {
+          "step": 9,
+          "value": 6.0607
+        },
+        {
+          "step": 10,
+          "value": 5.9697
+        },
+        {
+          "step": 200,
+          "value": 2.9191
+        },
+        {
+          "step": 400,
+          "value": 2.4007
+        },
+        {
+          "step": 600,
+          "value": 2.5811
+        },
+        {
+          "step": 800,
+          "value": 2.3205
+        },
+        {
+          "step": 1000,
+          "value": 2.3927
+        },
+        {
+          "step": 1200,
+          "value": 2.4095
+        },
+        {
+          "step": 1400,
+          "value": 2.4518
+        },
+        {
+          "step": 1600,
+          "value": 2.1178
+        },
+        {
+          "step": 1800,
+          "value": 2.219
+        },
+        {
+          "step": 2000,
+          "value": 2.2732
+        },
+        {
+          "step": 2200,
+          "value": 2.0936
+        },
+        {
+          "step": 2400,
+          "value": 2.2181
+        },
+        {
+          "step": 2600,
+          "value": 2.4298
+        },
+        {
+          "step": 2800,
+          "value": 2.2528
+        },
+        {
+          "step": 3000,
+          "value": 2.248
+        },
+        {
+          "step": 3200,
+          "value": 2.2062
+        },
+        {
+          "step": 3400,
+          "value": 2.1786
+        },
+        {
+          "step": 3600,
+          "value": 2.1406
+        },
+        {
+          "step": 3800,
+          "value": 2.2375
+        },
+        {
+          "step": 4000,
+          "value": 2.1811
+        },
+        {
+          "step": 4200,
+          "value": 2.2008
+        },
+        {
+          "step": 4400,
+          "value": 2.1336
+        },
+        {
+          "step": 4600,
+          "value": 1.9877
+        },
+        {
+          "step": 4800,
+          "value": 2.2826
+        },
+        {
+          "step": 5000,
+          "value": 2.0453
+        },
+        {
+          "step": 5200,
+          "value": 2.1847
+        },
+        {
+          "step": 5400,
+          "value": 2.1893
+        },
+        {
+          "step": 5600,
+          "value": 2.1749
+        },
+        {
+          "step": 5800,
+          "value": 2.1251
+        },
+        {
+          "step": 6000,
+          "value": 2.2008
+        }
+      ],
+      "val_by_mode": {
+        "non_overlapping": [
+          {
+            "step": 0,
+            "val_loss": 6.9357,
+            "val_bpb": 4.1077
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.358,
+            "val_bpb": 1.3965
+          },
+          {
+            "step": 2000,
+            "val_loss": 2.2548,
+            "val_bpb": 1.3354
+          },
+          {
+            "step": 3000,
+            "val_loss": 2.2129,
+            "val_bpb": 1.3106
+          },
+          {
+            "step": 4000,
+            "val_loss": 2.1873,
+            "val_bpb": 1.2954
+          },
+          {
+            "step": 5000,
+            "val_loss": 2.1703,
+            "val_bpb": 1.2854
+          },
+          {
+            "step": 6000,
+            "val_loss": 2.1192,
+            "val_bpb": 1.2551
+          },
+          {
+            "step": 6180,
+            "val_loss": 2.1131,
+            "val_bpb": 1.2515
+          }
+        ],
+        "sliding_window": [
+          {
+            "step": 0,
+            "val_loss": 6.9357,
+            "val_bpb": 4.1077
+          },
+          {
+            "step": 1000,
+            "val_loss": 2.3071,
+            "val_bpb": 1.3664
+          },
+          {
+            "step": 2000,
+            "val_loss": 2.2021,
+            "val_bpb": 1.3042
+          },
+          {
+            "step": 3000,
+            "val_loss": 2.1598,
+            "val_bpb": 1.2792
+          },
+          {
+            "step": 4000,
+            "val_loss": 2.134,
+            "val_bpb": 1.2638
+          },
+          {
+            "step": 5000,
+            "val_loss": 2.117,
+            "val_bpb": 1.2538
+          },
+          {
+            "step": 6000,
+            "val_loss": 2.0658,
+            "val_bpb": 1.2235
+          },
+          {
+            "step": 6180,
+            "val_loss": 2.0597,
+            "val_bpb": 1.2199
+          }
+        ]
+      },
+      "latest_metrics": {
+        "non_overlapping": {
+          "val_loss": 2.1131,
+          "val_bpb": 1.2515,
+          "step": 6180
+        },
+        "sliding_window": {
+          "val_loss": 2.0597,
+          "val_bpb": 1.2199,
+          "step": 6180
+        }
+      }
+    }
+  ],
+  "verifier": {
+    "generated_at_utc": "2026-03-24T07:01:29Z",
+    "repo_root": "/newcpfs/lxh/parameter-golf",
+    "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
+    "executables": {
+      "codex": {
+        "found": true,
+        "path": "/usr/local/nvm/versions/node/v16.20.2/bin/codex"
+      },
+      "python": {
+        "found": true,
+        "path": "/newcpfs/lxh/miniconda3/bin/python"
+      },
+      "python3": {
+        "found": true,
+        "path": "/newcpfs/lxh/miniconda3/bin/python3"
+      },
+      "torchrun": {
+        "found": true,
+        "path": "/usr/local/bin/torchrun"
+      },
+      "nvidia-smi": {
+        "found": true,
+        "path": "/usr/bin/nvidia-smi"
+      }
+    },
+    "python_modules": {
+      "torch": {
+        "module": "torch",
+        "ok": true
+      },
+      "numpy": {
+        "module": "numpy",
+        "ok": true
+      },
+      "sentencepiece": {
+        "module": "sentencepiece",
+        "ok": true
+      },
+      "huggingface_hub": {
+        "module": "huggingface_hub",
+        "ok": true
+      },
+      "datasets": {
+        "module": "datasets",
+        "ok": true
+      },
+      "tqdm": {
+        "module": "tqdm",
+        "ok": true
+      }
+    },
+    "codex": {
+      "version_ok": true,
+      "version": "codex-cli 0.116.0",
+      "login_ok": true,
+      "login_status": "WARNING: failed to clean up stale arg0 temp dirs: Directory not empty (os error 39)\nLogged in using ChatGPT"
+    },
+    "git_status": {
+      "ok": true,
+      "summary": "M train_gpt.py\n?? docs/\n?? research_lab_pg/"
+    },
+    "data": {
+      "datasets_root_exists": true,
+      "tokenizers_root_exists": true,
+      "sp1024_train_shards": {
+        "exists": true,
+        "count": 80,
+        "examples": [
+          "/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_train_000000.bin",
+          "/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_train_000001.bin",
+          "/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_train_000002.bin",
+          "/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_train_000003.bin",
+          "/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_train_000004.bin"
+        ]
+      },
+      "sp1024_val_shards": {
+        "exists": true,
+        "count": 1,
+        "examples": [
+          "/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_val_000000.bin"
+        ]
+      },
+      "tokenizer_model_exists": true,
+      "tokenizer_model_path": "/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model"
+    },
+    "project": {
+      "exists": true,
+      "required_files": {
+        "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/planning/next_experiment.md": true,
+        "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/planning/experiment_ledger.md": true,
+        "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/planning/research_memory.md": true,
+        "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/reports/latest_status.md": true,
+        "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md": true
+      }
+    },
+    "python_context": {
+      "python_bin": "python",
+      "conda_env": "loongflow_ml"
+    },
+    "summary": {
+      "ready_for_real_iteration": true
+    }
+  },
+  "git": {
+    "changed_files": [
+      "A  .github/workflows/deploy-parameter-golf-dashboard.yml",
+      "M  .gitignore",
+      "A  docs/latest_sota_snapshot.md",
+      "A  docs/scientific_research_loop.md",
+      "A  docs/sota_review.md",
+      "A  research_lab_pg/README.md",
+      "A  research_lab_pg/examples/proposal_brief.md",
+      "A  research_lab_pg/examples/proposal_detailed.md",
+      "A  research_lab_pg/examples/proposal_parameter_golf_science.md",
+      "A  research_lab_pg/projects/parameter_golf_science/README_PROJECT.md",
+      "A  research_lab_pg/projects/parameter_golf_science/code/README.md",
+      "A  research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md",
+      "A  research_lab_pg/projects/parameter_golf_science/context/reference_materials/scientific_research_loop.md",
+      "A  research_lab_pg/projects/parameter_golf_science/context/reference_materials/sota_review.md",
+      "A  research_lab_pg/projects/parameter_golf_science/dashboard/README.md",
+      "AM research_lab_pg/projects/parameter_golf_science/dashboard/index.html",
+      "AM research_lab_pg/projects/parameter_golf_science/dashboard/status.json",
+      "A  research_lab_pg/projects/parameter_golf_science/experiments/README.md",
+      "A  research_lab_pg/projects/parameter_golf_science/planning/assumptions.md",
+      "A  research_lab_pg/projects/parameter_golf_science/planning/experiment_ledger.md",
+      "A  research_lab_pg/projects/parameter_golf_science/planning/next_experiment.md",
+      "A  research_lab_pg/projects/parameter_golf_science/planning/research_memory.md",
+      "A  research_lab_pg/projects/parameter_golf_science/planning/research_plan.md",
+      "A  research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
+      "A  research_lab_pg/projects/parameter_golf_science/reports/latest_status.md",
+      "A  research_lab_pg/projects/parameter_golf_science/tools/export_001_compare_containers.py",
+      "A  research_lab_pg/projects/parameter_golf_science/tools/export_002_compare_precisions.py",
+      "A  research_lab_pg/projects/parameter_golf_science/tools/export_003_compare_mlp_only_int6.py",
+      "A  research_lab_pg/projects/parameter_golf_science/tools/export_004_compare_mlp_plus_attn_proj_int6.py",
+      "A  research_lab_pg/projects/parameter_golf_science/tools/export_005_retest_attn_proj_after_warmdown.py",
+      "A  research_lab_pg/projects/parameter_golf_science/tools/gpu_experiment_runner.py",
+      "A  research_lab_pg/projects/parameter_golf_science/tools/gpu_smoke_test.py",
+      "A  research_lab_pg/scripts/codex_research_loop.sh",
+      "A  research_lab_pg/scripts/codex_research_prompt.txt",
+      "A  research_lab_pg/scripts/codex_research_review_prompt.txt",
+      "A  research_lab_pg/scripts/codex_research_worker_prompt.txt",
+      "A  research_lab_pg/scripts/generate_progress_dashboard.py",
+      "A  research_lab_pg/scripts/gpu_experiment_runner.py",
+      "A  research_lab_pg/scripts/gpu_smoke_test.py",
+      "A  research_lab_pg/scripts/init_research_workspace.py",
+      "A  research_lab_pg/scripts/refresh_parameter_golf_sota_context.py",
+      "A  research_lab_pg/scripts/start_parameter_golf_iteration.sh",
+      "A  research_lab_pg/scripts/verify_parameter_golf_env.py",
+      "M  train_gpt.py"
+    ],
+    "diff_stat": [
+      ".../parameter_golf_science/dashboard/index.html    |  8 +--",
+      ".../parameter_golf_science/dashboard/status.json   | 79 +++++++++++++++++++---",
+      "2 files changed, 74 insertions(+), 13 deletions(-)"
+    ]
+  }
+}
