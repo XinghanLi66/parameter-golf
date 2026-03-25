@@ -1,6 +1,6 @@
 # Latest Parameter Golf SOTA Snapshot
 
-- Generated at: `2026-03-25T09:32:12Z`
+- Generated at: `2026-03-25T12:00:06Z`
 - Source: `https://raw.githubusercontent.com/openai/parameter-golf/main/README.md`
 - Current top leaderboard entry: `LeakyReLU² + Legal Score-First TTT + Parallel Muon` by `abaybektursun` at `1.1194`
 

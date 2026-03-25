@@ -3,78 +3,83 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Experiment ID
-`arch_003_bigramhash_4096_under_export_006_protocol`
+`opt_003_arch_003_muon_wd004_plus_late_swa`
 
 ## Category
-- architecture
+- optimization
 
 ## Baseline / Comparison
-Locked local best byte-safe configuration after the successful `export_006` retest:
+Locked local best byte-safe configuration after the successful `arch_003` feature-stack run:
 - checkpoint/export lineage:
-  - training checkpoint `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_002_depth_10l_under_locked_export_protocol/final_model.pt`
-  - fixed scored export winner `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/export_006_retest_attn_proj_subset_on_arch_002_checkpoint/artifacts/final_model.mlp_int6_plus_attn_proj_int6_else_int8.zstd.ptz`
+  - training checkpoint `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_003_bigramhash_4096_smeargate_under_export_006_protocol/final_model.pt`
+  - fixed scored export winner `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_003_bigramhash_4096_smeargate_under_export_006_protocol/artifacts/final_model.mlp_int6_plus_attn_proj_int6_else_int8.zstd.ptz`
 - fixed evaluation standard `EVAL_MODE=sliding_window EVAL_STRIDE=64`
 - fixed export container `zstd-22`
 - fixed export policy for scoring: `mlp_int6_plus_attn_proj_int6_else_int8`
 - most relevant locked numbers:
-  - checkpoint `val_bpb=1.21510822`
-  - regenerated `uniform int8 + zstd-22` post-export `val_bpb=1.21806669`, total `17480480`
-  - regenerated `mlp_int6_else_int8 + zstd-22` post-export `val_bpb=1.22052401`, total `15482717`
-  - regenerated `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` post-export `val_bpb=1.22086139`, total `14954974`
+  - checkpoint `val_bpb=1.20992003`
+  - regenerated `uniform int8 + zstd-22` post-export `val_bpb=1.21486895`, total `18074538`
+  - regenerated `mlp_int6_else_int8 + zstd-22` post-export `val_bpb=1.21774203`, total `16084095`
+  - regenerated `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` post-export `val_bpb=1.21797944`, total `15564216`
 
 Candidate:
-- retrain one `10L / MLP2x` model with a small `BigramHash(4096)` feature path
-- keep the newly accepted `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` export readout fixed for scoring
+- retrain one `10L / MLP2x + BigramHash(4096) + SmearGate` model with bundled optimization changes `Muon decoupled weight decay = 0.04` plus one fixed late `SWA` window
+- score the same locked export readouts after retraining
 
 ## Hypothesis
-If the current `10L / MLP2x` recipe is still underpowered in token-pair context modeling, then adding only a small `BigramHash(4096)` auxiliary path should improve checkpoint and exported `val_bpb` more efficiently than another raw-capacity increase, while the stronger `export_006` readout should still remain under the 16 MB cap.
+If the new feature-stack checkpoint is quality-strong but not quantization-robust enough, then adding the nearby frontier optimization bundle `Muon WD=0.04 + late SWA` should recover export robustness and byte headroom efficiency, improving the locked exported readout or its quantization gap without giving back too much raw checkpoint quality.
 
 ## Why It Might Work
-`BigramHash` appears repeatedly in current leaderboard entries and is one of the lowest-cost recurring architecture motifs in the local SOTA notes. The project now has about `1.045 MB` of submission headroom under the cap with `export_006`, so a modest auxiliary feature is a more disciplined next test than either another nearby export subset tweak or a much larger capacity jump like `MLP3x`.
+Current leaderboard recipes repeatedly pair cheap feature additions with stronger compression-friendly optimization and late averaging. Local `arch_003` already proved that the feature stack improves raw and exported quality, but its quantization gap worsened materially and the old safe `mlp_int6_else_int8` readout crossed the byte cap. That makes the missing `WD + late averaging` bundle the clearest next lever.
 
 ## Minimal Intervention
-Retrain once from the current `arch_002` recipe lineage and change only one architecture variable: enable a small `BigramHash` pathway with `4096` buckets. Score the resulting checkpoint with regenerated `uniform int8 + zstd-22`, regenerated `mlp_int6_else_int8 + zstd-22`, and the fixed local-best `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22`.
+Retrain once from the current `arch_003` recipe lineage and change only optimization behavior: apply `Muon weight decay = 0.04` in the matrix-parameter path and enable one fixed late `SWA` collection window. Keep architecture, evaluation protocol, and export protocol fixed.
 
 ## Variables To Change
-- architecture feature: add `BigramHash(4096)` only
+- optimization: set Muon decoupled weight decay to `0.04`
+- late averaging: enable `SWA`
+- SWA window: collect every `50` steps while the learning-rate multiplier is below `0.5`
 
 ## Variables To Hold Fixed
-- depth `NUM_LAYERS=10`
-- width, heads, KV heads, and `MLP_MULT=2`
+- architecture `10L / MLP2x + BigramHash(4096) + SmearGate`
 - tokenizer
 - dataset and validation shard pattern
-- optimizer family and the locked schedule settings `WARMDOWN_ITERS=3000` and `MUON_MOMENTUM_WARMUP_STEPS=1500`
+- optimizer family
+- `WARMDOWN_ITERS=3000`
+- `MUON_MOMENTUM_WARMUP_STEPS=1500`
 - wallclock-limited launch shape and 8-GPU execution pattern
 - evaluation mode `sliding_window`
 - evaluation stride `64`
 - export container `zstd-22`
 - export schema
-- primary export readout for decision-making: `mlp_int6_plus_attn_proj_int6_else_int8`
+- scored export policies: regenerate `uniform int8`, `mlp_int6_else_int8`, and `mlp_int6_plus_attn_proj_int6_else_int8`
 - metric definitions and reporting format
 
 ## Success Metric
 Primary:
-- improve regenerated `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` post-export `val_bpb` versus the current `1.22086139`
-- keep the same readout under the 16 MB cap
+- improve regenerated `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` beyond `1.21797944`
+- reduce its quantization gap below `+0.00805941`
+- keep the locked best readout under the 16 MB cap
 
 Secondary:
-- improve checkpoint `val_bpb` versus `1.21510822`
-- avoid materially worsening the quantization gap of the locked best export readout
+- make regenerated `mlp_int6_else_int8 + zstd-22` byte-safe again
+- preserve the checkpoint-quality gain from `arch_003` as much as practical
 - preserve exact export roundtrip/load correctness
 
 ## Failure Interpretation
-If a small `BigramHash` does not improve the locked best exported readout or pushes the export over the byte cap, then the next architecture-side move should likely shift to a different motif such as `SmearGate` or an optimization/export machinery change rather than more auxiliary-context variants.
+If `WD=0.04 + late SWA` does not improve export robustness on top of the successful feature-stack architecture, then this checkpoint family is likely bottlenecked less by this generic optimization layer and more by a stronger frontier stack such as `EMA`, `GPTQ-lite`, or a structural architecture/capacity change.
 
 ## Redundancy Check
-- This is not another nearby export-subset retest; `export_006` already answered the most obvious remaining selective-export question positively.
-- This tests one current leaderboard motif with a single architecture change against the strongest local byte-safe export baseline.
+- This does not repeat the already-answered `BigramHash + SmearGate` architecture question.
+- This directly targets the newly exposed bottleneck from `arch_003`: worse quantization gap and reduced byte headroom on the stronger checkpoint.
+- Local work has not yet tested `WD=0.04`, `SWA`, or the exact `arch_003` retrain with this optimization bundle.
 
 ## Execution Plan
-1. Reuse the `arch_002` recipe and change only the architecture by adding `BigramHash(4096)`.
+1. Reuse the `arch_003` recipe and change only the optimization bundle: `Muon weight decay = 0.04` plus one fixed late `SWA` window.
 2. Train via `tools/gpu_experiment_runner.py` on the same 8-GPU wallclock-limited setup.
 3. Evaluate the resulting checkpoint under `EVAL_MODE=sliding_window EVAL_STRIDE=64`.
 4. Regenerate `uniform int8 + zstd-22`, `mlp_int6_else_int8 + zstd-22`, and `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22`.
-5. Validate roundtrip/load correctness and compare bytes, totals, post-export `val_bpb`, and quantization gaps against the locked `export_006` baseline.
+5. Validate roundtrip/load correctness and compare bytes, totals, post-export `val_bpb`, and quantization gaps against the locked `arch_003` baseline.
 
 ## Expected Effect
-Best case: `BigramHash(4096)` yields a modest but real quality gain on the locked exported readout while preserving byte safety thanks to the stronger `export_006` baseline. A clean failure would still be informative because it would rule out one of the cheaper leaderboard motifs before attempting more invasive architecture changes.
+Best case: the bundled frontier optimization change keeps most of the `arch_003` raw-quality gain while making the exported readouts safer, ideally pulling the locked best readout back inside the old `+0.003` relative band and reopening some byte headroom.
