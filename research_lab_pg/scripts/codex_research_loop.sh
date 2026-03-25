@@ -118,6 +118,55 @@ append_directory_sections() {
   done
 }
 
+push_dashboard() {
+  local round="$1"
+  local round_tag
+  round_tag="$(printf 'round_%03d' "$round")"
+
+  # Regenerate dashboard
+  set +e
+  python "$SCRIPT_DIR/generate_progress_dashboard.py" \
+    --project-root "$WORKDIR" \
+    --repo-root "$LAB_ROOT/.." \
+    --output-dir "$WORKDIR/dashboard" \
+    --refresh-seconds 60
+  set -e
+
+  # Commit and push dashboard + scientific memory
+  local repo_root
+  repo_root="$(git -C "$WORKDIR" rev-parse --show-toplevel 2>/dev/null || echo "")"
+  if [[ -z "$repo_root" ]]; then
+    repo_root="$(git -C "$LAB_ROOT" rev-parse --show-toplevel 2>/dev/null || echo "")"
+  fi
+  if [[ -z "$repo_root" ]]; then
+    echo "[push_dashboard] Could not find git repo root, skipping push." >&2
+    return 0
+  fi
+
+  set +e
+  git -C "$repo_root" add \
+    research_lab_pg/projects/parameter_golf_science/dashboard/index.html \
+    research_lab_pg/projects/parameter_golf_science/dashboard/status.json \
+    research_lab_pg/projects/parameter_golf_science/planning/ \
+    research_lab_pg/projects/parameter_golf_science/reports/ \
+    docs/latest_sota_snapshot.md \
+    research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md \
+    2>/dev/null
+
+  if git -C "$repo_root" diff --cached --quiet; then
+    echo "[push_dashboard] Nothing to commit after ${round_tag}."
+    set -e
+    return 0
+  fi
+
+  git -C "$repo_root" commit -m "Auto-update dashboard and memory after ${round_tag} [skip ci]" \
+    2>/dev/null
+  git -C "$repo_root" push origin main 2>/dev/null \
+    && echo "[push_dashboard] Pushed dashboard after ${round_tag}." \
+    || echo "[push_dashboard] Push failed after ${round_tag} (will retry next round)." >&2
+  set -e
+}
+
 run_startup_gpu_smoke() {
   local smoke_output_json="$WORKDIR/context/startup_gpu_smoke.json"
   local smoke_runner_json="$WORKDIR/context/startup_gpu_smoke_runner.json"
@@ -447,6 +496,7 @@ run_round() {
   if [[ "$worker_exit_code" -eq 0 ]]; then
     cp "$worker_summary_path" "$RUN_ROOT/worker_last_summary.txt"
     cp "$worker_summary_path" "$WORKDIR/reports/round_summaries/${round_tag}.md"
+    push_dashboard "$round"
   fi
 
   {
