@@ -118,6 +118,46 @@ append_directory_sections() {
   done
 }
 
+refresh_sota_context() {
+  local round="$1"
+  local repo_root
+  repo_root="$(cd "${LAB_ROOT}/.." && pwd)"
+  local sota_records_dir="${repo_root}/docs/sota_records"
+  local ref_dir="$WORKDIR/context/reference_materials"
+
+  echo "[refresh_sota_context] Round ${round}: refreshing SOTA snapshot and training scripts..."
+
+  set +e
+
+  # Refresh live leaderboard snapshot
+  python "$SCRIPT_DIR/refresh_parameter_golf_sota_context.py" \
+    --repo-root "$repo_root" \
+    --output "${repo_root}/docs/latest_sota_snapshot.md" \
+    --output "${ref_dir}/latest_sota_snapshot.md" \
+    2>/dev/null \
+    && echo "[refresh_sota_context] SOTA snapshot updated." \
+    || echo "[refresh_sota_context] Warning: SOTA snapshot refresh failed." >&2
+
+  # Fetch top SOTA training scripts
+  python "$SCRIPT_DIR/fetch_sota_records.py" \
+    --repo-root "$repo_root" \
+    --output-dir "$sota_records_dir" \
+    --top-n 5 \
+    2>/dev/null \
+    && echo "[refresh_sota_context] SOTA records updated." \
+    || echo "[refresh_sota_context] Warning: fetch_sota_records failed." >&2
+
+  # Copy updated record files into context/reference_materials/
+  if [[ -d "$sota_records_dir" ]]; then
+    while IFS= read -r -d '' record_file; do
+      cp "$record_file" "${ref_dir}/"
+    done < <(find "$sota_records_dir" -maxdepth 1 -name "*.md" -type f -print0)
+    echo "[refresh_sota_context] Copied SOTA record files to context/reference_materials/."
+  fi
+
+  set -e
+}
+
 push_dashboard() {
   local round="$1"
   local round_tag
@@ -419,6 +459,8 @@ run_round() {
   planner_prompt_path="$RUN_ROOT/${round_tag}.planner.prompt.txt"
   review_prompt_path="$RUN_ROOT/${round_tag}.review.prompt.txt"
   worker_prompt_path="$RUN_ROOT/${round_tag}.worker.prompt.txt"
+
+  refresh_sota_context "$round"
 
   build_planner_prompt \
     "$round" \
