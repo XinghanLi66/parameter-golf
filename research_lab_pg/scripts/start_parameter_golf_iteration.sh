@@ -15,6 +15,8 @@ RUN_STARTUP_GPU_SMOKE="${RUN_STARTUP_GPU_SMOKE:-0}"
 DATASET_DIR="${REPO_ROOT}/data/datasets/fineweb10B_sp1024"
 TOKENIZER_FILE="${REPO_ROOT}/data/tokenizers/fineweb_1024_bpe.model"
 LIVE_SOTA_FILE="${LIVE_SOTA_FILE:-${REPO_ROOT}/docs/latest_sota_snapshot.md}"
+SOTA_RECORDS_DIR="${SOTA_RECORDS_DIR:-${REPO_ROOT}/docs/sota_records}"
+SOTA_RECORDS_TOP_N="${SOTA_RECORDS_TOP_N:-5}"
 EXTRA_CONTEXT_FILES="${EXTRA_CONTEXT_FILES:-${REPO_ROOT}/docs/sota_review.md:${LIVE_SOTA_FILE}:${REPO_ROOT}/docs/scientific_research_loop.md}"
 
 wait_for_assets() {
@@ -35,6 +37,19 @@ python "${LAB_ROOT}/scripts/refresh_parameter_golf_sota_context.py" \
   --repo-root "$REPO_ROOT" \
   --output "$LIVE_SOTA_FILE" \
   --output "${PROJECT_ROOT}/context/reference_materials/latest_sota_snapshot.md"
+
+echo "Fetching top ${SOTA_RECORDS_TOP_N} SOTA training scripts..."
+python "${LAB_ROOT}/scripts/fetch_sota_records.py" \
+  --repo-root "$REPO_ROOT" \
+  --output-dir "$SOTA_RECORDS_DIR" \
+  --top-n "$SOTA_RECORDS_TOP_N" || echo "Warning: fetch_sota_records failed, continuing without updated SOTA codes."
+
+# Append all fetched SOTA record files to EXTRA_CONTEXT_FILES
+if [[ -d "$SOTA_RECORDS_DIR" ]]; then
+  while IFS= read -r -d '' record_file; do
+    EXTRA_CONTEXT_FILES="${EXTRA_CONTEXT_FILES}:${record_file}"
+  done < <(find "$SOTA_RECORDS_DIR" -maxdepth 1 -name "*.md" -type f -print0 | sort -z)
+fi
 
 python "${LAB_ROOT}/scripts/verify_parameter_golf_env.py" \
   --repo-root "$REPO_ROOT" \
