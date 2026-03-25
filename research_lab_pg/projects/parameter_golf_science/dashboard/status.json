@@ -1,24 +1,24 @@
 {
-  "generated_at_utc": "2026-03-25T02:23:16Z",
+  "generated_at_utc": "2026-03-25T10:31:50Z",
   "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
   "repo_root": "/newcpfs/lxh/parameter-golf",
-  "external_sota_bpb": 1.1228,
+  "external_sota_bpb": 1.1194,
   "latest_sota": {
     "source": "https://raw.githubusercontent.com/openai/parameter-golf/main/README.md",
-    "top_run": "11L EMA + GPTQ-lite + warmdown3500",
-    "top_author": "signalrush",
-    "top_score": 1.1228,
+    "top_run": "LeakyReLU² + Legal Score-First TTT + Parallel Muon",
+    "top_author": "abaybektursun",
+    "top_score": 1.1194,
     "entries": [
-      "1. `11L EMA + GPTQ-lite + warmdown3500` | score `1.1228` | signalrush | 2026-03-22 | On PR #374: GPTQ-lite clip search + EMA, plus warmdown3500 and QAT@0.15",
-      "2. `11L Partial RoPE + LN Scale + EMA + XSA4` | score `1.1248` | jfprincz | 2026-03-21 | On PR #287: Partial RoPE (16/64) + layerwise LN scale",
-      "3. `11L XSA4 + EMA + Int6 MLP3x` | score `1.1271` | jfprincz | 2026-03-20 | On PR #198: XSA on the last 4 layers + EMA replacing SWA",
-      "4. `11L Efficient Partial XSA` | score `1.1307` | unnir | 2026-03-20 | On PR #198: Efficient Partial XSA on the deepest 3 layers"
+      "1. `LeakyReLU² + Legal Score-First TTT + Parallel Muon` | score `1.1194` | abaybektursun | 2026-03-23 | On PR #549: LeakyReLU(0.5)^2 + TTT + Parallel Muon on the PR #414 stack",
+      "2. `11L EMA + GPTQ-lite + warmdown3500` | score `1.1228` | signalrush | 2026-03-22 | On PR #374: GPTQ-lite clip search + EMA, plus warmdown3500 and QAT@0.15",
+      "3. `11L Partial RoPE + LN Scale + EMA + XSA4` | score `1.1248` | jfprincz | 2026-03-21 | On PR #287: Partial RoPE (16/64) + layerwise LN scale",
+      "4. `11L XSA4 + EMA + Int6 MLP3x` | score `1.1271` | jfprincz | 2026-03-20 | On PR #198: XSA on the last 4 layers + EMA replacing SWA"
     ],
     "motifs": [
-      "`Int6 quantization` appears in 5 of the current top 8 leaderboard entries.",
-      "`BigramHash` appears in 3 of the current top 8 leaderboard entries.",
+      "`Int6 quantization` appears in 4 of the current top 8 leaderboard entries.",
       "`EMA` appears in 3 of the current top 8 leaderboard entries.",
-      "`MLP3x` appears in 3 of the current top 8 leaderboard entries."
+      "`MLP3x` appears in 3 of the current top 8 leaderboard entries.",
+      "`XSA` appears in 3 of the current top 8 leaderboard entries."
     ]
   },
   "local_best_bpb": {
@@ -26,7 +26,7 @@
     "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
     "matched_text": "Local architecture locked recipe: baseline `MLP_MULT=2` vs candidate `3` on top of `opt_002` | Candidate: `1.20227788`"
   },
-  "gap_to_sota": 0.079478,
+  "gap_to_sota": 0.082878,
   "latest_status_sections": {
     "Current Best Evidence": "- External SOTA review indicates the main repo baseline is behind on evaluation and export protocol, not just on architecture.\n- The root `train_gpt.py` now supports explicit `non_overlapping` and `sliding_window` evaluation modes, plus `both` for direct comparison, with stride and wall-clock time logged for both pre-export and post-export evaluation.\n- The real local `eval_001` comparison is now measured on one fresh baseline checkpoint plus its matching `int8+zlib` artifact, and the result is decision-quality: `sliding_window stride=64` improved the same pair by about `-0.0316` pre-export and `-0.0318` post-export.\n- The real local `export_001` comparison is now measured on that same checkpoint with a fixed `int8` payload, and the result is also decision-quality: `zstd-22` reduced artifact bytes by `37362` (`-0.2367%`) versus `zlib-9` with exact roundtrip tensor equality and identical post-export `val_bpb`.\n- The real local `export_002` comparison is now measured on that same locked checkpoint with fixed `zstd-22`, and it rules out broad lower-bit export on this checkpoint: `uniform int6` cut artifact bytes by `3365248` (`-21.3692%`) versus regenerated `uniform int8`, but post-export `val_bpb` worsened by `+0.07313349`, far beyond the allowed `+0.003`.\n- The real local `export_003` comparison is now measured on that same locked checkpoint with fixed `zstd-22`, and it shows that selective export remains viable: `mlp_int6_else_int8` cut artifact bytes by `1801491` (`-11.4392%`) versus regenerated `uniform int8`, while post-export `val_bpb` worsened by only `+0.00263128`.\n- The real local `export_004` comparison is now measured on that same locked checkpoint with fixed `zstd-22`, and it suggests the selective export frontier is near saturation: adding `blocks.*.attn.proj.weight -> int6` on top of `MLP-only int6` cut artifact bytes by `2270838` (`-14.4195%`) versus regenerated `uniform int8`, but post-export `val_bpb` worsened by `+0.00300190`, just beyond the explicit guardrail.\n- The real local `opt_001` comparison is now measured on one retrain that changed only `WARMDOWN_ITERS` from `1200` to `3000`, and it modestly improves export robustness under the locked readout: fixed `mlp_int6_else_int8 + zstd-22` improved from `1.22768330` to `1.22696259` and its quantization gap fell from `+0.00762931` to `+0.00682063`, although checkpoint `val_bpb` was essentially flat at `1.22014196` versus `1.22005399`.\n- The real local `export_005` retest is now measured on the warmdown-3000 checkpoint with all three regenerated readouts in one run, and it closes the open export question cleanly: `mlp_int6_plus_attn_proj_int6_else_int8` improved to `1.22740875` from the historical `1.22805392`, but it still regressed by `+0.00313158` versus regenerated `uniform int8`, so the guardrail still fails.\n- The real local `opt_002` comparison is now measured on one retrain that changed only `MUON_MOMENTUM_WARMUP_STEPS` from `500` to `1500` on top of `WARMDOWN_ITERS=3000`, and it gives another modest export-robustness gain under the locked readout: regenerated `mlp_int6_else_int8 + zstd-22` improved from `1.22696259` to `1.22676204` and its quantization gap fell from `+0.00682063` to `+0.00614561`, while checkpoint `val_bpb` worsened from `1.22014196` to `1.22061644` and regenerated `uniform int8 + zstd-22` stayed essentially flat at `1.22429451` versus `1.22427718`.\n- The real local `arch_001` comparison is now measured on one retrain that changed only `MLP_MULT` from `2` to `3` on top of the locked `opt_002` recipe, and it gives a large quality gain on checkpoint and both exported readouts: checkpoint `val_bpb` improved from `1.22061644` to `1.20227788`, regenerated `uniform int8 + zstd-22` improved from `1.22429451` to `1.20534335`, and regenerated `mlp_int6_else_int8 + zstd-22` improved from `1.22676204` to `1.20764933`; however, both exported artifacts exceeded the 16 MB cap at totals `19989838` and `17326746`, so this exact configuration is negative for the submission objective.\n- The real local `arch_002` comparison is now measured on one retrain that changed only `NUM_LAYERS` from `9` to `10` on top of the locked `opt_002` recipe, and it gives a medium-sized quality gain with materially smaller byte growth than `MLP3x`: checkpoint `val_bpb` improved from `1.22061644` to `1.21510822`, regenerated `uniform int8 + zstd-22` improved from `1.22429451` to `1.21806669`, and regenerated `mlp_int6_else_int8 + zstd-22` improved from `1.22676204` to `1.22052401`; the regenerated `mlp_int6_else_int8` artifact stayed under the cap at `15482717` total bytes, while regenerated `uniform int8` remained over the cap at `17480480`.\n- The real local `export_006` retest is now measured on the locked `arch_002` 10-layer checkpoint with all three regenerated readouts in one run, and it reopens the prior `attn.proj` frontier cleanly: `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` scored `1.22086139` at `14954974` total bytes, saving `527743` artifact bytes versus regenerated `mlp_int6_else_int8` while regressing only `+0.00033737`, and staying within the explicit `+0.003` guardrail at `+0.00279470` versus regenerated `uniform int8`.",
     "Most Important Open Question": "Now that `arch_002 + mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` is the strongest local byte-safe export frontier, which single-variable architecture or optimization change can improve exported quality from this stronger baseline without giving back its byte advantage?",
@@ -2203,13 +2203,13 @@
     }
   ],
   "verifier": {
-    "generated_at_utc": "2026-03-24T07:01:29Z",
+    "generated_at_utc": "2026-03-25T09:32:12Z",
     "repo_root": "/newcpfs/lxh/parameter-golf",
     "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
     "executables": {
       "codex": {
-        "found": true,
-        "path": "/usr/local/nvm/versions/node/v16.20.2/bin/codex"
+        "found": false,
+        "path": ""
       },
       "python": {
         "found": true,
@@ -2255,14 +2255,14 @@
       }
     },
     "codex": {
-      "version_ok": true,
-      "version": "codex-cli 0.116.0",
-      "login_ok": true,
-      "login_status": "WARNING: failed to clean up stale arg0 temp dirs: Directory not empty (os error 39)\nLogged in using ChatGPT"
+      "version_ok": false,
+      "version": "[Errno 2] No such file or directory: 'codex'",
+      "login_ok": false,
+      "login_status": "[Errno 2] No such file or directory: 'codex'"
     },
     "git_status": {
       "ok": true,
-      "summary": "M train_gpt.py\n?? docs/\n?? research_lab_pg/"
+      "summary": "M docs/latest_sota_snapshot.md\n M research_lab_pg/examples/proposal_parameter_golf_science.md\n M research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md\n M research_lab_pg/projects/parameter_golf_science/dashboard/index.html\n M research_lab_pg/projects/parameter_golf_science/dashboard/status.json\n M research_lab_pg/scripts/codex_research_loop.sh\n M research_lab_pg/scripts/codex_research_prompt.txt\n M research_lab_pg/scripts/codex_research_review_prompt.txt\n M research_lab_pg/scripts/codex_research_worker_prompt.txt\n?? research_lab_pg/projects/gpu_runner_metadata.json\n?? research_lab_pg/projects/gpu_runner_metadata_export.json\n?? research_lab_pg/run_50rounds.log"
     },
     "data": {
       "datasets_root_exists": true,
@@ -2303,31 +2303,35 @@
       "conda_env": "loongflow_ml"
     },
     "summary": {
-      "ready_for_real_iteration": true
+      "ready_for_real_iteration": false
     }
   },
   "git": {
     "changed_files": [
+      "M docs/latest_sota_snapshot.md",
+      "M research_lab_pg/examples/proposal_parameter_golf_science.md",
+      "M research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md",
       "M research_lab_pg/projects/parameter_golf_science/dashboard/index.html",
       "M research_lab_pg/projects/parameter_golf_science/dashboard/status.json",
-      "M research_lab_pg/projects/parameter_golf_science/planning/experiment_ledger.md",
-      "M research_lab_pg/projects/parameter_golf_science/planning/next_experiment.md",
-      "M research_lab_pg/projects/parameter_golf_science/planning/research_memory.md",
-      "M research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
-      "M research_lab_pg/projects/parameter_golf_science/reports/latest_status.md",
+      "M research_lab_pg/scripts/codex_research_loop.sh",
+      "M research_lab_pg/scripts/codex_research_prompt.txt",
+      "M research_lab_pg/scripts/codex_research_review_prompt.txt",
+      "M research_lab_pg/scripts/codex_research_worker_prompt.txt",
       "?? research_lab_pg/projects/gpu_runner_metadata.json",
       "?? research_lab_pg/projects/gpu_runner_metadata_export.json",
-      "?? research_lab_pg/projects/parameter_golf_science/tools/export_006_retest_attn_proj_on_arch002.py"
+      "?? research_lab_pg/run_50rounds.log"
     ],
     "diff_stat": [
-      ".../parameter_golf_science/dashboard/index.html    |  28 +-",
-      ".../parameter_golf_science/dashboard/status.json   | 587 ++++++++++++++-------",
-      ".../planning/experiment_ledger.md                  |   2 +",
-      ".../planning/next_experiment.md                    |  83 ++-",
-      ".../planning/research_memory.md                    |  15 +-",
-      ".../reports/comparison_summary.md                  |   9 +",
-      ".../reports/latest_status.md                       |  38 +-",
-      "7 files changed, 488 insertions(+), 274 deletions(-)"
+      "docs/latest_sota_snapshot.md                       | 37 ++++++-----",
+      ".../examples/proposal_parameter_golf_science.md    | 77 +++++++---------------",
+      ".../reference_materials/latest_sota_snapshot.md    | 37 ++++++-----",
+      ".../parameter_golf_science/dashboard/index.html    | 14 ++--",
+      ".../parameter_golf_science/dashboard/status.json   | 76 +++++++++++----------",
+      "research_lab_pg/scripts/codex_research_loop.sh     | 26 ++++----",
+      "research_lab_pg/scripts/codex_research_prompt.txt  | 73 +++++++++++++-------",
+      ".../scripts/codex_research_review_prompt.txt       | 34 +++++++---",
+      ".../scripts/codex_research_worker_prompt.txt       | 28 +++++---",
+      "9 files changed, 220 insertions(+), 182 deletions(-)"
     ]
   }
 }

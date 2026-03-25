@@ -196,7 +196,7 @@
 </head>
 <body>
   <h1>Parameter Golf Research Dashboard</h1>
-  <p class="muted">Inspired by the lightweight experiment-tracking spirit of Karpathy's <a href="https://github.com/karpathy/autoresearch">`autoresearch`</a>. Generated at 2026-03-25T02:23:16Z.</p>
+  <p class="muted">Inspired by the lightweight experiment-tracking spirit of Karpathy's <a href="https://github.com/karpathy/autoresearch">`autoresearch`</a>. Generated at 2026-03-25T10:31:50Z.</p>
 
   <div class="grid three">
     <div class="card">
@@ -206,12 +206,12 @@
     </div>
     <div class="card">
       <h3>Current SOTA</h3>
-      <div class="metric">1.1228</div>
+      <div class="metric">1.1194</div>
       <p class="muted">Top repo leaderboard score</p>
     </div>
     <div class="card">
       <h3>Gap To SOTA</h3>
-      <div class="metric">+0.079478</div>
+      <div class="metric">+0.082878</div>
       <p class="muted">Local best minus current top score</p>
     </div>
   </div>
@@ -234,7 +234,7 @@
   <div class="grid three">
     <div class="card">
       <h3>Verifier Ready</h3>
-      <div class="metric">yes</div>
+      <div class="metric">no</div>
       <p class="muted">Real iteration readiness from `verifier_env.json`</p>
     </div>
     <div class="card">
@@ -273,7 +273,7 @@
 
   <div class="section">
     <h2>Latest SOTA Snapshot</h2>
-    <div class='grid three'><div class='card'><h3>Current Top Run</h3><p><strong>Run:</strong> 11L EMA + GPTQ-lite + warmdown3500</p><p><strong>Author:</strong> signalrush</p><p><strong>Score:</strong> 1.1228</p><p class='muted break mono'>https://raw.githubusercontent.com/openai/parameter-golf/main/README.md</p></div><div class='card'><h3>Recent Top Entries</h3><ul><li>1. `11L EMA + GPTQ-lite + warmdown3500` | score `1.1228` | signalrush | 2026-03-22 | On PR #374: GPTQ-lite clip search + EMA, plus warmdown3500 and QAT@0.15</li><li>2. `11L Partial RoPE + LN Scale + EMA + XSA4` | score `1.1248` | jfprincz | 2026-03-21 | On PR #287: Partial RoPE (16/64) + layerwise LN scale</li><li>3. `11L XSA4 + EMA + Int6 MLP3x` | score `1.1271` | jfprincz | 2026-03-20 | On PR #198: XSA on the last 4 layers + EMA replacing SWA</li><li>4. `11L Efficient Partial XSA` | score `1.1307` | unnir | 2026-03-20 | On PR #198: Efficient Partial XSA on the deepest 3 layers</li></ul></div><div class='card'><h3>Recurring Motifs</h3><ul><li>`Int6 quantization` appears in 5 of the current top 8 leaderboard entries.</li><li>`BigramHash` appears in 3 of the current top 8 leaderboard entries.</li><li>`EMA` appears in 3 of the current top 8 leaderboard entries.</li><li>`MLP3x` appears in 3 of the current top 8 leaderboard entries.</li></ul></div></div>
+    <div class='grid three'><div class='card'><h3>Current Top Run</h3><p><strong>Run:</strong> LeakyReLU² + Legal Score-First TTT + Parallel Muon</p><p><strong>Author:</strong> abaybektursun</p><p><strong>Score:</strong> 1.1194</p><p class='muted break mono'>https://raw.githubusercontent.com/openai/parameter-golf/main/README.md</p></div><div class='card'><h3>Recent Top Entries</h3><ul><li>1. `LeakyReLU² + Legal Score-First TTT + Parallel Muon` | score `1.1194` | abaybektursun | 2026-03-23 | On PR #549: LeakyReLU(0.5)^2 + TTT + Parallel Muon on the PR #414 stack</li><li>2. `11L EMA + GPTQ-lite + warmdown3500` | score `1.1228` | signalrush | 2026-03-22 | On PR #374: GPTQ-lite clip search + EMA, plus warmdown3500 and QAT@0.15</li><li>3. `11L Partial RoPE + LN Scale + EMA + XSA4` | score `1.1248` | jfprincz | 2026-03-21 | On PR #287: Partial RoPE (16/64) + layerwise LN scale</li><li>4. `11L XSA4 + EMA + Int6 MLP3x` | score `1.1271` | jfprincz | 2026-03-20 | On PR #198: XSA on the last 4 layers + EMA replacing SWA</li></ul></div><div class='card'><h3>Recurring Motifs</h3><ul><li>`Int6 quantization` appears in 4 of the current top 8 leaderboard entries.</li><li>`EMA` appears in 3 of the current top 8 leaderboard entries.</li><li>`MLP3x` appears in 3 of the current top 8 leaderboard entries.</li><li>`XSA` appears in 3 of the current top 8 leaderboard entries.</li></ul></div></div>
   </div>
 
   <div class="section">
@@ -281,11 +281,11 @@
     <div class="grid three">
       <div class="card">
         <h3>Git Status</h3>
-        <ul><li>M research_lab_pg/projects/parameter_golf_science/dashboard/index.html</li><li>M research_lab_pg/projects/parameter_golf_science/dashboard/status.json</li><li>M research_lab_pg/projects/parameter_golf_science/planning/experiment_ledger.md</li><li>M research_lab_pg/projects/parameter_golf_science/planning/next_experiment.md</li><li>M research_lab_pg/projects/parameter_golf_science/planning/research_memory.md</li><li>M research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md</li><li>M research_lab_pg/projects/parameter_golf_science/reports/latest_status.md</li><li>?? research_lab_pg/projects/gpu_runner_metadata.json</li><li>?? research_lab_pg/projects/gpu_runner_metadata_export.json</li><li>?? research_lab_pg/projects/parameter_golf_science/tools/export_006_retest_attn_proj_on_arch002.py</li></ul>
+        <ul><li>M docs/latest_sota_snapshot.md</li><li>M research_lab_pg/examples/proposal_parameter_golf_science.md</li><li>M research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md</li><li>M research_lab_pg/projects/parameter_golf_science/dashboard/index.html</li><li>M research_lab_pg/projects/parameter_golf_science/dashboard/status.json</li><li>M research_lab_pg/scripts/codex_research_loop.sh</li><li>M research_lab_pg/scripts/codex_research_prompt.txt</li><li>M research_lab_pg/scripts/codex_research_review_prompt.txt</li><li>M research_lab_pg/scripts/codex_research_worker_prompt.txt</li><li>?? research_lab_pg/projects/gpu_runner_metadata.json</li><li>?? research_lab_pg/projects/gpu_runner_metadata_export.json</li><li>?? research_lab_pg/run_50rounds.log</li></ul>
       </div>
       <div class="card" style="grid-column: span 2;">
         <h3>Diff Stat</h3>
-        <ul><li>.../parameter_golf_science/dashboard/index.html    |  28 +-</li><li>.../parameter_golf_science/dashboard/status.json   | 587 ++++++++++++++-------</li><li>.../planning/experiment_ledger.md                  |   2 +</li><li>.../planning/next_experiment.md                    |  83 ++-</li><li>.../planning/research_memory.md                    |  15 +-</li><li>.../reports/comparison_summary.md                  |   9 +</li><li>.../reports/latest_status.md                       |  38 +-</li><li>7 files changed, 488 insertions(+), 274 deletions(-)</li></ul>
+        <ul><li>docs/latest_sota_snapshot.md                       | 37 ++++++-----</li><li>.../examples/proposal_parameter_golf_science.md    | 77 +++++++---------------</li><li>.../reference_materials/latest_sota_snapshot.md    | 37 ++++++-----</li><li>.../parameter_golf_science/dashboard/index.html    | 14 ++--</li><li>.../parameter_golf_science/dashboard/status.json   | 76 +++++++++++----------</li><li>research_lab_pg/scripts/codex_research_loop.sh     | 26 ++++----</li><li>research_lab_pg/scripts/codex_research_prompt.txt  | 73 +++++++++++++-------</li><li>.../scripts/codex_research_review_prompt.txt       | 34 +++++++---</li><li>.../scripts/codex_research_worker_prompt.txt       | 28 +++++---</li><li>9 files changed, 220 insertions(+), 182 deletions(-)</li></ul>
       </div>
     </div>
   </div>

@@ -2,13 +2,17 @@
 
 ## Goal
 
-Use the upgraded planner-reviewer-worker system to improve the `parameter-golf` repository in a disciplined, hypothesis-driven way for the Parameter Golf competition.
+Use the planner-reviewer-worker system to improve the `parameter-golf` repository and **surpass the current SOTA on the Parameter Golf leaderboard**.
 
 The target codebase is the repository root at:
 
 - `/newcpfs/lxh/parameter-golf`
 
-The immediate objective is not to make broad model changes blindly. The immediate objective is to build a clean experimental program that can produce high-quality, non-redundant optimization steps.
+The primary objective is to close the gap to SOTA as fast as possible. The system should operate in two phases:
+- **Aggressive phase** (local best BPB is more than ~0.02 above SOTA): reproduce and stack proven SOTA techniques from the leaderboard, even if multiple categories are touched together.
+- **Refinement phase** (local best BPB is within ~0.02 of SOTA): switch to tight single-variable experiments to find improvements beyond the known SOTA stack.
+
+Before every proposal, read `context/reference_materials/latest_sota_snapshot.md` to get the current leaderboard state. This snapshot is refreshed before every iteration run.
 
 ## Competition objective
 
@@ -50,64 +54,33 @@ The repository already contains:
 
 These should be treated as required context, especially for avoiding repeated exploration of already obvious ideas.
 
-## Initial research task
+## Research task
 
-For the first round, do **not** launch into broad optimization work.
+Each round should advance the local BPB toward — and eventually past — the current SOTA. The system is past the initial setup phase.
 
-Instead, use the first round to establish a scientific starting point:
+In each round:
 
-1. Inspect the current root-level baseline and relevant record folders.
-2. Populate the scientific memory files with:
-   - best known external patterns,
-   - current local baseline understanding,
-   - open questions,
-   - redundancy watchlist.
-3. Define a clean experiment taxonomy:
-   - architecture
-   - optimization
-   - evaluation
-   - export
-4. Propose exactly one high-value next experiment that is:
-   - narrow,
-   - falsifiable,
-   - easy to compare,
-   - grounded in the SOTA review.
-5. Prefer not to modify the main training code in this first round unless a tiny instrumentation or bookkeeping change is strictly necessary to support the scientific loop.
+1. Read `context/reference_materials/latest_sota_snapshot.md` to get the freshest leaderboard state.
+2. Determine the current phase (aggressive or refinement) based on the gap between local best BPB and current SOTA.
+3. In **aggressive phase**: identify the highest-leverage technique(s) from the SOTA stack not yet applied locally. Implement them. It is acceptable to bundle multiple proven techniques.
+4. In **refinement phase**: propose exactly one narrow, falsifiable experiment grounded in the SOTA review.
+5. Always update the five scientific memory files after each experiment.
 
-## What counts as a good first experiment
+## What counts as a good experiment
 
-A good first experiment:
+A good experiment:
 
-- has a named baseline,
-- has one primary hypothesis,
-- controls non-target variables,
-- produces interpretable success and failure,
-- helps decide what class of optimization should come next.
-
-Bad first experiments include:
-
-- stacking many improvements at once,
-- changing architecture and optimization and evaluation together,
-- repeating a known SOTA recipe without a local question,
-- proposing work that cannot be compared against a stable baseline.
-
-## Preferred first-round deliverables
-
-By the end of the first round, the workspace should contain:
-
-- a filled or partially filled `planning/research_memory.md`
-- a structured `planning/next_experiment.md`
-- a more useful `planning/experiment_ledger.md`
-- a concise `reports/latest_status.md`
-- a concise `reports/comparison_summary.md`
-- a single recommended next experiment for the main repo
+- has a named baseline (local BPB before the change),
+- targets a specific SOTA technique or hypothesis,
+- produces a measurable post-export `val_bpb` result,
+- records what was changed and what was held fixed.
 
 ## Guidance for interacting with the target repo
 
-- You may inspect files in `/newcpfs/lxh/parameter-golf`.
-- Avoid invasive edits to the target repo in the first round.
-- If you identify a tiny instrumentation change that would materially improve scientific comparison quality, justify it explicitly before making it.
+- The main training script is `/newcpfs/lxh/parameter-golf/train_gpt.py`.
+- Modifications to the training script are expected and encouraged when they implement SOTA techniques.
+- Always validate with post-export `val_bpb`, not just pre-export train loss.
 
-## Success criteria for this proposal
+## Success criteria
 
-The first round is successful if it leaves behind a cleaner scientific decision process for future optimization and surfaces one concrete next experiment that should be run next on the contest model.
+A round is successful if it produces a measurable improvement in post-export `val_bpb`, or produces a clear negative result that eliminates a hypothesis and informs the next step.

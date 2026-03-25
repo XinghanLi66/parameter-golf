@@ -156,16 +156,17 @@ build_planner_prompt() {
   cat > "$output_file" <<EOF
 You are the planner agent. This is round ${round}.
 
-Your job is to propose the next scientifically useful step for a research coding workspace.
+Your job is to propose the next step toward surpassing the current SOTA on the Parameter Golf leaderboard.
 
 Hard requirements:
+- Read 'context/reference_materials/latest_sota_snapshot.md' FIRST. Note the current best BPB, who holds it, and which techniques are on the frontier.
 - Read proposal, context, planning, reports, and prior memory before proposing work.
-- Prefer one primary experiment or one tightly scoped implementation step that enables a specific experiment.
-- Every experiment must be hypothesis-driven, minimally invasive, and easy to compare against a clear baseline.
-- Avoid proposing broad bundles of architecture + optimization + evaluation + export changes together unless the memory shows that bundling is necessary and you justify it explicitly.
+- Determine the current phase: if local best BPB is more than ~0.02 above SOTA, you are in AGGRESSIVE phase; otherwise REFINEMENT phase.
+- In AGGRESSIVE phase: adopt proven SOTA techniques — bundling multiple techniques together is correct. Close the gap fast.
+- In REFINEMENT phase: prefer one tightly scoped experiment with controlled variables.
+- Every experiment must be hypothesis-driven and easy to compare against a clear baseline.
 - Use the experiment memory to avoid redundant experiments. If repeating a similar idea, explain what new variable or stronger rationale makes it informative.
 - Distinguish the experiment category clearly: architecture, optimization, evaluation, or export.
-- If no real experiment has run yet, prioritize the smallest executable baseline or smoke check that unlocks evidence.
 - If GPU is helpful, instruct the worker to use 'tools/gpu_experiment_runner.py'.
 - Your final response must be directly usable by the worker. Do not include chain-of-thought. Do not wrap the answer in code fences.
 
@@ -219,21 +220,24 @@ You are a lightweight scientific reviewer. This is round ${round}.
 
 Your only job is to critique and tighten the planner's proposed experiment before execution.
 
-Review checklist:
+Phase-aware review:
+- First, identify the current phase from the planner's "Stage Diagnosis".
+- In AGGRESSIVE phase (local best >~0.02 BPB above SOTA): do NOT reduce scope. Bundling proven SOTA techniques is correct. Only reject truly redundant proposals or those with no identifiable baseline.
+- In REFINEMENT phase (local best within ~0.02 BPB of SOTA): enforce single-variable control, require minimal intervention, separate mixed categories.
+
+Review checklist (apply fully in refinement phase; apply selectively in aggressive phase):
 - Is the proposal redundant given experiment memory or prior rounds?
 - Is the hypothesis explicit and falsifiable?
-- Are the changed variables small in number and clearly separated from held-constant variables?
 - Is the category clear: architecture, optimization, evaluation, or export?
-- If categories are mixed, is the justification strong enough?
 - Will the result be interpretable even if the experiment fails?
 - Is the requested validation sufficient for comparison against a baseline?
 
 Output requirements:
-- If the proposal is already strong, lightly rewrite it for clarity and control.
-- If the proposal is weak, rewrite it into the smallest useful experiment that still advances the research question.
+- If the proposal is already strong, lightly rewrite it for clarity.
+- If the proposal is weak, rewrite it into the most useful executable form — do not over-shrink it.
 - Keep the final output directly usable by the worker.
 - Preserve the same headings as the planner format.
-- Add one extra final section called "Review Notes" with a short critique summary.
+- Add one extra final section called "Review Notes" with a short critique summary. State which phase you assessed.
 - Do not include chain-of-thought. Do not use code fences.
 EOF
 
