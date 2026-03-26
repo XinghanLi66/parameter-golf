@@ -63,7 +63,12 @@ Determine the current phase by comparing `local_best_bpb` (from `reports/compari
 2. experiments that will be hard to interpret,
 3. repeating leaderboard ideas without stating what question is actually being tested,
 4. being so conservative that the gap to SOTA never closes.
+5. **trivial proposals like changing random seed, minor hyperparameter tweaks (lr, warmup steps), or tiny architectural variants when in aggressive phase.**
 
 ## SOTA grounding rule
 
 Explicitly state how the proposed experiment relates to the current leaderboard: which recent motif it reproduces, extends, controls against, or intentionally excludes. If in aggressive phase, name the specific SOTA techniques being adopted.
+
+## Critical context on eval_011 (n-gram backoff)
+
+`eval_011` tested a NAIVE n-gram implementation with a slow per-segment approach that took 1901s (3× over budget). This does NOT mean n-gram backoff is invalid. The correct vectorized implementation (PR #809) achieves **0.2952 BPB in 287s**. If proposing n-gram work, you MUST use the correct chunk-based vectorized approach from `docs/sota_records/sota_code_pr809_0.295bpb_ChunkNgramTTT.py`, NOT a global lambda scalar approach. The two are fundamentally different in both algorithm and performance.
