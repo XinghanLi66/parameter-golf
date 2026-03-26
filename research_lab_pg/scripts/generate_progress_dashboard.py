@@ -325,6 +325,82 @@ def parse_latest_sota_snapshot(path: Path) -> dict[str, Any]:
     }
 
 
+EVAL_BUDGET_MS = 600_000  # 10 minutes in ms
+
+
+def scan_eval_runs(project_root: Path) -> list[dict[str, Any]]:
+    """Scan runs/eval_* summary.md files for BPB and timing, regardless of budget status."""
+    runs_dir = project_root / "runs"
+    if not runs_dir.exists():
+        return []
+    _primary_section_re = re.compile(
+        r"## (?:Primary Results|Actual Result)(.*?)(?=\n## |\Z)", re.DOTALL
+    )
+    _bpb_re = re.compile(r"val_bpb[^0-9]*([0-9]+\.[0-9]+)")
+    _wc_re = re.compile(r"script eval wallclock[^0-9]*([0-9]+)ms")
+    results = []
+    for summary_path in sorted(runs_dir.glob("eval_*/summary.md")):
+        run_name = summary_path.parent.name
+        text = safe_read_text(summary_path)
+        if not text:
+            continue
+        # Extract from Primary Results / Actual Result section first; fall back to full text
+        section_m = _primary_section_re.search(text)
+        search_text = section_m.group(1) if section_m else text
+        bpb_m = _bpb_re.search(search_text)
+        if not bpb_m:
+            bpb_m = _bpb_re.search(text)
+        if not bpb_m:
+            continue
+        bpb = float(bpb_m.group(1))
+        wc_m = _wc_re.search(search_text)
+        if not wc_m:
+            wc_m = _wc_re.search(text)
+        wallclock_ms = int(wc_m.group(1)) if wc_m else None
+        over_budget = wallclock_ms is not None and wallclock_ms > EVAL_BUDGET_MS
+        results.append({
+            "run": run_name,
+            "val_bpb": bpb,
+            "wallclock_ms": wallclock_ms,
+            "over_budget": over_budget,
+        })
+    results.sort(key=lambda r: r["val_bpb"])
+    return results
+
+
+def render_eval_runs_table(eval_runs: list[dict[str, Any]]) -> str:
+    if not eval_runs:
+        return "<p class='muted'>No eval runs found.</p>"
+    rows_html = []
+    for r in eval_runs:
+        bpb_str = f"{r['val_bpb']:.6f}"
+        wc = r["wallclock_ms"]
+        wc_str = f"{wc/1000:.0f}s" if wc is not None else "—"
+        if r["over_budget"]:
+            row_style = "style='color:#d29922'"  # orange = over budget
+            budget_badge = "<span style='font-size:0.75em;background:rgba(210,153,34,0.18);color:#d29922;border:1px solid rgba(210,153,34,0.4);border-radius:4px;padding:1px 5px;margin-left:6px'>over budget</span>"
+        else:
+            row_style = "style='color:#3fb950'"  # green = within budget
+            budget_badge = ""
+        rows_html.append(
+            f"<tr {row_style}>"
+            f"<td class='mono' style='font-size:0.85em'>{html.escape(r['run'])}</td>"
+            f"<td class='mono'><strong>{html.escape(bpb_str)}</strong>{budget_badge}</td>"
+            f"<td class='mono'>{html.escape(wc_str)}</td>"
+            f"</tr>"
+        )
+    return (
+        "<table style='width:100%;border-collapse:collapse'>"
+        "<thead><tr style='color:var(--muted);font-size:0.8em'>"
+        "<th style='text-align:left;padding:4px 8px'>Run</th>"
+        "<th style='text-align:left;padding:4px 8px'>BPB</th>"
+        "<th style='text-align:left;padding:4px 8px'>Eval time</th>"
+        "</tr></thead><tbody>"
+        + "".join(rows_html)
+        + "</tbody></table>"
+    )
+
+
 def should_scan_file(path: Path) -> bool:
     if not path.is_file():
         return False
@@ -406,6 +482,7 @@ def build_status(project_root: Path, repo_root: Path) -> dict[str, Any]:
     if external_sota is None:
         external_sota = parse_external_sota(repo_root)
     verifier = read_json(project_root / "context" / "verifier_env.json")
+    eval_runs = scan_eval_runs(project_root)
     gap_to_sota = None
     if external_sota is not None and best_bpb:
         gap_to_sota = round(best_bpb["val_bpb"] - external_sota, 6)
@@ -426,6 +503,7 @@ def build_status(project_root: Path, repo_root: Path) -> dict[str, Any]:
         "run_batches": run_batches,
         "training_runs": training_runs,
         "verifier": verifier,
+        "eval_runs": eval_runs,
         "git": git_change_summary(repo_root),
     }
 
@@ -940,6 +1018,15 @@ def render_dashboard(status: dict[str, Any], refresh_seconds: int) -> str:
     experiment_highlights = render_experiment_highlights(status.get("experiment_rows", []))
     comparison_highlights = render_comparison_highlights(status.get("comparison_rows", []))
     latest_sota_html = render_latest_sota_summary(latest_sota)
+    eval_runs = status.get("eval_runs", [])
+    eval_runs_html = render_eval_runs_table(eval_runs)
+    # Best eval BPB (including over-budget) for the top card
+    best_eval_bpb = eval_runs[0]["val_bpb"] if eval_runs else None
+    best_eval_over_budget = eval_runs[0]["over_budget"] if eval_runs else False
+    if best_eval_bpb is not None:
+        ob_note = " ⚠ over budget" if best_eval_over_budget else " ✓ legal"
+        local_best_display = f"{best_eval_bpb:.6f}{ob_note}"
+        local_best_path = eval_runs[0]["run"]
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -1214,6 +1301,11 @@ def render_dashboard(status: dict[str, Any], refresh_seconds: int) -> str:
   </div>
 
   <div class="section">
+    <h2>Eval Runs <span style="font-size:0.7em;color:var(--muted)">(🟢 within budget &nbsp;🟡 over 600s budget)</span></h2>
+    <div class="card">
+      {eval_runs_html}
+    </div>
+
     <h2>Latest SOTA Snapshot</h2>
     {latest_sota_html}
   </div>
