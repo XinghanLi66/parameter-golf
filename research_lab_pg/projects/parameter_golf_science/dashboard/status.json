@@ -1,24 +1,24 @@
 {
-  "generated_at_utc": "2026-03-26T04:36:09Z",
+  "generated_at_utc": "2026-03-26T07:42:03Z",
   "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
   "repo_root": "/newcpfs/lxh/parameter-golf",
-  "external_sota_bpb": 1.1194,
+  "external_sota_bpb": 0.2952,
   "latest_sota": {
-    "source": "https://raw.githubusercontent.com/openai/parameter-golf/main/README.md",
-    "top_run": "LeakyReLU² + Legal Score-First TTT + Parallel Muon",
-    "top_author": "abaybektursun",
-    "top_score": 1.1194,
+    "source": "https://github.com/openai/parameter-golf/pulls",
+    "top_run": "ChunkNgram + TTT + LeakyReLU(0.9)² + GPTQ5",
+    "top_author": "community",
+    "top_score": 0.2952,
     "entries": [
-      "1. `LeakyReLU² + Legal Score-First TTT + Parallel Muon` | score `1.1194` | abaybektursun | 2026-03-23 | On PR #549: LeakyReLU(0.5)^2 + TTT + Parallel Muon on the PR #414 stack",
-      "2. `11L EMA + GPTQ-lite + warmdown3500` | score `1.1228` | signalrush | 2026-03-22 | On PR #374: GPTQ-lite clip search + EMA, plus warmdown3500 and QAT@0.15",
-      "3. `11L Partial RoPE + LN Scale + EMA + XSA4` | score `1.1248` | jfprincz | 2026-03-21 | On PR #287: Partial RoPE (16/64) + layerwise LN scale",
-      "4. `11L XSA4 + EMA + Int6 MLP3x` | score `1.1271` | jfprincz | 2026-03-20 | On PR #198: XSA on the last 4 layers + EMA replacing SWA"
+      "1. `ChunkNgram + TTT + LeakyReLU(0.9)² + GPTQ5` | score `0.2952` | community | 2026-03-26 | PR #809: order-9 n-gram backoff + entropy-adaptive alpha + score-first TTT (LoRA rank 8)",
+      "2. `Distributed Prefill + 15-Gram + Order-Adaptive + EBLS` | score `0.4374` | community | 2026-03-26 | PR #796: 15-gram with distributed pre-fill + per-order entropy thresholds, EBLS architecture",
+      "3. `Complementary Training + Backoff N-gram + TTT` | score `0.4416` | community | 2026-03-26 | PR #803: train loss weighted by bigram-predictability, orders 2-10 at eval, AdamW TTT",
+      "4. `X-WING 3D Cubric + Complementary Training` | score `0.4820` | community | 2026-03-26 | PR #814: cubric architecture + complementary training"
     ],
     "motifs": [
-      "`Int6 quantization` appears in 4 of the current top 8 leaderboard entries.",
-      "`EMA` appears in 3 of the current top 8 leaderboard entries.",
-      "`MLP3x` appears in 3 of the current top 8 leaderboard entries.",
-      "`XSA` appears in 3 of the current top 8 leaderboard entries."
+      "`N-gram backoff cache (eval-time)` is the single biggest technique in ALL top 2026-03-26 entries.",
+      "`Entropy-adaptive alpha mixing` appears in all n-gram entries: mix more when model is uncertain.",
+      "`Score-first legality`: all n-gram caches are backward-looking (updated after scoring, not before).",
+      "`TTT (Test-Time Training)` still adds value but is now secondary to n-gram cache."
     ]
   },
   "local_best_bpb": {
@@ -26,88 +26,32 @@
     "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
     "matched_text": "Local reproduced leaderboard `#2` stack: `opt_008` ReLU² baseline vs `arch_010` LeakyReLU² transfer | Candidate: `1.12211549`"
   },
-  "gap_to_sota": 0.002715,
+  "gap_to_sota": 0.826915,
   "latest_status_sections": {
-    "Current Best Evidence": "- The real local `eval_007_arch010_legal_ttt_epochs4_seed2024_confirm` comparison is now measured on one controlled refinement-phase evaluation-only run on top of the locked `arch_010` seed-`2024` export lineage: keep the saved seed-`2024` artifact, the copied legal score-first TTT helper, and the `eval_006` winning TTT setting (`TTT_LR=0.0025`, `TTT_EPOCHS=4`) fixed, and change only the evaluated artifact lineage relative to `eval_006`.\n- The guardrail passed before launch, so this remained a clean single-variable confirmation rather than a drifted rerun: the copied helper stayed byte-identical to the `eval_006` helper lineage at `84059` bytes and SHA-256 `d93fc02cd20958d56d49af2df6b886527cef71d98ac46aa6304c4db048211bf8`, while the saved seed-`2024` `final_model.pt` and `final_model.int6.ptz` stayed unchanged at `106178569` bytes / `302fe0ad...` and `15761090` bytes / `479e5ccc...`.\n- Because helper and artifact identity stayed locked, the brief did not require rerunning same-script no-TTT parity. The valid comparison baselines therefore remain the locked seed-`2024` legal-TTT baseline `1.12027199`, the inherited same-script no-TTT parity result `1.12225535`, the contextual seed-`1337` `eval_006` result `1.11935008`, the locked legal-TTT 3-seed mean `1.12010450`, and live SOTA `1.1194`.\n- The single managed 8-GPU eval-only run in `physicslm` on `8x NVIDIA L20Z` completed cleanly with exit code `0` and produced `legal_ttt_exact val_loss=1.89097347`, `legal_ttt_exact val_bpb=1.11994397`, script TTT eval wallclock `465406ms`, and managed wallclock `506s`.\n- Versus the primary seed-`2024` legal-TTT baseline `1.12027199`, the candidate improved by `-0.00032802`; versus the inherited same-script no-TTT parity baseline `1.12225535`, by `-0.00231138`; versus the seed-`1337` `eval_006` breakthrough `1.11935008`, it regressed by `+0.00059389`; versus the locked legal-TTT 3-seed mean `1.12010450`, it improved by `-0.00016053`; and versus live SOTA `1.1194`, it remained `+0.00054397` above.\n- Eval-time cost rose materially versus the seed-`2024` locked `TTT_EPOCHS=3` run but stayed below the real limit: script wallclock rose `+65058ms` (`400348 -> 465406`) and managed wallclock rose `+65s` (`441 -> 506`), leaving about `94s` of managed headroom under the practical `10 min` cap.\n- The strongest local single-seed post-export result still remains `eval_006` at `1.11935008`, but `eval_007` is a clean positive confirmation on the more discriminating seed and lands in the brief’s “especially strong” band `<= 1.12010` at unchanged total bytes `15845149`, under the cap by `154851`.\n- Interpretation against the reviewed thresholds is positive: the run beats the primary decision baseline and stays budget-safe. The remaining caution is that `TTT_EPOCHS=4` is still not fully promoted across the line because the final locked seed-`42` confirmation has not yet been run.",
-    "Most Important Open Question": "Does the same locked-helper, locked-artifact `TTT_LR=0.0025`, `TTT_EPOCHS=4` legal-TTT setting also beat the seed-`42` baseline strongly enough, and with acceptable eval cost, to justify promoting `TTT_EPOCHS=4` across the locked `arch_010` legal-TTT line?",
-    "Active Experiment ID": "`eval_007_arch010_legal_ttt_epochs4_seed2024_confirm`",
-    "Latest Result Summary": "- Completed `eval_007_arch010_legal_ttt_epochs4_seed2024_confirm` in [summary.md](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_007_arch010_legal_ttt_epochs4_seed2024_confirm/summary.md).\n- Controlled intervention actually executed:\n  - copied the exact `eval_006` helper into a fresh `eval_007` run directory\n  - reused the exact saved seed-`2024` `arch_010` checkpoint/export lineage unchanged\n  - kept `TTT_LR=0.0025`, `TTT_EPOCHS=4` fixed\n  - changed only the evaluated artifact lineage from seed `1337 -> 2024`\n- Locked identity checks:\n  - helper bytes/hash: `84059`, `d93fc02cd20958d56d49af2df6b886527cef71d98ac46aa6304c4db048211bf8`\n  - saved seed-`2024` `final_model.pt`: `106178569` bytes, `302fe0ad739f19e51e35ecd6f55e5568009a31a2ead991fd3ebfbcf5be150987`\n  - saved seed-`2024` `final_model.int6.ptz`: `15761090` bytes, `479e5ccc5cb21d67fa937abb884fb63f1f812d99402b77b25fe32c2b9d838af3`\n- Managed 8-GPU eval-only run:\n  - environment: `physicslm`\n  - GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`\n  - result: `legal_ttt_exact val_bpb=1.11994397`, `val_loss=1.89097347`\n  - bytes: artifact `15761090`, code `84059`, total `15845149`\n  - byte status: under cap by `154851`\n  - legality: `score_first=True`, `last_chunk_untrained=True`, `1893` chunks of `32768` tokens\n  - load/decompress/dequantize status: pass\n- Deltas:\n  - vs primary seed-`2024` legal-TTT baseline `1.12027199`: `-0.00032802`\n  - vs same-script no-TTT parity baseline `1.12225535`: `-0.00231138`\n  - vs contextual `eval_006` seed-`1337` result `1.11935008`: `+0.00059389`\n  - vs locked legal-TTT 3-seed mean `1.12010450`: `-0.00016053`\n  - vs live SOTA `1.1194`: `+0.00054397`\n  - vs seed-`2024` locked `TTT_EPOCHS=3` script eval wallclock `400348ms`: `+65058ms`\n  - vs seed-`2024` locked `TTT_EPOCHS=3` managed wallclock `441s`: `+65s`\n- Decision:\n  - hypothesis confirmed on the discriminating seed\n  - the locked legal-TTT regime still appears to have real but not uniform extra adaptation-budget headroom\n  - the setting is now strong enough to justify the final exact seed-`42` confirmation before promotion",
-    "Recommended Next Step": "Run the exact locked-helper, locked-artifact `TTT_LR=0.0025`, `TTT_EPOCHS=4` eval-only test on seed `42`. If that final confirmation stays positive and remains comfortably under the real eval budget, promote `TTT_EPOCHS=4` across the locked `arch_010` legal-TTT line; if not, stop nearby TTT-budget tuning and move to a different single-variable refinement."
+    "Current Best Evidence": "- The real local `eval_011_arch010_legal_ttt_backoff_ngram_seed1337` comparison is now measured on one controlled refinement-phase evaluation-only higher-order count-based mixing test on top of locked seed-`1337` `arch_010`: reuse the saved seed-`1337` artifact lineage unchanged, copy the exact `eval_010` helper, remove the old bigram path, add one scoring-only `EVAL_NGRAM_LAMBDA` hook plus one fixed prefix-only multi-order backoff cache inside `eval_val_sliding_ttt()`, and keep the TTT adaptation path unchanged.\n- The helper/artifact guardrail passed cleanly. The copied helper started at `89121` bytes with SHA-256 `1cecd32edeb0d4c10fe29d3011a52d32324e8f39f068df478e06333763e1fde2` and ended at `94173` bytes with SHA-256 `60779a33716859ff74ca25ee82ef57e778350a4faba1588d2aa29b1285048ec3`; the saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged before and after all runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.\n- The full-val parity run at `EVAL_NGRAM_LAMBDA=0.0` completed cleanly in `physicslm` on `8x NVIDIA L20Z` and scored `legal_ttt_exact val_loss=1.88997934`, `legal_ttt_exact val_bpb=1.11935518`, script eval wallclock `466883ms`, managed wallclock `508s`, artifact bytes `15555121`, code bytes `94173`, and total bytes `15649294`.\n- Parity versus the historical locked baseline was effectively exact: `1.11935518` is only `+0.00000510` from `eval_006=1.11935008`, so the reviewed `±0.0002` parity gate passed easily. The edited helper is therefore scientifically valid for controlled eval-side mixing experiments.\n- The frozen held-out train slice was reused unchanged from `eval_009` and kept off the official validation set: it was carved from `fineweb_train_000000.bin` starting at token offset `8388608`, copied `2097153` tokens (`2097152` scored), covered exactly `64` TTT chunks, and lives at `runs/eval_009_arch010_legal_ttt_temperature_seed1337/heldout_data/fineweb_val_000000.bin`.\n- The held-out higher-order backoff sweep selected `EVAL_NGRAM_LAMBDA=0.01`, not `0.0`. Results were:\n  - `0.00 -> 1.11556687`\n  - `0.01 -> 1.11494470`\n  - `0.02 -> 1.11689406`\n  - `0.05 -> 1.12465863`\n  - `0.10 -> 1.14061444`\n- The selected-lambda full-val result was materially negative despite the small held-out win: `EVAL_NGRAM_LAMBDA=0.01` scored `1.12044055`, which is `+0.00108537` worse than parity, `+0.00109047` worse than historical `eval_006`, `+0.00067958` worse than the refined legal-TTT 3-seed mean `1.11976097`, and `+0.00104055` worse than live SOTA `1.1194`.\n- Runtime also failed decisively. The selected-lambda full-val path took `1859145ms` of script eval time and `1901s` managed wallclock, which is more than `3x` the practical `10 min` eval budget. Even if BPB had been slightly better, this path would still have been non-promotable.\n- Matched-order coverage was high rather than absent, so the failure is not explained by a lack of reusable prefixes. On the selected held-out run, any-match coverage was `0.95245996` with order fractions `0.54428965`, `0.26436115`, `0.07250697`, `0.03091272`, `0.01541253`, `0.00841584`, `0.00505732`, `0.01150378` for orders `2..9`. On final full validation, any-match coverage was `0.95310151` with order fractions `0.55396806`, `0.26538959`, `0.06916794`, `0.02840139`, `0.01368285`, `0.00731826`, `0.00444924`, `0.01072417`.\n- Interpretation against the reviewed thresholds is therefore cleanly negative: the helper edit is valid, but the selected nonzero higher-order backoff weight overfit the held-out slice, failed on full validation, and massively exceeded the eval budget. This count-based prefix-only backoff family is non-promotable on locked `arch_010` legal-TTT.",
+    "Most Important Open Question": "Which genuinely different single-variable refinement should follow the now-promoted `TTT_LR=0.0025`, `TTT_EPOCHS=4` legal-TTT regime on locked `arch_010`, given that the controlled `Parallel Muon` transfer, simple global temperature scaling, simple chunk-local prefix bigram interpolation, and now higher-order prefix-only backoff n-gram mixing have all been answered negatively?",
+    "Active Experiment ID": "`eval_011_arch010_legal_ttt_backoff_ngram_seed1337`",
+    "Latest Result Summary": "- Completed `eval_011_arch010_legal_ttt_backoff_ngram_seed1337` in [summary.md](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337/summary.md).\n- Controlled intervention actually executed:\n  - copied the exact `eval_010` helper into a fresh `eval_011` run directory\n  - removed the old bigram path and added one env scalar `EVAL_NGRAM_LAMBDA`\n  - applied one chunk-local, prefix-only, highest-order-first multi-order backoff cache only inside `eval_val_sliding_ttt()` scoring\n  - left TTT adaptation updates unchanged\n  - reused the exact saved seed-`1337` `arch_010` checkpoint/export lineage unchanged\n  - ran one full-val parity check at `EVAL_NGRAM_LAMBDA=0.0`\n  - reused the fixed held-out train slice from `eval_009`\n  - ran the required held-out grid `{0.00, 0.01, 0.02, 0.05, 0.10}`\n  - selected `EVAL_NGRAM_LAMBDA=0.01` from held-out performance only\n  - ran one final full-val comparison at the selected `lambda`\n- Locked identity checks:\n  - helper before edit: `89121`, `1cecd32edeb0d4c10fe29d3011a52d32324e8f39f068df478e06333763e1fde2`\n  - helper after edit: `94173`, `60779a33716859ff74ca25ee82ef57e778350a4faba1588d2aa29b1285048ec3`\n  - saved seed-`1337` `final_model.pt`: `106178569` bytes, `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - saved seed-`1337` `final_model.int6.ptz`: `15555121` bytes, `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- Managed full-val runs:\n  - parity environment: `physicslm`\n  - parity GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`\n  - parity result: `legal_ttt_exact val_bpb=1.11935518`, `val_loss=1.88997934`\n  - selected-lambda result: `legal_ttt_exact val_bpb=1.12044055`, `val_loss=1.89181193`\n  - bytes: artifact `15555121`, code `94173`, total `15649294`\n  - byte status: under cap by `350706`\n  - legality: `score_first=True`, `last_chunk_untrained=True`, `1893` chunks of `32768` tokens\n  - artifact load/decompress/dequantize status: pass via successful eval-only artifact run\n- Deltas:\n  - vs parity: `+0.00108537`\n  - vs historical `eval_006` seed-`1337` baseline `1.11935008`: `+0.00109047`\n  - vs refined legal-TTT 3-seed mean `1.11976097`: `+0.00067958`\n  - vs live SOTA `1.1194`: `+0.00104055`\n- Timing:\n  - parity script eval wallclock: `466883ms`\n  - final script eval wallclock: `1859145ms`\n  - parity managed wallclock: `508s`\n  - final managed wallclock: `1901s`\n  - practical budget status: failed by `1259145ms` script time and `1301s` managed wallclock\n- Decision:\n  - parity gate passed\n  - the held-out selection did find one small nonzero candidate, `lambda=0.01`\n  - that selected nonzero candidate did not transfer to full validation\n  - the final full-val path was also far outside the practical eval budget\n  - this higher-order count-based eval-mixing family is closed on locked seed-`1337` legal-TTT `arch_010`",
+    "Recommended Next Step": "Do not run nearby lambda sweeps, order sweeps, or smoothing variants for this exact prefix-only backoff cache on locked legal-TTT. Keep the promoted `TTT_LR=0.0025`, `TTT_EPOCHS=4` regime fixed and move to a different controlled single-variable direction if the next round stays evaluation-only."
   },
   "next_experiment_sections": {
-    "Status": "Completed on `2026-03-26` as a controlled positive refinement and discriminating seed-`2024` confirmation.\n\n- Executed exactly as the reviewed brief requested:\n  - created `runs/eval_007_arch010_legal_ttt_epochs4_seed2024_confirm`\n  - copied the exact `eval_006` helper with no edits\n  - reused the exact saved seed-`2024` `arch_010` checkpoint/export lineage unchanged\n  - kept the winning TTT setting fixed at `TTT_LR=0.0025`, `TTT_EPOCHS=4`\n  - changed only the evaluated artifact lineage from seed `1337 -> 2024`\n- Identity guardrail passed before launch:\n  - helper bytes: `84059`\n  - helper `sha256`: `d93fc02cd20958d56d49af2df6b886527cef71d98ac46aa6304c4db048211bf8`\n  - saved seed-`2024` `final_model.pt` bytes/hash: `106178569` / `302fe0ad739f19e51e35ecd6f55e5568009a31a2ead991fd3ebfbcf5be150987`\n  - saved seed-`2024` `final_model.int6.ptz` bytes/hash: `15761090` / `479e5ccc5cb21d67fa937abb884fb63f1f812d99402b77b25fe32c2b9d838af3`\n- Actual result:\n  - post-export legal-TTT `sliding_window stride=64 val_bpb=1.11994397`\n  - delta vs seed-`2024` legal-TTT baseline `1.12027199`: `-0.00032802`\n  - delta vs same-script no-TTT parity baseline `1.12225535`: `-0.00231138`\n  - delta vs `eval_006` seed-`1337` result `1.11935008`: `+0.00059389`\n  - delta vs locked legal-TTT 3-seed mean `1.12010450`: `-0.00016053`\n  - delta vs live SOTA `1.1194`: `+0.00054397`\n  - script eval wallclock: `465406 ms`\n  - managed wallclock: `506 s`\n  - time deltas vs seed-`2024` locked `TTT_EPOCHS=3` run: `+65058 ms` script, `+65 s` managed\n- Decision:\n  - hypothesis confirmed on the discriminating seed\n  - the run beats the primary decision baseline cleanly and lands in the brief’s “especially strong” band `<= 1.12010`\n  - the run remains under the eval-time budget\n  - this is strong enough to justify the final seed-`42` confirmation, but not yet enough to promote `TTT_EPOCHS=4` across the full line",
-    "Recommended Follow-Up": "Run the exact same locked-helper, locked-artifact `TTT_LR=0.0025`, `TTT_EPOCHS=4` eval-only confirmation on seed `42`. If that final seed stays positive and remains comfortably under the real eval budget, promote `TTT_EPOCHS=4` across the locked `arch_010` legal-TTT line; if not, stop nearby TTT-budget tuning.",
-    "Experiment ID": "`eval_007_arch010_legal_ttt_epochs4_seed2024_confirm`",
-    "Category": "- evaluation\n\nOperational subtype: `locked legal-TTT cross-seed confirmation`",
-    "Baseline / Comparison": "Primary decision baseline:\n- `eval_004_arch010_legal_ttt_seed2024_confirm`: `1.12027199`\n\nContext baselines:\n- same-script no-TTT parity on the same saved seed-`2024` artifact: `1.12225535`\n- `eval_006_arch010_legal_ttt_epochs4_seed1337`: `1.11935008`\n- locked legal-TTT 3-seed mean: `1.12010450`\n- live SOTA: `1.1194`",
-    "Hypothesis": "If the `eval_006` gain reflects real remaining eval-time adaptation headroom rather than a seed-`1337` one-off, then applying the exact same locked `TTT_LR=0.0025`, `TTT_EPOCHS=4` setting to the saved seed-`2024` artifact should improve over the seed-`2024` legal-TTT baseline `1.12027199` while remaining under the practical eval-time budget.",
-    "Why It Might Work": "This is the narrowest remaining test of the current top-motif component that is still locally open: legal score-first TTT already transferred positively on all three locked seeds at `TTT_LR=0.002`, `TTT_EPOCHS=3`, and seed `1337` improved again when moved to `TTT_LR=0.0025`, `TTT_EPOCHS=4`. Seed `2024` is the strongest discriminating confirmation because it previously had the weakest absolute TTT landing of the three locked seeds.",
-    "Minimal Intervention": "Reuse the exact copied `eval_006` helper with no code edits and the exact saved seed-`2024` `arch_010` checkpoint/export lineage with no rewrite. Change only the evaluated artifact lineage relative to `eval_006`.",
-    "Variables To Change": "- saved export lineage under evaluation: `seed 1337 -> seed 2024`",
-    "Variables To Hold Fixed": "- exact copied legal-TTT helper code (`84059` bytes)\n- exact saved seed-`2024` `arch_010` checkpoint/export lineage\n- legal score-first scheduling\n- `TTT_LR=0.0025`\n- `TTT_EPOCHS=4`\n- `TTT_CHUNK_TOKENS=32768`\n- `TTT_FREEZE_BLOCKS=0`\n- `TTT_MOMENTUM=0.9`\n- `TTT_BATCH_SEQS=32`\n- `TTT_GRAD_CLIP=1.0`\n- `score_first=True`\n- `last_chunk_untrained=True`\n- `sliding_window stride=64`\n- no training changes\n- no export changes\n- no artifact rewrite\n- shim-free `physicslm`",
-    "Success Metric": "Primary readout:\n- post-export legal-TTT `sliding_window stride=64 val_bpb` on the saved seed-`2024` artifact\n\nInterpretation thresholds:\n- positive confirmation: `< 1.12027199`\n- especially strong: `<= 1.12010`\n- exceptional: `< 1.1194`\n- practical failure: eval materially approaches or exceeds the `10 min` limit without a compensating BPB gain",
-    "Failure Interpretation": "If seed `2024` is flat or worse than `1.12027199`, do not promote `TTT_EPOCHS=4` across the line. Interpret `eval_006` as a strong single-seed landing, not yet a robust recipe upgrade. If seed `2024` improves only trivially while eval cost rises materially again, treat the remaining headroom as too weak to justify broader promotion.",
-    "Redundancy Check": "- no retraining\n- no export rewrite\n- no helper code edit\n- no same-script no-TTT parity rerun, because helper/artifact identity already proved the comparison was still valid\n- no artifact rewrite\n- no mixing with any training-side motif",
-    "Execution Plan": "1. Copy the exact `eval_006` helper into a fresh `eval_007` run directory.\n2. Verify helper bytes/hash and saved seed-`2024` artifact bytes/hash match the locked lineage.\n3. Run one managed 8-GPU eval-only job with `TTT_LR=0.0025`, `TTT_EPOCHS=4`, and all other TTT settings fixed.\n4. Compare primarily against `1.12027199`, then contextually against `1.12225535`, `1.11935008`, `1.12010450`, and `1.1194`.",
-    "Expected Effect": "If the `eval_006` gain reflects real remaining eval-time adaptation headroom rather than a seed-`1337` one-off, this round should produce a small but measurable improvement on the saved seed-`2024` artifact while staying comfortably under the practical eval cap."
+    "Status": "Completed on `2026-03-26` as a controlled evaluation-only higher-order count-based mixing test on locked seed-`1337` `arch_010`.\n\n- Executed the reviewed brief with one narrow operational clarification:\n  - created `runs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337`\n  - copied the exact `eval_010` helper into the new run directory\n  - removed the prior bigram-mix path and replaced it with one env-controlled scalar `EVAL_NGRAM_LAMBDA`\n  - added one scoring-only `BackoffNgramCache` inside `eval_val_sliding_ttt()` with fixed `min_order=2`, `max_order=9`, `min_count=2`, `num_buckets=4194304`\n  - kept the TTT adaptation path, training, export, artifact contents, and saved lineage unchanged\n  - ran one full-val parity check at `EVAL_NGRAM_LAMBDA=0.0`\n  - reused the exact held-out train slice created in `eval_009`\n  - ran the required held-out lambda grid `{0.00, 0.01, 0.02, 0.05, 0.10}`\n  - selected exactly one lambda from held-out performance only\n  - ran one final full-validation comparison at the selected `lambda`\n- Operational clarification:\n  - to preserve parity against the locked baseline and avoid introducing artificial runtime drift at `lambda=0.0`, the edited helper keeps the inherited fast distributed scoring path when `EVAL_NGRAM_LAMBDA=0.0`\n  - the chunk-owner scoring path is activated only when `EVAL_NGRAM_LAMBDA>0.0`, which is the only case where prefix-only cache lookups and updates are needed\n  - this keeps the parity comparison scientifically clean while still satisfying the reviewed legal-prefix requirement for the actual backoff mechanism\n- Helper bytes and hashes:\n  - copied helper before edit: `89121` bytes, `1cecd32edeb0d4c10fe29d3011a52d32324e8f39f068df478e06333763e1fde2`\n  - edited helper after adding scoring-only higher-order backoff mixing: `94173` bytes, `60779a33716859ff74ca25ee82ef57e778350a4faba1588d2aa29b1285048ec3`\n- Saved seed-`1337` artifact bytes and hashes stayed unchanged before and after all runs:\n  - `final_model.pt`: `106178569` bytes, `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - `final_model.int6.ptz`: `15555121` bytes, `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- Reused held-out slice definition:\n  - source shard: `/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_train_000000.bin`\n  - source start token offset: `8388608`\n  - copied token count: `2097153`\n  - scored token count after load: `2097152`\n  - exact chunk coverage at `TTT_CHUNK_TOKENS=32768`: `64`\n  - created slice bytes/hash: `4195330`, `8b5e92cca71fcfb03dff3a5b2cbf37b25e15a476e8218d253006f1bbcb4db556`\n- Actual result:\n  - full-val parity at `EVAL_NGRAM_LAMBDA=0.0`: `1.11935518`\n  - parity delta vs historical `eval_006=1.11935008`: `+0.00000510`\n  - held-out sweep results:\n    - `lambda=0.00`: `1.11556687`\n    - `lambda=0.01`: `1.11494470`\n    - `lambda=0.02`: `1.11689406`\n    - `lambda=0.05`: `1.12465863`\n    - `lambda=0.10`: `1.14061444`\n  - selected lambda from held-out slice: `0.01`\n  - selected-lambda full-val result: `1.12044055`\n  - delta vs parity: `+0.00108537`\n  - delta vs historical `eval_006=1.11935008`: `+0.00109047`\n  - delta vs refined legal-TTT 3-seed mean `1.11976097`: `+0.00067958`\n  - delta vs live SOTA `1.1194`: `+0.00104055`\n  - parity script eval wallclock: `466883 ms`\n  - final selected-lambda script eval wallclock: `1859145 ms`\n  - parity managed wallclock: `508 s`\n  - final selected-lambda managed wallclock: `1901 s`\n  - held-out managed wallclocks: `61 s`, `112 s`, `114 s`, `112 s`, `113 s`\n  - practical `10 min` eval budget status for final selected lambda: failed by `1259145 ms` script time and `1301 s` managed wallclock\n  - held-out selected-lambda matched-order coverage:\n    - any match: `0.95245996`\n    - order-2: `0.54428965`\n    - order-3: `0.26436115`\n    - order-4: `0.07250697`\n    - order-5: `0.03091272`\n    - order-6: `0.01541253`\n    - order-7: `0.00841584`\n    - order-8: `0.00505732`\n    - order-9: `0.01150378`\n  - final full-val selected-lambda matched-order coverage:\n    - any match: `0.95310151`\n    - order-2: `0.55396806`\n    - order-3: `0.26538959`\n    - order-4: `0.06916794`\n    - order-5: `0.02840139`\n    - order-6: `0.01368285`\n    - order-7: `0.00731826`\n    - order-8: `0.00444924`\n    - order-9: `0.01072417`\n- Decision:\n  - parity gate passed cleanly\n  - the held-out train slice selected `EVAL_NGRAM_LAMBDA=0.01`, not `0.0`\n  - that nonzero selector did not transfer to full validation and was materially worse than parity\n  - the final full-val path also exceeded the practical eval budget by more than `3x`\n  - this higher-order count-based prefix-only backoff family is non-promotable on locked legal-TTT `arch_010`",
+    "Recommended Follow-Up": "Do not run nearby lambda sweeps, order sweeps, or smoothing variants for this exact prefix-only backoff cache on locked legal-TTT `arch_010`. Keep the promoted `TTT_LR=0.0025`, `TTT_EPOCHS=4` regime fixed and move to a genuinely different single-variable direction rather than another count-based eval mixer.",
+    "Experiment ID": "`eval_011_arch010_legal_ttt_backoff_ngram_seed1337`",
+    "Category": "- evaluation\n\nOperational subtype: `post-TTT scoring mixture`",
+    "Baseline / Comparison": "Primary historical baseline:\n- `eval_006_arch010_legal_ttt_epochs4_seed1337`: `1.11935008`\n\nRequired parity baseline after helper edit:\n- same saved seed-`1337` artifact, same edited helper, `EVAL_NGRAM_LAMBDA=0.0`\n- observed parity result: `1.11935518`\n\nContext baselines:\n- refined legal-TTT 3-seed mean: `1.11976097`\n- live SOTA: `1.1194`",
+    "Hypothesis": "If the locked `arch_010 + legal score-first TTT` evaluator still leaves exploitable exact repeated local spans beyond order-2 statistics, then a fixed higher-order prefix-only backoff cache with small interpolation weight will beat `1.11935008` on the unchanged saved seed-`1337` artifact. If the best held-out setting remains `lambda=0.0`, then count-based eval mixing is locally exhausted on this locked line.",
+    "Why It Might Work": "This directly tested the next controlled user-priority eval-mixing motif after temperature scaling and simple prefix bigram interpolation both failed. The mechanism is still evaluation-only and zero-artifact-byte, but it targets exact higher-order local continuation counts inside each TTT chunk rather than global calibration or first-order counts.",
+    "Minimal Intervention": "Change only evaluation scoring by introducing one scalar `EVAL_NGRAM_LAMBDA` and one chunk-local prefix-only multi-order backoff cache inside `eval_val_sliding_ttt()`. Do not change TTT adaptation updates, chunk schedule, training code, artifact contents, or export path.",
+    "Variables To Change": "- `EVAL_NGRAM_LAMBDA`: held-out sweep `{0.00, 0.01, 0.02, 0.05, 0.10}`\n- final selected lambda from that held-out slice only",
+    "Variables To Hold Fixed": "- saved seed-`1337` `arch_010` checkpoint/export lineage\n- legal score-first TTT enabled\n- `TTT_LR=0.0025`\n- `TTT_EPOCHS=4`\n- `TTT_CHUNK_TOKENS=32768`\n- `TTT_FREEZE_BLOCKS=0`\n- `TTT_MOMENTUM=0.9`\n- `TTT_BATCH_SEQS=32`\n- `TTT_GRAD_CLIP=1.0`\n- `score_first=True`\n- `last_chunk_untrained=True`\n- `sliding_window stride=64`\n- cuDNN-backed SDPA fallback path\n- tokenizer and dataset format\n- no retraining\n- no export rewrite\n- no artifact rewrite\n- no temperature scaling\n- no bigram interpolation\n- no entropy-adaptive alpha\n- no complementary training\n- official validation set excluded from lambda selection\n- fixed cache config `min_order=2`, `max_order=9`, `min_count=2`, `num_buckets=4194304`\n- chunk-local reset behavior fixed for the whole round",
+    "Success Metric": "Primary readout:\n- post-export legal-TTT `sliding_window stride=64 val_bpb` on the saved seed-`1337` artifact\n\nInterpretation thresholds:\n- parity gate: `lambda=0.0` reproduces `1.11935008` within `±0.0002`\n- positive refinement: selected nonzero lambda beats the parity run\n- especially strong: best full-val result `<= 1.11925`\n- strong enough to justify cross-seed follow-up: best full-val result `<= 1.11930` or at least `-0.00010` better than parity",
+    "Failure Interpretation": "If `lambda=0.0` fails parity, reject the helper edit and do not interpret any n-gram result. If the held-out slice selects `lambda>0` but the single final full-val run does not beat parity, conclude that this eval-side local-memory gain overfits the selector slice and is not promotable. If runtime pushes the final full-val path over the practical eval budget, classify the mechanism as non-promotable even if BPB improves slightly.",
+    "Redundancy Check": "- no retraining\n- no export rewrite\n- no artifact rewrite\n- no TTT-budget change\n- no architecture change\n- no bigram interpolation\n- no temperature scaling\n- no entropy-adaptive alpha\n- no complementary training\n- no official-val tuning\n- no helper drift in the parity comparison",
+    "Execution Summary": "1. Copied the exact `eval_010` helper into `eval_011`.\n2. Removed the old bigram-mix path and added one scoring-only `EVAL_NGRAM_LAMBDA` hook plus one chunk-local prefix-only multi-order backoff cache inside `eval_val_sliding_ttt()`.\n3. Verified saved seed-`1337` artifact identity before and after the runs.\n4. Ran one managed full-val parity check at `EVAL_NGRAM_LAMBDA=0.0`.\n5. Reused the exact held-out train slice from `eval_009`.\n6. Ran the fixed lambda grid on that held-out slice only.\n7. Selected `EVAL_NGRAM_LAMBDA=0.01` from held-out performance only.\n8. Ran one managed full-val comparison at the selected `lambda=0.01`.\n9. Recorded matched-order coverage on the selected held-out run and the final full-val run.",
+    "Expected Effect": "If legal-TTT still missed exact higher-order chunk-local continuation statistics, one small nonzero lambda from the fixed grid should have won on the held-out train slice and then improved the final full-val result beyond the parity baseline without blowing the practical eval budget."
   },
   "experiment_rows": [
-    {
-      "Date (UTC)": "2026-03-25",
-      "ID": "`repro_005_record02_cudnn_sdpa_seed42_confirm`",
-      "Category": "evaluation",
-      "Baseline / Comparison": "Active local best `opt_008_record02_cudnn_sdpa_fallback_isolation` at checkpoint `1.1407`, post-EMA `1.1397`, post-export `1.12425244`, artifact `15484915`, code `71243`, total `15556158`, `step=6796`, `step_avg=88.29 ms`; contextual references `repro_004=1.12837920`, documented record-`#2` seed `1337=1.12278022`, documented seed `42≈1.1236`",
-      "Hypothesis": "If the cuDNN-only SDPA fallback is a real portability fix rather than a seed-1337-specific landing, then rerunning the exact same `opt_008` stack with only `SEED=42` changed should stay within `+0.0015` post-export `val_bpb` of `opt_008` and remain clearly better than `repro_004`",
-      "Mechanism / Rationale": "`opt_008` had already answered the backend selector question on one seed; the remaining uncertainty was robustness across seed, not backend choice itself",
-      "Changed Variables": "Reused the exact `opt_008` run-local script unchanged, copied it into a new run directory, verified the copied file stayed hash-identical at `71243` code bytes, and changed only `SEED=42` in the managed smoke/full launch commands",
-      "Held Fixed": "SDPA backend flags `cudnn=True flash=False mem_efficient=False math=False`, fallback wrapper `F.scaled_dot_product_attention(..., enable_gqa=True)`, `11L / 512 / 8 heads / 4 KV heads / MLP3x`, `XSA_LAST_N=4`, `ROPE_DIMS=16`, `LN_SCALE=1`, `VE128`, `BigramHash(2048,128)`, `SmearGate`, `EMA=0.997`, `SWA_EVERY=50`, `WARMDOWN_ITERS=3500`, late QAT threshold `0.15`, GPTQ-lite, tokenizer/data paths, shim-free `physicslm`, managed 8-GPU launch, `600s` cap, `zstd-22`, and `sliding_window stride=64`",
-      "Expected Effect": "Stay near `1.12425244`, remain under the cap, preserve exact roundtrip/load correctness, and confirm the recovered cuDNN gain is not seed-fragile",
-      "Actual Result": "Smoke passed on 8 GPUs with exact roundtrip/load correctness, direct-runtime `zstd`, and the same backend probe outcome as `opt_008`: `eligible_cudnn=True`, `eligible_flash=False`, `observed_backend=cudnn`, `observed_cudnn_active=True`. The full seed-42 run finished at `step=6796` in `600040ms` with steady-state `88.29ms/step`, checkpoint `val_bpb=1.1415`, post-EMA `1.1405`, post-export non-overlapping `1.14850831`, post-export `sliding_window stride=64 val_bpb=1.12484349`, artifact `15715799`, code `71243`, total `15787042`, `swa:start=6150`, `late_qat:enabled step=6276 scale=0.1499`, and exact roundtrip/load correctness. Versus `opt_008`, exported score changed by `+0.00059105`, steps by `+0`, artifact and total bytes by `+230884`, and code bytes by `+0`. Versus `repro_004`, exported score improved by `-0.00353571`, steps by `+712`, and total bytes by `-14550`. Versus documented references, the run was `+0.00206327` worse than documented seed-1337 and about `+0.00124349` worse than the documented seed-42 readout, while still meeting the predeclared `<=1.1258` threshold",
-      "Interpretation": "This is a positive seed-robustness confirmation. The cuDNN-only fallback stayed within the declared `+0.0015` band of `opt_008`, kept identical code bytes and identical step geometry, and remained clearly better than the old flash-only fallback, so cuDNN-only SDPA should now be treated as the stable local fallback for the leaderboard-`#2` lineage. Because the two local seeds now cluster tightly, the remaining miss looks less like seed luck and more like a smaller remaining portability/runtime component",
-      "Next Step": "Keep the cuDNN-only fallback locked and shift the next round from seed confirmation to the remaining portability gap, starting with a bounded audit for a local native `flash_attn_interface.flash_attn_func` path"
-    },
-    {
-      "Date (UTC)": "2026-03-25",
-      "ID": "`infra_002_record02_flashattention3_binding_audit`",
-      "Category": "evaluation",
-      "Baseline / Comparison": "Active local best `opt_008_record02_cudnn_sdpa_fallback_isolation` at checkpoint `1.1407`, post-EMA `1.1397`, post-export `1.12425244`, artifact `15484915`, code `71243`, total `15556158`, `step=6796`; documented record-`#2` seed `1337=1.12278022`; seed-42 confirmation `repro_005=1.12484349`",
-      "Hypothesis": "If the remaining `~0.0013-0.0021` miss is mainly caused by the missing native `flash_attn_interface.flash_attn_func` path, then that exact binding should be importable and minimally executable inside the validated shim-free `physicslm` environment, justifying one controlled smoke and one full seed-`1337` comparison",
-      "Mechanism / Rationale": "`opt_008` and `repro_005` already stabilized the cuDNN-backed fallback across seeds, so the exact native FlashAttention 3 binding was the cleanest still-unmatched portability variable",
-      "Changed Variables": "Environment audit only: added one standalone audit helper and one managed 1-GPU audit run; no training script, architecture, optimization, evaluation, or export changes",
-      "Held Fixed": "Validated `physicslm` environment requirement for any scored run, exact reproduced leaderboard `#2` recipe, cuDNN-backed fallback baseline, dataset/tokenizer paths, and the rule that any scored comparison must change only the native attention path",
-      "Expected Effect": "Either prove the required binding exists in `physicslm` and proceed to smoke/full comparison, or prove it is unavailable and stop without launching a non-comparable scored run",
-      "Actual Result": "Managed 1-GPU audit in `physicslm` reported `cuda_available=true`, `torch=2.10.0+cu128`, `flash_attn_interface_spec=null`, `flash_attn_spec=null`, and `status=missing_flash_attn_interface`, exiting `2`; no controlled smoke/full scored run was launched. Bounded availability checks found `loongflow_ml` also lacked top-level `flash_attn_interface` and native `zstandard`; a VLLM-packaged `flash_attn_interface.py` existed there but attempting to import `flash_attn_func` from it failed; `physicslm` exposed `xformers.flash_attn_3` only, not the audited binding",
-      "Interpretation": "The native `flash_attn_interface.flash_attn_func` path is not locally controllable inside the validated `physicslm` environment, so this refinement question is answered negatively for now. Availability hints in other materially different package paths do not count as a controlled comparison, so environment chasing should stop here",
-      "Next Step": "Keep `opt_008` as the active best and pivot the next controlled refinement to a different locally controllable delta, such as removing the now-redundant backend probe/profiler code to recover code bytes and any tiny startup/runtime overhead without changing the cuDNN-backed recipe"
-    },
-    {
-      "Date (UTC)": "2026-03-26",
-      "ID": "`arch_010_record02_leakyrelu2_keep_cudnn_recipe`",
-      "Category": "architecture",
-      "Baseline / Comparison": "Active local best `opt_008_record02_cudnn_sdpa_fallback_isolation` at checkpoint `1.1407`, post-EMA `1.1397`, post-export non-overlapping `1.14806403`, post-export `sliding_window stride=64` `1.12425244`, artifact `15484915`, code `71243`, total `15556158`, `step=6796`, `88.29 ms/step`; secondary robustness reference `repro_005=1.12484349`; documented record-`#2` `1.12278022`",
-      "Hypothesis": "If `LeakyReLU(0.5)^2` is a portable improvement rather than a `record06`-specific effect, then changing only the MLP activation on the exact `opt_008` stack should improve post-export `sliding_window stride=64 val_bpb` beyond `1.12425244` with little or no change in step geometry",
-      "Mechanism / Rationale": "The live SOTA snapshot identifies `LeakyReLU(0.5)^2` as the defining current-`#1` motif, and the local `record06` lineage already transferred it positively across two seeds; this isolates that motif on the strongest reproduced leaderboard-`#2` stack",
-      "Changed Variables": "Changed only the MLP activation line in the copied `opt_008` run-local script: `torch.relu(...) -> F.leaky_relu(..., negative_slope=0.5)`",
-      "Held Fixed": "Exact `opt_008` script outside that one activation line, `SEED=1337`, cuDNN-only SDPA fallback flags, fallback wrapper, `11L / 512 / 8 heads / 4 KV heads / MLP3x`, `XSA_LAST_N=4`, `ROPE_DIMS=16`, `LN_SCALE=1`, `VE128`, `BigramHash(2048,128)`, `SmearGate`, `EMA=0.997`, `SWA_EVERY=50`, `WARMDOWN_ITERS=3500`, late QAT threshold `0.15`, GPTQ-lite, tokenizer/data paths, shim-free `physicslm`, managed 8-GPU launch, `600s` cap, `zstd-22`, and `sliding_window stride=64`",
-      "Expected Effect": "Improve post-export `sliding_window stride=64 val_bpb` beyond `1.12425244` while keeping step geometry close enough that the result remains a clean activation-only comparison",
-      "Actual Result": "Structural verification passed before launch: activation-only text diff, identical `121` state-dict keys/shapes, identical `190` export tensor keys, and identical export meta. Managed 8-GPU smoke passed with exact roundtrip/load correctness and the same cuDNN probe result as `opt_008`. The full seed-1337 run finished at `step=6734` in `599994ms` with steady-state `89.10 ms/step`, checkpoint `val_bpb=1.1384`, post-EMA `1.1375`, post-export non-overlapping `1.14584172`, post-export `sliding_window stride=64 val_bpb=1.12211549`, artifact `15555121`, code `71265`, total `15626386`, `swa:start=6050`, `late_qat:enabled step=6214 scale=0.1498`, exact roundtrip/load correctness, and observed cuDNN SDPA dispatch",
-      "Interpretation": "This is a clean positive refinement result. The activation-only change improved checkpoint, post-EMA, non-overlapping export, and the primary post-export sliding score, beating `opt_008` by `-0.00213695`, beating `repro_005` by `-0.00272800`, and even edging the documented record-`#2` seed-1337 readout by `-0.00066473`. Step geometry moved only modestly (`-62` steps, `+0.81 ms/step`), so the gain is interpretable as an activation effect rather than a runtime confound",
-      "Next Step": "Promote `arch_010` to the new active local baseline and run a seed-only `SEED=42` confirmation next before stacking another motif"
-    },
-    {
-      "Date (UTC)": "2026-03-26",
-      "ID": "`repro_006_record02_leakyrelu2_seed42_confirm`",
-      "Category": "evaluation",
-      "Baseline / Comparison": "Active local best `arch_010_record02_leakyrelu2_keep_cudnn_recipe` at checkpoint `1.1384`, post-EMA `1.1375`, post-export non-overlapping `1.14584172`, post-export `sliding_window stride=64` `1.12211549`, artifact `15555121`, code `71265`, total `15626386`, `step=6734`, `89.10 ms/step`; seed-42 pre-activation reference `repro_005=1.12484349`; documented record-`#2` seed `1337=1.12278022`",
-      "Hypothesis": "If the `LeakyReLU(0.5)^2` gain on the reproduced leaderboard-`#2` stack is real rather than a seed-1337-only landing, then rerunning the exact `arch_010` script with only `SEED=42` changed should stay within `+0.0015` of `1.12211549` and still beat `1.12484349`",
-      "Mechanism / Rationale": "The seed-1337 activation transfer was already positive; the remaining refinement question was robustness on the exact new best script, not mechanism plausibility",
-      "Changed Variables": "Reused the copied `arch_010` run-local script unchanged and changed only `SEED=42` in the managed smoke/full launch commands",
-      "Held Fixed": "Exact `arch_010` script at `71265` code bytes, `LeakyReLU(0.5)^2`, cuDNN-only SDPA fallback flags, fallback wrapper, `11L / 512 / 8 heads / 4 KV heads / MLP3x`, `XSA_LAST_N=4`, `ROPE_DIMS=16`, `LN_SCALE=1`, `VE128`, `BigramHash(2048,128)`, `SmearGate`, `EMA=0.997`, `SWA_EVERY=50`, `WARMDOWN_ITERS=3500`, late QAT threshold `0.15`, GPTQ-lite, tokenizer/data paths, shim-free `physicslm`, managed 8-GPU launch, `600s` cap, `zstd-22`, and `sliding_window stride=64`",
-      "Expected Effect": "Stay within `+0.0015` of `1.12211549`, still beat `1.12484349`, preserve identical code bytes and cuDNN dispatch, and keep step geometry near `6734 @ 89.10 ms/step`",
-      "Actual Result": "Copy verification showed identical SHA-256 and identical `71265` code bytes. Smoke logged exact roundtrip/load correctness, `final_int6_roundtrip_exact val_bpb=4.10536258`, and the same cuDNN probe outcome as `arch_010`; the smoke runner then hung in distributed teardown after result capture and was terminated only after the outputs were already on disk. The full run exited cleanly with checkpoint `1.1390`, post-EMA `1.1381`, post-export non-overlapping `1.14644940`, post-export `sliding_window stride=64` `1.12281449`, artifact `15802352`, code `71265`, total `15873617`, `step=6737`, `89.07 ms/step`, `swa:start=6050`, `late_qat:enabled step=6215 scale=0.1499`, exact roundtrip/load correctness, and observed cuDNN SDPA dispatch",
-      "Interpretation": "This is a positive seed-robustness confirmation. The seed-42 rerun stayed only `+0.00069900` behind `arch_010`, comfortably inside the declared band, and still beat the pre-activation seed-42 reference by `-0.00202900`, so `LeakyReLU(0.5)^2` should now be treated as the stable local baseline on the reproduced leaderboard-`#2` lineage. The main caveat is byte variance: the seed-42 artifact was `+247231` bytes larger than seed-1337 even though score and step geometry stayed close",
-      "Next Step": "If three-seed evidence is desired before stacking another motif, run one more exact seed-only confirmation at `SEED=2024`; otherwise use the now-stable `arch_010` lineage for the next beyond-`#2` controlled refinement"
-    },
     {
       "Date (UTC)": "2026-03-26",
       "ID": "`repro_007_record02_leakyrelu2_seed2024_confirm`",
@@ -219,104 +163,160 @@
       "Actual Result": "Identity guardrail passed without drift: copied helper remained `84059` bytes with the same SHA-256, and the saved seed-`2024` `final_model.pt` / `final_model.int6.ptz` stayed unchanged at `106178569` / `302fe0ad...` and `15761090` / `479e5ccc...`. The managed 8-GPU eval-only run scored `legal_ttt_exact val_bpb=1.11994397` with `val_loss=1.89097347`, a gain of `-0.00032802` vs the primary seed-`2024` legal-TTT baseline `1.12027199`, `-0.00231138` vs the inherited same-script no-TTT parity baseline `1.12225535`, `+0.00059389` vs `eval_006`, `-0.00016053` vs the locked legal-TTT 3-seed mean `1.12010450`, and `+0.00054397` vs live SOTA `1.1194`; script eval wallclock was `465406ms` and managed wallclock `506s`",
       "Interpretation": "This is a controlled positive refinement on the discriminating seed. The result beats the round’s primary decision baseline cleanly and stays in the “especially strong” band, but it is weaker than the seed-`1337` breakthrough and still above live SOTA, so it justifies the final seed-`42` confirmation rather than immediate full-line promotion",
       "Next Step": "Run the exact locked-helper, locked-artifact `TTT_LR=0.0025`, `TTT_EPOCHS=4` eval-only confirmation on seed `42`; if that final seed also stays positive and budget-safe, promote the new setting, otherwise stop nearby TTT-budget tuning"
+    },
+    {
+      "Date (UTC)": "2026-03-26",
+      "ID": "`eval_008_arch010_legal_ttt_epochs4_seed42_confirm`",
+      "Category": "evaluation",
+      "Baseline / Comparison": "Primary decision baseline `eval_003_arch010_legal_ttt_seed42_confirm=1.12032675`; context same-script no-TTT parity `1.12281449`, `eval_006=1.11935008`, `eval_007=1.11994397`, locked legal-TTT 3-seed mean `1.12010450`, live SOTA `1.1194`",
+      "Hypothesis": "If the refined `TTT_LR=0.0025`, `TTT_EPOCHS=4` gain is real across the locked line rather than a two-seed coincidence, then applying the exact same locked setting to the saved seed-`42` artifact should improve over `1.12032675` while remaining under the practical eval-time budget",
+      "Mechanism / Rationale": "Seed `42` was the final unresolved locked seed, so this is the last controlled answer needed to decide whether the higher legal-TTT budget should be promoted across the line",
+      "Changed Variables": "Copied the exact `eval_007` helper byte-for-byte into a fresh run directory and changed only the evaluated artifact lineage from seed `2024 -> 42` while keeping `TTT_LR=0.0025`, `TTT_EPOCHS=4`, and all other TTT settings fixed",
+      "Held Fixed": "Exact helper lineage at `84059` bytes and `sha256=d93fc02cd20958d56d49af2df6b886527cef71d98ac46aa6304c4db048211bf8`, exact saved seed-`42` artifact hashes/bytes (`final_model.pt` `106178569` / `c59cdd33...`, `final_model.int6.ptz` `15802352` / `3db765aa...`), legal score-first scheduling, `TTT_CHUNK_TOKENS=32768`, `TTT_FREEZE_BLOCKS=0`, `TTT_MOMENTUM=0.9`, `TTT_BATCH_SEQS=32`, `TTT_GRAD_CLIP=1.0`, `sliding_window stride=64`, shim-free `physicslm`, managed 8-GPU launch, no retraining, no export rewrite, no artifact rewrite, no same-script no-TTT rerun because identity guardrail passed",
+      "Expected Effect": "Beat the primary seed-`42` baseline `1.12032675`, ideally land at or below `1.12010`, and if positive make the refined exact 3-seed mean beat the locked `TTT_EPOCHS=3` mean `1.12010450` while staying below the `10 min` eval limit",
+      "Actual Result": "Identity guardrail passed without drift before and after launch: copied helper remained `84059` bytes with the same SHA-256, and the saved seed-`42` `final_model.pt` / `final_model.int6.ptz` stayed unchanged at `106178569` / `c59cdd33...` and `15802352` / `3db765aa...`. The managed 8-GPU eval-only run scored `legal_ttt_exact val_bpb=1.11998885` with `val_loss=1.89104925`, a gain of `-0.00033790` vs the primary seed-`42` legal-TTT baseline `1.12032675`, `-0.00282564` vs the inherited same-script no-TTT parity baseline `1.12281449`, `+0.00063877` vs `eval_006`, `+0.00004488` vs `eval_007`, and `+0.00058885` vs live SOTA `1.1194`; the refined exact 3-seed mean became `1.11976097`, which beats the locked legal-TTT 3-seed mean `1.12010450` by `-0.00034353`; script eval wallclock was `461177ms` and managed wallclock `503s`",
+      "Interpretation": "This is a controlled positive refinement on the final locked seed. The result beats the round’s primary decision baseline cleanly, lands in the “especially strong” band, and makes the refined exact 3-seed mean clearly better than the locked `TTT_EPOCHS=3` mean while staying budget-safe, so the refined eval regime is now promotable across the locked `arch_010` line",
+      "Next Step": "Promote `TTT_LR=0.0025`, `TTT_EPOCHS=4` across the locked `arch_010` legal-TTT line and stop nearby TTT-budget tuning; the next round should change a different single variable"
+    },
+    {
+      "Date (UTC)": "2026-03-26",
+      "ID": "`eval_009_arch010_legal_ttt_temperature_seed1337`",
+      "Category": "evaluation",
+      "Baseline / Comparison": "Historical seed-`1337` legal-TTT baseline `eval_006=1.11935008`; required same-helper parity baseline after edit at `EVAL_TEMPERATURE=1.0`; context refined legal-TTT 3-seed mean `1.11976097`, live SOTA `1.1194`",
+      "Hypothesis": "If the locked `arch_010 + legal score-first TTT` evaluator is still slightly miscalibrated at scoring time, then one global temperature applied only to scoring logits can improve post-export `sliding_window stride=64 val_bpb` beyond `1.11935008` on the exact saved seed-`1337` artifact",
+      "Mechanism / Rationale": "This directly tested the user-priority eval-mixing motif while staying within refinement discipline: copy the locked helper, change only scoring calibration, exclude official-val tuning, and keep the TTT update path untouched",
+      "Changed Variables": "Added `EVAL_TEMPERATURE` to a copied `eval_008` helper; applied it only in `eval_val_sliding()` and `eval_val_sliding_ttt()` scoring logits; swept held-out temperatures `{0.95,0.975,1.00,1.025,1.05}` on one frozen train slice",
+      "Held Fixed": "Exact saved seed-`1337` `arch_010` checkpoint/export lineage (`106178569` / `b8291ad1...`, `15555121` / `eb062c96...`), legal score-first TTT, `TTT_LR=0.0025`, `TTT_EPOCHS=4`, `TTT_CHUNK_TOKENS=32768`, `TTT_FREEZE_BLOCKS=0`, `TTT_MOMENTUM=0.9`, `TTT_BATCH_SEQS=32`, `TTT_GRAD_CLIP=1.0`, `score_first=True`, `last_chunk_untrained=True`, `sliding_window stride=64`, cuDNN-backed SDPA fallback, tokenizer/data format, no retraining, no export rewrite, no artifact rewrite, official validation excluded from temperature selection",
+      "Expected Effect": "`T=1.0` should reproduce `1.11935008` within `±0.0002`; one off-baseline temperature should win on the held-out slice and then beat parity on full validation if simple global calibration helps",
+      "Actual Result": "The edited helper changed from `84059` bytes / `d93fc02c...` to `84578` bytes / `3db38c0e...`; saved artifact hashes stayed unchanged before and after all runs. Full-val parity at `EVAL_TEMPERATURE=1.0` scored `1.11935013`, only `+0.00000005` vs historical `eval_006`, with script eval wallclock `461600ms` and managed wallclock `503s`, so the parity gate passed cleanly. The fixed held-out train slice was created from `fineweb_train_000000.bin` starting at token offset `8388608`, copying `2097153` tokens (`2097152` scored, exactly `64` TTT chunks). Held-out results were: `0.95 -> 1.11733953`, `0.975 -> 1.11620707`, `1.00 -> 1.11555286`, `1.025 -> 1.11614565`, `1.05 -> 1.11734831`; the selected temperature was `1.0`. Because the selected temperature matched parity exactly, the parity run is also the final full-val result for the selected temperature, so delta vs parity was `+0.00000000`, delta vs refined legal-TTT 3-seed mean was `-0.00041084`, and delta vs live SOTA was `-0.00004987`",
+      "Interpretation": "The helper edit is valid, but the mechanism is negative: the frozen held-out slice selected `T=1.0`, so simple global temperature scaling did not improve the locked seed-`1337` legal-TTT line. This motif is locally exhausted on the controlled seed rather than mildly positive",
+      "Next Step": "Do not run nearby global-temperature sweeps on locked legal-TTT; keep the promoted `TTT_LR=0.0025`, `TTT_EPOCHS=4` regime fixed and move to a different controlled eval-side mixing motif"
+    },
+    {
+      "Date (UTC)": "2026-03-26",
+      "ID": "`eval_010_arch010_legal_ttt_prefix_bigram_interp_seed1337`",
+      "Category": "evaluation",
+      "Baseline / Comparison": "Historical seed-`1337` legal-TTT baseline `eval_006=1.11935008`; required same-helper parity baseline after edit at `EVAL_BIGRAM_LAMBDA=0.0`; context refined legal-TTT 3-seed mean `1.11976097`, live SOTA `1.1194`",
+      "Hypothesis": "If the locked `arch_010 + legal score-first TTT` evaluator still misses exact chunk-local continuation statistics after adaptation, then adding one prefix-only chunk-local bigram interpolation term during scoring can improve post-export `sliding_window stride=64 val_bpb` beyond `1.11935008` on the exact saved seed-`1337` artifact",
+      "Mechanism / Rationale": "This tested the next user-priority eval-mixing motif while staying within refinement discipline: copy the locked helper, change only scoring inside `eval_val_sliding_ttt()`, reuse the existing held-out slice, and keep TTT updates untouched",
+      "Changed Variables": "Added `EVAL_BIGRAM_LAMBDA` to a copied `eval_008` helper; modified only `eval_val_sliding_ttt()` scoring to mix `p_model` with one chunk-local prefix-only previous-token bigram distribution; swept held-out lambdas `{0.00,0.05,0.10,0.15,0.20}` on the frozen `eval_009` held-out slice",
+      "Held Fixed": "Exact saved seed-`1337` `arch_010` checkpoint/export lineage (`106178569` / `b8291ad1...`, `15555121` / `eb062c96...`), legal score-first TTT, `TTT_LR=0.0025`, `TTT_EPOCHS=4`, `TTT_CHUNK_TOKENS=32768`, `TTT_FREEZE_BLOCKS=0`, `TTT_MOMENTUM=0.9`, `TTT_BATCH_SEQS=32`, `TTT_GRAD_CLIP=1.0`, `score_first=True`, `last_chunk_untrained=True`, `sliding_window stride=64`, cuDNN-backed SDPA fallback, tokenizer/data format, no retraining, no export rewrite, no artifact rewrite, no temperature scaling, official validation excluded from lambda selection",
+      "Expected Effect": "`lambda=0.0` should reproduce `1.11935008` within `±0.0002`; one nonzero lambda should win on the held-out slice and then beat parity on full validation if simple chunk-local bigram mixing helps",
+      "Actual Result": "The edited helper changed from `84059` bytes / `d93fc02c...` to `89121` bytes / `1cecd32e...`; saved artifact hashes stayed unchanged before and after all runs. Full-val parity at `EVAL_BIGRAM_LAMBDA=0.0` scored `1.11935127`, only `+0.00000119` vs historical `eval_006`, with script eval wallclock `457427ms` and managed wallclock `498s`, so the parity gate passed cleanly. The exact `eval_009` held-out slice was reused unchanged. Held-out results were: `0.00 -> 1.11556493`, `0.05 -> 1.12860428`, `0.10 -> 1.14760131`, `0.15 -> 1.16896766`, `0.20 -> 1.19233780`; the selected lambda was `0.0`. Because the selected lambda matched parity exactly, the parity run is also the final full-val result for the selected lambda, so delta vs parity was `+0.00000000`, delta vs refined legal-TTT 3-seed mean was `-0.00040970`, and delta vs live SOTA was `-0.00004873`",
+      "Interpretation": "The helper edit is valid, but the mechanism is strongly negative: the frozen held-out slice selected `lambda=0.0`, and every nonzero lambda degraded sharply, so simple chunk-local prefix bigram interpolation is locally exhausted on the locked seed-`1337` legal-TTT line",
+      "Next Step": "Do not run nearby lambda sweeps or smoothing variants for this exact chunk-local prefix bigram mechanism; keep the promoted `TTT_LR=0.0025`, `TTT_EPOCHS=4` regime fixed and move to a different controlled eval-side mixing motif"
+    },
+    {
+      "Date (UTC)": "2026-03-26",
+      "ID": "`eval_011_arch010_legal_ttt_backoff_ngram_seed1337`",
+      "Category": "evaluation",
+      "Baseline / Comparison": "Historical seed-`1337` legal-TTT baseline `eval_006=1.11935008`; required same-helper parity baseline after edit at `EVAL_NGRAM_LAMBDA=0.0`; context refined legal-TTT 3-seed mean `1.11976097`, live SOTA `1.1194`",
+      "Hypothesis": "If the locked `arch_010 + legal score-first TTT` evaluator still leaves exploitable exact repeated local spans beyond order-2 statistics, then a fixed higher-order prefix-only backoff cache with small interpolation weight can improve post-export `sliding_window stride=64 val_bpb` beyond `1.11935008` on the exact saved seed-`1337` artifact",
+      "Mechanism / Rationale": "This tested the next controlled eval-side mechanism while staying within refinement discipline: copy the locked helper, change only scoring inside `eval_val_sliding_ttt()`, reuse the existing held-out slice, enforce fixed cache structure `orders 2..9 / min_count 2 / 4194304 buckets`, and keep TTT updates untouched",
+      "Changed Variables": "Added `EVAL_NGRAM_LAMBDA` to a copied `eval_010` helper; removed the old bigram path; modified only `eval_val_sliding_ttt()` scoring to mix `p_model` with one chunk-local prefix-only highest-order-first multi-order backoff distribution; swept held-out lambdas `{0.00,0.01,0.02,0.05,0.10}` on the frozen `eval_009` held-out slice",
+      "Held Fixed": "Exact saved seed-`1337` `arch_010` checkpoint/export lineage (`106178569` / `b8291ad1...`, `15555121` / `eb062c96...`), legal score-first TTT, `TTT_LR=0.0025`, `TTT_EPOCHS=4`, `TTT_CHUNK_TOKENS=32768`, `TTT_FREEZE_BLOCKS=0`, `TTT_MOMENTUM=0.9`, `TTT_BATCH_SEQS=32`, `TTT_GRAD_CLIP=1.0`, `score_first=True`, `last_chunk_untrained=True`, `sliding_window stride=64`, cuDNN-backed SDPA fallback, tokenizer/data format, no retraining, no export rewrite, no artifact rewrite, no temperature scaling, no bigram interpolation, no entropy-adaptive alpha, no complementary training, official validation excluded from lambda selection",
+      "Expected Effect": "`lambda=0.0` should reproduce `1.11935008` within `±0.0002`; one small nonzero lambda should win on the held-out slice and then beat parity on full validation if higher-order prefix reuse helps",
+      "Actual Result": "The edited helper changed from `89121` bytes / `1cecd32e...` to `94173` bytes / `60779a33...`; saved artifact hashes stayed unchanged before and after all runs. Full-val parity at `EVAL_NGRAM_LAMBDA=0.0` scored `1.11935518`, only `+0.00000510` vs historical `eval_006`, with script eval wallclock `466883ms` and managed wallclock `508s`, so the parity gate passed cleanly. Held-out results were `0.00 -> 1.11556687`, `0.01 -> 1.11494470`, `0.02 -> 1.11689406`, `0.05 -> 1.12465863`, `0.10 -> 1.14061444`; the held-out selector chose `lambda=0.01`. The selected-lambda final full-val run scored `1.12044055`, which is `+0.00108537` worse than parity, with script eval wallclock `1859145ms`, managed wallclock `1901s`, and matched-order coverage any-match fractions `0.95245996` on held-out and `0.95310151` on full val",
+      "Interpretation": "The helper edit is valid, but the mechanism is non-promotable: the held-out-selected nonzero weight overfit the selector slice, full validation regressed materially versus parity, and the final owner-path eval exceeded the practical `10 min` budget by more than `3x`",
+      "Next Step": "Close this higher-order count-based prefix-only backoff family on locked legal-TTT `arch_010` and move to a genuinely different single-variable direction rather than another nearby count-based sweep"
     }
   ],
   "comparison_rows": [
     {
-      "Comparison": "Locked same-script no-TTT parity baseline vs `eval_006` `TTT_EPOCHS=4` on the same saved artifact",
-      "Metric": "post-export `val_bpb`",
-      "Baseline": "`1.12211550`",
-      "Candidate": "`1.11935008`",
-      "Delta": "`-0.00276542`",
-      "Notes": "No new no-TTT rerun was needed because helper and artifact identity stayed locked; the comparison remains valid against the inherited `eval_002` parity result."
+      "Comparison": "Frozen held-out temperature sweep on locked seed-`1337` legal-TTT",
+      "Metric": "best held-out `val_bpb`",
+      "Baseline": "`T=1.025 -> 1.11614565`",
+      "Candidate": "`T=1.00 -> 1.11555286`",
+      "Delta": "`-0.00059279`",
+      "Notes": "The fixed non-official train slice selected the baseline temperature itself; no off-baseline temperature won the calibration sweep."
     },
     {
-      "Comparison": "Locked legal-TTT 3-seed mean vs `eval_006` `TTT_EPOCHS=4` seed-`1337`",
+      "Comparison": "`eval_009` parity run vs selected-temperature final full-val run",
       "Metric": "post-export `val_bpb`",
-      "Baseline": "`1.12010450`",
-      "Candidate": "`1.11935008`",
-      "Delta": "`-0.00075442`",
-      "Notes": "The new single-seed result now beats the fully locked `TTT_EPOCHS=3` 3-seed mean by about `7.5e-4`, but still needs seed `42` and `2024` confirmation before promotion."
+      "Baseline": "`1.11935013`",
+      "Candidate": "`1.11935013`",
+      "Delta": "`+0.00000000`",
+      "Notes": "The held-out sweep selected `EVAL_TEMPERATURE=1.0`, so the already-completed parity run is also the final full-validation result and a second redundant rerun was intentionally skipped."
     },
     {
-      "Comparison": "Live SOTA vs `eval_006` `TTT_EPOCHS=4` seed-`1337`",
+      "Comparison": "Live SOTA vs `eval_009` selected-temperature final full-val run",
       "Metric": "post-export `val_bpb`",
       "Baseline": "`1.1194`",
-      "Candidate": "`1.11935008`",
-      "Delta": "`-0.00004992`",
-      "Notes": "This is the first local result on the locked `arch_010` line to cross live SOTA, though only by about `5e-5` and still on one seed."
+      "Candidate": "`1.11935013`",
+      "Delta": "`-0.00004987`",
+      "Notes": "The final result remains slightly better than live SOTA in absolute BPB, but that strength comes from the pre-existing refined legal-TTT baseline rather than a new temperature-scaling gain."
     },
     {
-      "Comparison": "Locked seed-`1337` `TTT_EPOCHS=3` / `TTT_LR=0.0025` baseline vs `eval_006` `TTT_EPOCHS=4`",
-      "Metric": "script TTT eval wallclock",
-      "Baseline": "`397765ms`",
-      "Candidate": "`459677ms`",
-      "Delta": "`+61912ms`",
-      "Notes": "The score gain is real, but eval cost rises materially by about `15.6%`; the result remains under the real `10 min` budget at `459677ms`."
-    },
-    {
-      "Comparison": "Locked seed-`1337` `TTT_EPOCHS=3` / `TTT_LR=0.0025` baseline vs `eval_006` `TTT_EPOCHS=4`",
-      "Metric": "managed wallclock",
-      "Baseline": "`438s`",
-      "Candidate": "`502s`",
-      "Delta": "`+64s`",
-      "Notes": "Managed wallclock also rises materially, but the candidate still completes with about `98s` of headroom under the practical `10 min` eval limit."
-    },
-    {
-      "Comparison": "Locked seed-`2024` legal-TTT baseline vs `eval_007` `TTT_LR=0.0025`, `TTT_EPOCHS=4` on the same saved artifact",
-      "Metric": "post-export `val_bpb`",
-      "Baseline": "`1.12027199`",
-      "Candidate": "`1.11994397`",
-      "Delta": "`-0.00032802`",
-      "Notes": "Same saved seed-`2024` `arch_010` artifact lineage, same `84059`-byte helper lineage, same legal score-first TTT recipe; this is the primary decision comparison for the round."
-    },
-    {
-      "Comparison": "Locked same-script no-TTT parity baseline vs `eval_007` `TTT_LR=0.0025`, `TTT_EPOCHS=4` on the same saved artifact",
-      "Metric": "post-export `val_bpb`",
-      "Baseline": "`1.12225535`",
-      "Candidate": "`1.11994397`",
-      "Delta": "`-0.00231138`",
-      "Notes": "No new no-TTT rerun was needed because helper and artifact identity stayed locked; the comparison remains valid against the inherited `eval_004` parity result."
-    },
-    {
-      "Comparison": "`eval_006` seed-`1337` breakthrough vs `eval_007` seed-`2024` confirmation",
+      "Comparison": "Historical `eval_006` seed-`1337` legal-TTT baseline vs `eval_010` parity/final run",
       "Metric": "post-export `val_bpb`",
       "Baseline": "`1.11935008`",
-      "Candidate": "`1.11994397`",
-      "Delta": "`+0.00059389`",
-      "Notes": "The seed-`2024` confirmation remains clearly positive versus its own baseline, but it does not match the seed-`1337` breakthrough in absolute BPB."
+      "Candidate": "`1.11935127`",
+      "Delta": "`+0.00000119`",
+      "Notes": "This is the parity gate comparison for the prefix-bigram hook: the edited helper reproduces the locked baseline essentially exactly, so the scoring-only mixer edit itself is valid."
     },
     {
-      "Comparison": "Locked legal-TTT 3-seed mean vs `eval_007` seed-`2024` confirmation",
+      "Comparison": "Frozen held-out prefix-bigram sweep on locked seed-`1337` legal-TTT",
+      "Metric": "best held-out `val_bpb`",
+      "Baseline": "`lambda=0.05 -> 1.12860428`",
+      "Candidate": "`lambda=0.00 -> 1.11556493`",
+      "Delta": "`-0.01303935`",
+      "Notes": "The fixed non-official train slice selected the baseline mixer weight itself; every nonzero lambda was worse, and the degradation grew monotonically through `0.20`."
+    },
+    {
+      "Comparison": "`eval_010` parity run vs selected-lambda final full-val run",
       "Metric": "post-export `val_bpb`",
-      "Baseline": "`1.12010450`",
-      "Candidate": "`1.11994397`",
-      "Delta": "`-0.00016053`",
-      "Notes": "The new seed-`2024` result beats the fully locked `TTT_EPOCHS=3` 3-seed mean, but only modestly, so one final seed is still useful before promotion."
+      "Baseline": "`1.11935127`",
+      "Candidate": "`1.11935127`",
+      "Delta": "`+0.00000000`",
+      "Notes": "The held-out sweep selected `EVAL_BIGRAM_LAMBDA=0.0`, so the already-completed parity run is also the final full-validation result and a second redundant rerun was intentionally skipped."
     },
     {
-      "Comparison": "Live SOTA vs `eval_007` seed-`2024` confirmation",
+      "Comparison": "Live SOTA vs `eval_010` selected-lambda final full-val run",
       "Metric": "post-export `val_bpb`",
       "Baseline": "`1.1194`",
-      "Candidate": "`1.11994397`",
-      "Delta": "`+0.00054397`",
-      "Notes": "The discriminating seed confirms real gain over the seed-`2024` baseline, but it remains about `5.4e-4` above live SOTA."
+      "Candidate": "`1.11935127`",
+      "Delta": "`-0.00004873`",
+      "Notes": "The final result remains slightly better than live SOTA in absolute BPB, but that strength comes from the pre-existing refined legal-TTT baseline rather than a new prefix-bigram gain."
     },
     {
-      "Comparison": "Locked seed-`2024` `TTT_EPOCHS=3` baseline vs `eval_007` `TTT_EPOCHS=4`",
-      "Metric": "script TTT eval wallclock",
-      "Baseline": "`400348ms`",
-      "Candidate": "`465406ms`",
-      "Delta": "`+65058ms`",
-      "Notes": "Eval cost rises materially by about `16.3%`, but the run remains under the real `10 min` budget at `465406ms`."
+      "Comparison": "Historical `eval_006` seed-`1337` legal-TTT baseline vs `eval_011` parity run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935008`",
+      "Candidate": "`1.11935518`",
+      "Delta": "`+0.00000510`",
+      "Notes": "This is the parity gate comparison for the higher-order backoff hook: the edited helper reproduces the locked baseline essentially exactly, so the scoring-only cache edit itself is valid."
     },
     {
-      "Comparison": "Locked seed-`2024` `TTT_EPOCHS=3` baseline vs `eval_007` `TTT_EPOCHS=4`",
-      "Metric": "managed wallclock",
-      "Baseline": "`441s`",
-      "Candidate": "`506s`",
-      "Delta": "`+65s`",
-      "Notes": "Managed wallclock also rises materially, but the candidate still completes with about `94s` of headroom under the practical `10 min` eval limit."
+      "Comparison": "Frozen held-out higher-order backoff sweep on locked seed-`1337` legal-TTT",
+      "Metric": "best held-out `val_bpb`",
+      "Baseline": "`lambda=0.00 -> 1.11556687`",
+      "Candidate": "`lambda=0.01 -> 1.11494470`",
+      "Delta": "`-0.00062217`",
+      "Notes": "The fixed non-official train slice did find one small nonzero selector win, but the gain was tiny and all larger nonzero lambdas were clearly worse."
+    },
+    {
+      "Comparison": "`eval_011` parity run vs selected-lambda final full-val run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935518`",
+      "Candidate": "`1.12044055`",
+      "Delta": "`+0.00108537`",
+      "Notes": "The held-out-selected nonzero `lambda=0.01` did not transfer to full validation; this is a direct overfit signal rather than another parity failure."
+    },
+    {
+      "Comparison": "`eval_011` parity run vs selected-lambda final full-val run",
+      "Metric": "script eval wallclock",
+      "Baseline": "`466883ms`",
+      "Candidate": "`1859145ms`",
+      "Delta": "`+1392262ms`",
+      "Notes": "The selected-lambda owner-path full-val run took over `3x` the practical `10 min` eval budget, so the mechanism is runtime-non-promotable even before considering its BPB regression."
+    },
+    {
+      "Comparison": "Live SOTA vs `eval_011` selected-lambda final full-val run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.1194`",
+      "Candidate": "`1.12044055`",
+      "Delta": "`+0.00104055`",
+      "Notes": "Unlike `eval_009` and `eval_010`, this round’s selected-lambda final result is clearly worse than both live SOTA and the locked parity baseline, so the higher-order count-based prefix-only family should be closed on this line."
     }
   ],
   "comparison_rows_all": [
@@ -2023,6 +2023,158 @@
       "Candidate": "`506s`",
       "Delta": "`+65s`",
       "Notes": "Managed wallclock also rises materially, but the candidate still completes with about `94s` of headroom under the practical `10 min` eval limit."
+    },
+    {
+      "Comparison": "Locked seed-`42` legal-TTT baseline vs `eval_008` `TTT_LR=0.0025`, `TTT_EPOCHS=4` on the same saved artifact",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.12032675`",
+      "Candidate": "`1.11998885`",
+      "Delta": "`-0.00033790`",
+      "Notes": "Same saved seed-`42` `arch_010` artifact lineage, same `84059`-byte helper lineage, same legal score-first TTT recipe; this is the primary decision comparison for the final locked seed."
+    },
+    {
+      "Comparison": "Locked same-script no-TTT parity baseline vs `eval_008` `TTT_LR=0.0025`, `TTT_EPOCHS=4` on the same saved artifact",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.12281449`",
+      "Candidate": "`1.11998885`",
+      "Delta": "`-0.00282564`",
+      "Notes": "No new no-TTT rerun was needed because helper and artifact identity stayed locked; the comparison remains valid against the inherited `eval_003` parity result."
+    },
+    {
+      "Comparison": "`eval_006` seed-`1337` breakthrough vs `eval_008` seed-`42` confirmation",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935008`",
+      "Candidate": "`1.11998885`",
+      "Delta": "`+0.00063877`",
+      "Notes": "The final seed remains clearly positive versus its own baseline, but it does not match the single-seed breakthrough in absolute BPB."
+    },
+    {
+      "Comparison": "`eval_007` seed-`2024` confirmation vs `eval_008` seed-`42` confirmation",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11994397`",
+      "Candidate": "`1.11998885`",
+      "Delta": "`+0.00004488`",
+      "Notes": "The last two refined seeds are essentially tied, which is the strongest sign that the promoted regime is not a seed-`1337` one-off."
+    },
+    {
+      "Comparison": "Locked legal-TTT 3-seed mean (`TTT_LR=0.002`, `TTT_EPOCHS=3`) vs refined exact 3-seed mean (`TTT_LR=0.0025`, `TTT_EPOCHS=4`)",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.12010450`",
+      "Candidate": "`1.11976097`",
+      "Delta": "`-0.00034353`",
+      "Notes": "This is the promotion comparison: once the final seed is included, the refined exact 3-seed mean clearly beats the older locked regime while keeping the eval-time budget practical."
+    },
+    {
+      "Comparison": "Live SOTA vs refined exact 3-seed legal-TTT mean on locked `arch_010` artifacts",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.1194`",
+      "Candidate": "`1.11976097`",
+      "Delta": "`+0.00036097`",
+      "Notes": "The promoted refined regime is the new local locked default, but it is still above live SOTA on exact 3-seed evidence, so this is local promotion rather than a leaderboard-beating result."
+    },
+    {
+      "Comparison": "Historical `eval_006` seed-`1337` legal-TTT baseline vs `eval_009` parity/final run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935008`",
+      "Candidate": "`1.11935013`",
+      "Delta": "`+0.00000005`",
+      "Notes": "This is the parity gate comparison for the temperature hook: the edited helper reproduces the locked baseline essentially exactly, so the scoring-only calibration edit itself is valid."
+    },
+    {
+      "Comparison": "Frozen held-out temperature sweep on locked seed-`1337` legal-TTT",
+      "Metric": "best held-out `val_bpb`",
+      "Baseline": "`T=1.025 -> 1.11614565`",
+      "Candidate": "`T=1.00 -> 1.11555286`",
+      "Delta": "`-0.00059279`",
+      "Notes": "The fixed non-official train slice selected the baseline temperature itself; no off-baseline temperature won the calibration sweep."
+    },
+    {
+      "Comparison": "`eval_009` parity run vs selected-temperature final full-val run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935013`",
+      "Candidate": "`1.11935013`",
+      "Delta": "`+0.00000000`",
+      "Notes": "The held-out sweep selected `EVAL_TEMPERATURE=1.0`, so the already-completed parity run is also the final full-validation result and a second redundant rerun was intentionally skipped."
+    },
+    {
+      "Comparison": "Live SOTA vs `eval_009` selected-temperature final full-val run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.1194`",
+      "Candidate": "`1.11935013`",
+      "Delta": "`-0.00004987`",
+      "Notes": "The final result remains slightly better than live SOTA in absolute BPB, but that strength comes from the pre-existing refined legal-TTT baseline rather than a new temperature-scaling gain."
+    },
+    {
+      "Comparison": "Historical `eval_006` seed-`1337` legal-TTT baseline vs `eval_010` parity/final run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935008`",
+      "Candidate": "`1.11935127`",
+      "Delta": "`+0.00000119`",
+      "Notes": "This is the parity gate comparison for the prefix-bigram hook: the edited helper reproduces the locked baseline essentially exactly, so the scoring-only mixer edit itself is valid."
+    },
+    {
+      "Comparison": "Frozen held-out prefix-bigram sweep on locked seed-`1337` legal-TTT",
+      "Metric": "best held-out `val_bpb`",
+      "Baseline": "`lambda=0.05 -> 1.12860428`",
+      "Candidate": "`lambda=0.00 -> 1.11556493`",
+      "Delta": "`-0.01303935`",
+      "Notes": "The fixed non-official train slice selected the baseline mixer weight itself; every nonzero lambda was worse, and the degradation grew monotonically through `0.20`."
+    },
+    {
+      "Comparison": "`eval_010` parity run vs selected-lambda final full-val run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935127`",
+      "Candidate": "`1.11935127`",
+      "Delta": "`+0.00000000`",
+      "Notes": "The held-out sweep selected `EVAL_BIGRAM_LAMBDA=0.0`, so the already-completed parity run is also the final full-validation result and a second redundant rerun was intentionally skipped."
+    },
+    {
+      "Comparison": "Live SOTA vs `eval_010` selected-lambda final full-val run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.1194`",
+      "Candidate": "`1.11935127`",
+      "Delta": "`-0.00004873`",
+      "Notes": "The final result remains slightly better than live SOTA in absolute BPB, but that strength comes from the pre-existing refined legal-TTT baseline rather than a new prefix-bigram gain."
+    },
+    {
+      "Comparison": "Historical `eval_006` seed-`1337` legal-TTT baseline vs `eval_011` parity run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935008`",
+      "Candidate": "`1.11935518`",
+      "Delta": "`+0.00000510`",
+      "Notes": "This is the parity gate comparison for the higher-order backoff hook: the edited helper reproduces the locked baseline essentially exactly, so the scoring-only cache edit itself is valid."
+    },
+    {
+      "Comparison": "Frozen held-out higher-order backoff sweep on locked seed-`1337` legal-TTT",
+      "Metric": "best held-out `val_bpb`",
+      "Baseline": "`lambda=0.00 -> 1.11556687`",
+      "Candidate": "`lambda=0.01 -> 1.11494470`",
+      "Delta": "`-0.00062217`",
+      "Notes": "The fixed non-official train slice did find one small nonzero selector win, but the gain was tiny and all larger nonzero lambdas were clearly worse."
+    },
+    {
+      "Comparison": "`eval_011` parity run vs selected-lambda final full-val run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.11935518`",
+      "Candidate": "`1.12044055`",
+      "Delta": "`+0.00108537`",
+      "Notes": "The held-out-selected nonzero `lambda=0.01` did not transfer to full validation; this is a direct overfit signal rather than another parity failure."
+    },
+    {
+      "Comparison": "`eval_011` parity run vs selected-lambda final full-val run",
+      "Metric": "script eval wallclock",
+      "Baseline": "`466883ms`",
+      "Candidate": "`1859145ms`",
+      "Delta": "`+1392262ms`",
+      "Notes": "The selected-lambda owner-path full-val run took over `3x` the practical `10 min` eval budget, so the mechanism is runtime-non-promotable even before considering its BPB regression."
+    },
+    {
+      "Comparison": "Live SOTA vs `eval_011` selected-lambda final full-val run",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.1194`",
+      "Candidate": "`1.12044055`",
+      "Delta": "`+0.00104055`",
+      "Notes": "Unlike `eval_009` and `eval_010`, this round’s selected-lambda final result is clearly worse than both live SOTA and the locked parity baseline, so the higher-order count-based prefix-only family should be closed on this line."
     }
   ],
   "latest_run": {
@@ -2430,41 +2582,93 @@
         "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.worker.prompt.txt",
         "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.worker.final.txt",
         "worker_exit_code": "0"
+      },
+      "round_032.meta": {
+        "round": "32",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_033.meta": {
+        "round": "33",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_034.meta": {
+        "round": "34",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.worker.final.txt",
+        "worker_exit_code": "0"
+      },
+      "round_035.meta": {
+        "round": "35",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.worker.final.txt",
+        "worker_exit_code": "0"
       }
     },
     "phase_meta": {
       "planner": {
         "phase": "planner",
-        "round": "32",
-        "start_time": "2026-03-26T04:28:44Z",
-        "end_time": "2026-03-26T04:29:39Z",
+        "round": "36",
+        "start_time": "2026-03-26T07:24:49Z",
+        "end_time": "2026-03-26T07:29:04Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.planner.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.planner.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.planner.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.planner.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.planner.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.planner.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.planner.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.planner.final.txt"
       },
       "review": {
         "phase": "review",
-        "round": "32",
-        "start_time": "2026-03-26T04:29:40Z",
-        "end_time": "2026-03-26T04:30:37Z",
+        "round": "36",
+        "start_time": "2026-03-26T07:29:04Z",
+        "end_time": "2026-03-26T07:31:02Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.review.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.review.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.review.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.review.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.review.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.review.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.review.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.review.final.txt"
       },
       "worker": {
         "phase": "worker",
-        "round": "31",
-        "start_time": "2026-03-26T04:11:08Z",
-        "end_time": "2026-03-26T04:28:41Z",
+        "round": "35",
+        "start_time": "2026-03-26T06:06:29Z",
+        "end_time": "2026-03-26T07:24:46Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.worker.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.worker.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.worker.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.worker.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.worker.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.worker.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.worker.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.worker.final.txt"
       }
     }
   },
@@ -2472,11 +2676,11 @@
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z",
       "configured_rounds": 50,
-      "completed_rounds": 31,
-      "latest_round": "32",
+      "completed_rounds": 35,
+      "latest_round": "36",
       "latest_phase": "review",
       "state": "in progress",
-      "latest_timestamp": "2026-03-26T04:30:37Z"
+      "latest_timestamp": "2026-03-26T07:31:02Z"
     },
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260324T070233Z",
@@ -2517,9 +2721,9 @@
   ],
   "training_runs": [
     {
-      "name": "eval_008_arch010_legal_ttt_epochs4_seed42_confirm_ttt",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_008_arch010_legal_ttt_epochs4_seed42_confirm/ttt_8gpu/logs/eval_008_arch010_legal_ttt_epochs4_seed42_confirm_ttt.txt",
-      "updated_at_utc": "2026-03-26T04:36:07Z",
+      "name": "eval_012_arch010_legal_ttt_logit_bias_seed1337_parity_l0p0",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_012_arch010_legal_ttt_logit_bias_seed1337/parity_8gpu/logs/eval_012_arch010_legal_ttt_logit_bias_seed1337_parity_l0p0.txt",
+      "updated_at_utc": "2026-03-26T07:42:01Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -2529,9 +2733,9 @@
       "latest_metrics": {}
     },
     {
-      "name": "eval_007_arch010_legal_ttt_epochs4_seed2024_confirm_ttt",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_007_arch010_legal_ttt_epochs4_seed2024_confirm/ttt_8gpu/logs/eval_007_arch010_legal_ttt_epochs4_seed2024_confirm_ttt.txt",
-      "updated_at_utc": "2026-03-26T04:20:55Z",
+      "name": "eval_011_arch010_legal_ttt_backoff_ngram_seed1337_final_l0p01",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337/final_8gpu/logs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337_final_l0p01.txt",
+      "updated_at_utc": "2026-03-26T07:18:07Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -2541,9 +2745,9 @@
       "latest_metrics": {}
     },
     {
-      "name": "eval_006_arch010_legal_ttt_epochs4_seed1337_ttt",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_006_arch010_legal_ttt_epochs4_seed1337/ttt_8gpu/logs/eval_006_arch010_legal_ttt_epochs4_seed1337_ttt.txt",
-      "updated_at_utc": "2026-03-26T03:59:38Z",
+      "name": "eval_011_arch010_legal_ttt_backoff_ngram_seed1337_heldout_l0p10",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337/heldout_sweep_8gpu/logs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337_heldout_l0p10.txt",
+      "updated_at_utc": "2026-03-26T06:44:49Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -2553,9 +2757,9 @@
       "latest_metrics": {}
     },
     {
-      "name": "eval_005_arch010_legal_ttt_lr0025_seed1337_ttt",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_005_arch010_legal_ttt_lr0025_seed1337/ttt_8gpu/logs/eval_005_arch010_legal_ttt_lr0025_seed1337_ttt.txt",
-      "updated_at_utc": "2026-03-26T03:38:02Z",
+      "name": "eval_011_arch010_legal_ttt_backoff_ngram_seed1337_heldout_l0p05",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337/heldout_sweep_8gpu/logs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337_heldout_l0p05.txt",
+      "updated_at_utc": "2026-03-26T06:42:56Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -2565,9 +2769,9 @@
       "latest_metrics": {}
     },
     {
-      "name": "pending_opt_009_arch010_parallel_muon_seed1337_nottt_eval_nottt",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/pending_opt_009_arch010_parallel_muon_seed1337_nottt/eval_nottt_8gpu/logs/pending_opt_009_arch010_parallel_muon_seed1337_nottt_eval_nottt.txt",
-      "updated_at_utc": "2026-03-26T03:18:01Z",
+      "name": "eval_011_arch010_legal_ttt_backoff_ngram_seed1337_heldout_l0p02",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337/heldout_sweep_8gpu/logs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337_heldout_l0p02.txt",
+      "updated_at_utc": "2026-03-26T06:41:03Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -2577,91 +2781,14 @@
       "latest_metrics": {}
     },
     {
-      "name": "pending_opt_009_arch010_parallel_muon_seed1337_nottt",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/pending_opt_009_arch010_parallel_muon_seed1337_nottt/full_8gpu/logs/pending_opt_009_arch010_parallel_muon_seed1337_nottt.txt",
-      "updated_at_utc": "2026-03-26T03:15:06Z",
-      "latest_step": 4939,
-      "total_steps": 20000,
+      "name": "eval_011_arch010_legal_ttt_backoff_ngram_seed1337_heldout_l0p01",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337/heldout_sweep_8gpu/logs/eval_011_arch010_legal_ttt_backoff_ngram_seed1337_heldout_l0p01.txt",
+      "updated_at_utc": "2026-03-26T06:39:08Z",
+      "latest_step": 0,
+      "total_steps": 0,
       "is_complete": true,
-      "stop_reason": "wallclock cap",
-      "train_points": [
-        {
-          "step": 1,
-          "value": 6.9299
-        },
-        {
-          "step": 2,
-          "value": 8.3425
-        },
-        {
-          "step": 3,
-          "value": 8.2536
-        },
-        {
-          "step": 4,
-          "value": 7.8389
-        },
-        {
-          "step": 5,
-          "value": 7.2691
-        },
-        {
-          "step": 6,
-          "value": 6.7779
-        },
-        {
-          "step": 7,
-          "value": 6.3777
-        },
-        {
-          "step": 8,
-          "value": 6.1196
-        },
-        {
-          "step": 9,
-          "value": 5.9831
-        },
-        {
-          "step": 10,
-          "value": 5.9134
-        },
-        {
-          "step": 500,
-          "value": 2.45
-        },
-        {
-          "step": 1000,
-          "value": 2.2971
-        },
-        {
-          "step": 1500,
-          "value": 2.2293
-        },
-        {
-          "step": 2000,
-          "value": 2.0562
-        },
-        {
-          "step": 2500,
-          "value": 2.1548
-        },
-        {
-          "step": 3000,
-          "value": 2.127
-        },
-        {
-          "step": 3500,
-          "value": 2.1313
-        },
-        {
-          "step": 4000,
-          "value": 1.9154
-        },
-        {
-          "step": 4500,
-          "value": 2.0522
-        }
-      ],
+      "stop_reason": "",
+      "train_points": [],
       "val_by_mode": {},
       "latest_metrics": {}
     }
@@ -2772,7 +2899,7 @@
   },
   "git": {
     "changed_files": [
-      "M docs/sota_records/sota_records_index.md",
+      "M research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md",
       "M research_lab_pg/projects/parameter_golf_science/dashboard/index.html",
       "M research_lab_pg/projects/parameter_golf_science/dashboard/status.json",
       "M research_lab_pg/projects/parameter_golf_science/planning/experiment_ledger.md",
@@ -2780,19 +2907,8 @@
       "M research_lab_pg/projects/parameter_golf_science/planning/research_memory.md",
       "M research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
       "M research_lab_pg/projects/parameter_golf_science/reports/latest_status.md",
-      "?? docs/sota_records/sota_record_06_1.14582_2026-03-20_Int6_MLP3x_SmearGate_BigramHash_MuonWD_SWA.md",
-      "?? docs/sota_records/sota_record_07_1.15015_2026-03-19_MLP3x_QAT_Int6_SlidingWindow.md",
-      "?? docs/sota_records/sota_record_08_1.15560_2026-03-19_smeargate_orthoinit_muonwd.md",
-      "?? docs/sota_records/sota_record_09_1.15744_2026-03-19_WarmdownQuantization.md",
-      "?? docs/sota_records/sota_record_10_1.15862_2026-03-19_Seq2048_FP16Emb_TunedLR.md",
-      "?? docs/sota_records/sota_record_11_1.16301_2026-03-19_MixedQuant_Int6Int8_SlidingWindow.md",
-      "?? docs/sota_records/sota_record_12_1.19250_2026-03-19_SlidingWindowEval.md",
-      "?? docs/sota_records/sota_record_13_1.19290_2026-03-17_LoRA_TTT.md",
-      "?? docs/sota_records/sota_record_14_1.20143_2026-03-19_TrainingOptSeq4096.md",
-      "?? docs/sota_records/sota_record_15_1.20576_2026-03-18_LongContextSeq2048.md",
       "?? research_lab_pg/projects/gpu_runner_metadata.json",
       "?? research_lab_pg/projects/gpu_runner_metadata_export.json",
-      "?? research_lab_pg/projects/parameter_golf_science/context/reference_materials/user_proposed_ideas_eval_mixing.md",
       "?? research_lab_pg/projects/parameter_golf_science/final_model.int8.ptz",
       "?? research_lab_pg/projects/parameter_golf_science/final_model.pt",
       "?? research_lab_pg/run_50rounds.log",
@@ -2800,15 +2916,15 @@
       "?? research_lab_pg/scripts/.efc_2906510760244555859_3613575764239186937_1774445648457022_start_parameter_golf_iteration.sh"
     ],
     "diff_stat": [
-      "docs/sota_records/sota_records_index.md            |  30 +-",
-      ".../parameter_golf_science/dashboard/index.html    |  26 +-",
-      ".../parameter_golf_science/dashboard/status.json   | 699 ++++++++++++++-------",
+      ".../reference_materials/latest_sota_snapshot.md    |  65 +-",
+      ".../parameter_golf_science/dashboard/index.html    |  34 +-",
+      ".../parameter_golf_science/dashboard/status.json   | 710 ++++++++++++---------",
       ".../planning/experiment_ledger.md                  |   4 +",
-      ".../planning/next_experiment.md                    | 139 ++--",
+      ".../planning/next_experiment.md                    | 189 ++++--",
       ".../planning/research_memory.md                    |  42 +-",
-      ".../reports/comparison_summary.md                  |  24 +",
-      ".../reports/latest_status.md                       | 170 ++---",
-      "8 files changed, 703 insertions(+), 431 deletions(-)"
+      ".../reports/comparison_summary.md                  |  19 +",
+      ".../reports/latest_status.md                       |  92 +--",
+      "8 files changed, 713 insertions(+), 442 deletions(-)"
     ]
   }
 }
