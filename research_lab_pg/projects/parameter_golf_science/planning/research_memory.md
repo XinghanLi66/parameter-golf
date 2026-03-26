@@ -2,36 +2,27 @@
 
 This file is the compact scientific memory for the project. Keep it updated so the planner can avoid redundant work.
 
-## !! PARADIGM SHIFT — 2026-03-26 — READ THIS FIRST !!
+## Working SOTA Anchor — 2026-03-26 (UPDATED)
 
-The leaderboard has been COMPLETELY TRANSFORMED by open PRs submitted on 2026-03-26.
-The true state-of-the-art is now **0.2952 BPB** (PR #809), not 1.1194.
+**TARGET SOTA: PR #803 at 0.4416 BPB** — Complementary Training + Backoff N-gram (orders 2-10) + AdamW TTT.
+(PR #809 at 0.2952 is excluded — under legality review by the user.)
 
-**This puts us in AGGRESSIVE phase.** Our local best (1.11935) is ~0.827 BPB above the new SOTA.
+This puts us in **AGGRESSIVE phase**:
+- best local single seed: `1.11935008` from `eval_006`
+- gap to target SOTA: **~0.722 BPB**
+- required action: implement PR #803-style n-gram backoff + complementary training
 
-The entire improvement comes from **eval-time n-gram backoff cache** — purely an eval change, no retraining:
-- PR #809: 0.2952 BPB — chunked vectorized n-gram (order 9) + entropy-adaptive alpha + TTT
-- PR #803: 0.4416 BPB — complementary training + n-gram backoff (orders 2-10)
-- PR #813: 0.6671 BPB — basic backoff n-gram alone
-
-**CRITICAL CORRECTION about eval_011**: The `eval_011` n-gram attempt did NOT prove n-gram doesn't work.
-It failed for two implementation-specific reasons:
-1. **Wrong algorithm**: used a naive per-segment global lambda, not the vectorized chunk-based approach
-2. **Too slow**: 1901s eval time (3× over budget) because it processed each segment individually
-
-The correct implementation (PR #809) uses:
-- **Chunk-based processing**: all 8 GPUs process 1M-token chunks, cache updated ONCE per chunk
-- **Fully vectorized numpy**: batch_lookup and update_batch operate on entire chunks at once
-- **Entropy-adaptive alpha**: per-token alpha based on model confidence, with per-order multipliers
-- **Per-order multipliers**: `[0.3, 0.3, 0.97, 2.0, 2.0, 2.0, 2.0, 2.0]` for orders 2-9
-- **Result**: 0.2952 BPB in only 287s eval time
-
-Full implementation: `context/reference_materials/URGENT_ngram_backoff_breakthrough.md`
-Full code: `docs/sota_records/sota_code_pr809_0.295bpb_ChunkNgramTTT.py`
-
-**The next experiment MUST implement the correct vectorized chunk n-gram. Do NOT do more tiny logit/bias/temperature experiments.**
+`context/reference_materials/URGENT_ngram_backoff_breakthrough.md` is **authoritative and mandatory** context.
+`context/reference_materials/latest_sota_snapshot.md` is **authoritative** — read it first every round.
+The prior snapshot (1.1194) is obsolete. The new target is 0.4416 BPB.
 
 ## Confirmed Signals
+- The controlled refinement `eval_012_arch010_legal_ttt_logit_bias_seed1337` answered the helper-validity part positively and the mechanism part negatively on locked seed-`1337` `arch_010`: after introducing one scoring-only `EVAL_LOGIT_BIAS_LAMBDA` hook plus one fixed off-val `log_prior`, the full-val parity run at `lambda=0.0` scored `1.11935063`, only `+0.00000055` from historical `eval_006=1.11935008`, so the helper edit is scientifically trustworthy.
+- The `eval_012` helper/artifact guardrail stayed explicit: the copied helper started at `84059` bytes with SHA-256 `d93fc02cd20958d56d49af2df6b886527cef71d98ac46aa6304c4db048211bf8` and ended at `87184` bytes with SHA-256 `227f842be584dacd24b77b4a58de423a7d8790a65b822d23133444abf0f2c8be`, while the saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged before and after all runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The frozen `eval_009` held-out slice is now recorded in three progressively tighter calibration uses on locked legal-TTT. In `eval_012`, it was deterministically split by token offset into a prior-build shard `b3102ee1...` and a selector shard `286e6e4e...`, each `1048577` tokens / `1048576` scored, with split boundaries `[0, 1048577)` and `[1048576, 2097153)` within the original `8b5e92cc...` slice.
+- The `eval_012` prior rule is now fixed and explicit for future avoidance or reuse: count target-token frequencies over scored positions in the prior-build half only, apply add-one smoothing over the full vocab, normalize once, store `log_prior`, and use it only at scoring time inside `eval_val_sliding_ttt()`.
+- On that disjoint selector half, every nonzero fixed token-prior bias was worse than `lambda=0.0`: `-0.10 -> 1.12511628`, `-0.05 -> 1.12345755`, `0.00 -> 1.12285060`, `0.05 -> 1.12334301`, `0.10 -> 1.12489128`. The selector therefore chose `EVAL_LOGIT_BIAS_LAMBDA=0.0`, which is direct evidence against this simple unigram calibration family even after separating prior construction from selection.
+- Because the selector chose `lambda=0.0`, the parity run is also the final full-val result for `eval_012`: `1.11935063`, which is `-0.00041034` better than the refined legal-TTT 3-seed mean `1.11976097`, `-0.00004937` better than live SOTA `1.1194`, and still under the practical eval budget at `470956ms` script wallclock and `512s` managed wallclock.
 - The controlled refinement `eval_011_arch010_legal_ttt_backoff_ngram_seed1337` answered the helper-validity part positively and the mechanism part negatively on locked seed-`1337` `arch_010`: after introducing one scoring-only `EVAL_NGRAM_LAMBDA` hook plus a fixed higher-order prefix-only backoff cache, the full-val parity run at `EVAL_NGRAM_LAMBDA=0.0` scored `1.11935518`, only `+0.00000510` from historical `eval_006=1.11935008`, so the helper edit is scientifically trustworthy.
 - The `eval_011` helper/artifact guardrail stayed explicit: the copied helper started at `89121` bytes with SHA-256 `1cecd32edeb0d4c10fe29d3011a52d32324e8f39f068df478e06333763e1fde2` and ended at `94173` bytes with SHA-256 `60779a33716859ff74ca25ee82ef57e778350a4faba1588d2aa29b1285048ec3`, while the saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged before and after all runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The exact held-out selector slice from `eval_009` is now reused across three controlled eval-side refinement rounds on locked legal-TTT. In `eval_011`, the prescribed grid selected a small nonzero weight: `0.00 -> 1.11556687`, `0.01 -> 1.11494470`, `0.02 -> 1.11689406`, `0.05 -> 1.12465863`, `0.10 -> 1.14061444`, so the held-out selector chose `EVAL_NGRAM_LAMBDA=0.01` by `-0.00062217` versus `0.00`.
@@ -194,8 +185,8 @@ Full code: `docs/sota_records/sota_code_pr809_0.295bpb_ChunkNgramTTT.py`
 - The same reproduction preserved one important archival marker despite the weaker score: `swa:applying averaged 24 checkpoints` matched the archived seed-42 run, which suggests the main mismatch is throughput and runtime-path drift rather than a different high-level schedule branch.
 
 ## Negative Or Inconclusive Results
-- **eval_011 NEGATIVE IS SUPERSEDED**: `eval_011` used a naive SLOW per-segment n-gram implementation (global lambda scalar, 1901s runtime = 3× over budget). This does NOT mean n-gram backoff is invalid. The correct vectorized chunk-based implementation (PR #809) achieves **0.2952 BPB in 287s**. Do NOT use eval_011 as evidence against n-gram caching. The correct implementation must be used — see `docs/sota_records/sota_code_pr809_0.295bpb_ChunkNgramTTT.py` and `context/reference_materials/URGENT_ngram_backoff_breakthrough.md`.
-- Do not retry the exact `eval_011` naive implementation (global EVAL_NGRAM_LAMBDA scalar + per-segment updates). That specific approach is confirmed non-promotable. The correct approach is the vectorized chunk-based NgramEvalCache from PR #809.
+- Do not spend another immediate round on nearby fixed logit-bias lambda sweeps, alternative small prior strengths, or other simple unigram token-prior calibration variants on locked seed-`1337` legal-TTT. `eval_012` already separated prior construction from selector data and still selected `lambda=0.0`, so this cheap fixed-calibration family is locally exhausted on `arch_010`.
+- Do not spend another immediate round on nearby lambda sweeps, order sweeps, or smoothing variants for the exact `eval_011` prefix-only higher-order backoff cache on locked seed-`1337` legal-TTT. The helper is valid, but the held-out-selected nonzero weight `0.01` regressed full validation by `+0.00108537` and pushed eval time to `1859145ms`, so the family is already answered as non-promotable.
 - Do not spend another immediate round on nearby chunk-local prefix-bigram lambda sweeps around `lambda=0.0` for locked seed-`1337` legal-TTT. `eval_010` already answered the single-mechanism question negatively enough: parity passed exactly, the frozen held-out slice selected `lambda=0.0`, and even the smallest nonzero lambda `0.05` regressed held-out `val_bpb` by `+0.01303935`.
 - `eval_010` does not justify a cross-seed confirmation round for this exact chunk-local prefix-bigram interpolation. The scientifically relevant signal is that the held-out selection itself collapsed to `lambda=0.0`, so there is no positive nonzero candidate to confirm on seeds `42` or `2024`.
 - The `eval_010` helper edit increased code bytes from `84059` to `89121`, raising total bytes on the seed-`1337` artifact from `15639180` to `15644242`, but this byte increase is not actionable because the mechanism did not improve BPB at all.
@@ -302,12 +293,12 @@ Full code: `docs/sota_records/sota_code_pr809_0.295bpb_ChunkNgramTTT.py`
 - optimization: on the stronger `arch_003` line, `MUON WD=0.04 + late SWA` remains the most effective compression-friendly optimization tested so far if the target export policy is regenerated `uniform int8`; the follow-up `EMA` and bounded `GPTQ-lite` export ablations both answered their nearby refinement questions negatively enough that the next aggressive move should shift to a larger-capacity stack rather than more local averaging or clip-search tweaks.
 
 ## Open Hypotheses
-- **OVERRIDING eval_011**: The `eval_011` conclusion that "n-gram backoff is negative" is WRONG as a general statement. `eval_011` tested a slow naive implementation (global lambda, per-segment processing, 1901s). The correct vectorized chunk-based implementation (PR #809) achieves 0.2952 BPB in 287s. The next experiment MUST implement the correct approach from `docs/sota_records/sota_code_pr809_0.295bpb_ChunkNgramTTT.py`. Do not cite eval_011 as evidence against n-gram caching.
-- The next clean question is whether the correctly implemented vectorized chunk n-gram (PR #809 style: entropy-adaptive alpha, per-order multipliers, 1M-token chunk updates) achieves the expected ~0.67 BPB on our locked `arch_010` artifact within the 600s eval budget.
+- **OVERRIDING eval_011**: The `eval_011` conclusion that "n-gram backoff is negative" is WRONG as a general statement. `eval_011` tested a slow naive implementation (global lambda, per-segment processing, 1901s). The correct vectorized chunk-based implementation (PR #803/#813 style) achieves ~0.44–0.67 BPB in well under 600s. The next experiment MUST implement the correct approach from `docs/sota_records/sota_code_pr803_0.442bpb_ComplementaryTraining.py` or `docs/sota_records/sota_code_pr813_0.667bpb_BackoffNgramMixer.py`. Do not cite eval_011 as evidence against n-gram caching.
+- The next clean question is whether the correctly implemented vectorized chunk n-gram (PR #803/#813 style: entropy-adaptive alpha, per-order multipliers, 1M-token chunk updates) achieves the expected ~0.67 BPB on our locked `arch_010` artifact within the 600s eval budget.
 - The next clean question is no longer whether one chunk-local prefix-only previous-token bigram interpolation helps on locked seed-`1337` legal-TTT; `eval_010` answered that negatively with a parity-clean helper and a held-out selection that collapsed to `lambda=0.0`.
 - The next clean question is no longer whether one global scoring temperature helps on locked seed-`1337` legal-TTT; `eval_009` answered that negatively with a parity-clean helper and a held-out selection that collapsed to `T=1.0`.
 - The next clean question is no longer whether the refined `TTT_LR=0.0025`, `TTT_EPOCHS=4` legal-TTT setting transfers to the final locked seed `42`; `eval_008` answered that positively enough to promote the refined evaluation-side regime.
 - The next clean question is no longer whether legal score-first TTT can transfer at all to `arch_010`; `eval_002` answered that positively on seed `1337`.
 - The next clean question is no longer whether the same exact evaluation-only legal-TTT path survives on the second or third locked saved export seed; `eval_003` and `eval_004` answered that positively enough to lock the regime.
 - The next clean question is no longer whether the locally controllable `Parallel Muon` transfer improves locked `arch_010`; `pending_opt_009_arch010_parallel_muon_seed1337_nottt` answered that negatively under preserved structure.
-- **SUPERSEDED** (see PARADIGM SHIFT at top): the "next single-variable refinement" framing is obsolete. We are now in AGGRESSIVE phase with a 0.827 BPB gap to SOTA (0.2952). The only open question is implementing the correct vectorized chunk n-gram backoff cache from PR #809.
+- **SUPERSEDED** (see Working SOTA Anchor above): the "next single-variable refinement" framing is obsolete. We are now in AGGRESSIVE phase with a ~0.722 BPB gap to target SOTA (PR #803, 0.4416 BPB). The immediate task is implementing the correct vectorized chunk n-gram backoff cache (PR #803/#813 style) and complementary training.

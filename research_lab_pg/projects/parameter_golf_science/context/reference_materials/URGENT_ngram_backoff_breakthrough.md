@@ -2,10 +2,11 @@
 
 ## STATUS: CRITICAL — Implement This NOW
 
-The leaderboard has been transformed TODAY (2026-03-26). The best SOTA is now **0.295 BPB**
-(down from 1.1194 yesterday). **The entire improvement comes from an eval-time n-gram backoff cache.**
+The leaderboard has been transformed TODAY (2026-03-26). **The target SOTA is PR #803 at 0.4416 BPB**
+(PR #809 at 0.295 is excluded pending legality review). The entire improvement comes from
+eval-time n-gram backoff cache + complementary training.
 Our current best is ~1.119 BPB. Implementing n-gram backoff alone will take us to ~0.67 BPB.
-With complementary training it goes to ~0.44 BPB. With TTT + best tuning: **0.295 BPB**.
+With complementary training it goes to ~0.44 BPB (matching PR #803 target).
 
 This is not a small optimization. This is a paradigm shift. DROP everything else and implement this.
 
