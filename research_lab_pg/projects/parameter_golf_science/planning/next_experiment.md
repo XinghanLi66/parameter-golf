@@ -3,58 +3,48 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Experiment ID
-`pending_eval_002_arch010_legal_ttt_seed42_confirm`
+`pending_opt_009_arch010_parallel_muon_seed1337_nottt`
 
 ## Category
-- evaluation
+- optimization
 
-Operational subtype: `same-script second-seed TTT confirmation`
+Operational subtype: `training-side current-#1 motif isolation`
 
 ## Baseline / Comparison
-New strongest local evaluation result from this round:
-- `eval_002_arch010_legal_ttt_seed1337_export_eval`
-- same-script no-TTT recovery on saved seed-`1337` export lineage: `1.12211550`
-- same-script `Legal Score-First TTT` on the same saved seed-`1337` export lineage: `1.11971476`
-- TTT gain: `-0.00240074`
-- artifact bytes: `15555121`
-- code bytes: `84059`
-- total bytes: `15639180`
-
-Exact non-TTT locked references:
+Locked non-TTT `arch_010` references:
 - `arch_010_record02_leakyrelu2_keep_cudnn_recipe` seed `1337`: `1.12211549`
 - `repro_006_record02_leakyrelu2_seed42_confirm` seed `42`: `1.12281449`
 - `repro_007_record02_leakyrelu2_seed2024_confirm` seed `2024`: `1.12225480`
 - locked exact 3-seed mean: `1.12239493`
 
+Locked evaluation-side TTT references on the same export lineage:
+- `eval_002_arch010_legal_ttt_seed1337_export_eval`: `1.11971476`
+- `eval_003_arch010_legal_ttt_seed42_confirm`: `1.12032675`
+- `eval_004_arch010_legal_ttt_seed2024_confirm`: `1.12027199`
+- exact TTT 3-seed mean: `1.12010450`
+
 Relevant frontier references:
-- live `#1`: `1.1194`
-- documented record-`#2` seed `1337`: `1.12278022`
+- live `#1`: `1.1194` with `LeakyReLU² + Legal Score-First TTT + Parallel Muon`
+- strongest local unmatched live-`#1` motif: `Parallel Muon`
 
 ## Hypothesis
-If the strong seed-`1337` evaluation-only TTT gain is a real transfer on the locked `arch_010` export lineage rather than a favorable one-seed landing, then applying the exact same same-script parity-plus-TTT protocol to the saved seed-`42` export lineage should again beat the recovered same-script no-TTT baseline by at least `-0.0008`.
+If the remaining miss to live SOTA on the locked `arch_010` line is now mainly the missing training-side optimizer/runtime motif from the current `#1` stack, then adding only `Parallel Muon` to the locked seed-`1337` `arch_010` recipe should improve the standard no-TTT post-export `sliding_window stride=64 val_bpb` by at least `-0.0005`.
 
 ## Why It Might Work
-The seed-`1337` TTT result was not a marginal win; it was a clean parity-qualified gain of `-0.00240074`, which is close to the record-`#1` note’s reported `-0.0025`. That is large enough that the next most useful question is robustness of the evaluation-side transfer, not another new motif.
+The reviewed TTT question is now answered across all three locked saved export seeds, so the next unresolved current-`#1` motif is `Parallel Muon`. The live record note describes it as part of the winning training-side stack, and it is the clearest remaining single variable that can be tested without changing architecture, export schema, or evaluation legality again.
 
 ## Minimal Intervention
-Keep the exact `eval_002` run-local script and the fixed TTT recipe unchanged. Change only the saved artifact lineage under evaluation from seed `1337` to seed `42`, and again run no-TTT parity before the TTT candidate.
+Fork the exact locked `arch_010` training script and change only the optimizer/runtime path needed to reproduce `Parallel Muon`. Keep architecture, activation, export, tokenizer/data, and standard no-TTT exported evaluation fixed.
 
 ## Variables To Change
-- saved export lineage under evaluation only: seed `1337 -> 42`
+- optimizer/runtime implementation only:
+  - current local cuDNN-backed `arch_010` optimizer path
+  - `->` `Parallel Muon` transfer
 
 ## Variables To Hold Fixed
-- exact `runs/eval_002_arch010_legal_ttt_seed1337_export_eval/train_gpt.py`
-- `TTT_ENABLED=0` parity pass before `TTT_ENABLED=1`
-- `TTT_LR=0.002`
-- `TTT_EPOCHS=3`
-- `TTT_CHUNK_TOKENS=32768`
-- `TTT_FREEZE_BLOCKS=0`
-- `TTT_MOMENTUM=0.9`
-- `TTT_BATCH_SEQS=32`
-- `TTT_GRAD_CLIP=1.0`
-- score-first legality rules and last-chunk-no-train rule
+- locked `arch_010` architecture and export stack
+- `SEED=1337` for the first controlled transfer
 - `LeakyReLU(0.5)^2`
-- cuDNN-backed SDPA fallback stack
 - `11L / 512 / 8 heads / 4 KV heads / MLP3x`
 - `XSA_LAST_N=4`
 - `ROPE_DIMS=16`
@@ -65,41 +55,42 @@ Keep the exact `eval_002` run-local script and the fixed TTT recipe unchanged. C
 - `SWA_EVERY=50`
 - `WARMDOWN_ITERS=3500`
 - late QAT threshold `0.15`
-- GPTQ-lite int6 export lineage
+- GPTQ-lite int6 export lineage and container path
 - tokenizer/data paths
 - shim-free `physicslm`
 - managed 8-GPU launch
 - evaluation protocol `sliding_window stride=64`
-- no retraining
-- no new export
-- no artifact rewrite
+- no legal-TTT in the primary readout
+- no architecture edits
+- no export-schema edits
 
 ## Success Metric
-Primary validity gate:
-- same-script recovered no-TTT eval on the saved seed-`42` artifact must match archived `1.12281449` within about `±0.0002`
+Primary readout:
+- post-export no-TTT `sliding_window stride=64 val_bpb` on seed `1337`
 
-Primary scientific readout:
-- same-script TTT-enabled eval must beat the recovered same-script no-TTT baseline on the seed-`42` artifact
+Primary comparison:
+- beat locked seed-`1337` non-TTT baseline `1.12211549`
 
 Interpretation thresholds:
-- strong positive: gain `<= -0.0015`
-- useful but modest positive: `-0.0015 < gain <= -0.0008`
-- weak / likely non-actionable: `-0.0008 < gain < 0`
-- negative or null: `>= 0`
+- strong positive: gain `<= -0.0010`
+- useful positive: `-0.0010 < gain <= -0.0005`
+- weak / likely non-actionable: `-0.0005 < gain < 0`
+- null or negative: `>= 0`
 
 ## Failure Interpretation
-If same-script no-TTT parity fails on seed `42`, treat the round as an implementation failure rather than evidence about TTT transfer. If parity passes but TTT gain collapses below about `-0.0008`, then the strong seed-`1337` landing should not yet be promoted to the new default evaluation regime without further explanation.
+If the `Parallel Muon` transfer does not beat the locked no-TTT baseline, then the remaining local gap is unlikely to be solved by porting that optimizer path alone, and the next refinement should shift to a different single motif rather than bundling more training/runtime changes into `arch_010`.
 
 ## Redundancy Check
-- Do not change the TTT recipe while asking the second-seed robustness question.
-- Do not bundle another architecture, optimization, export, or runtime-path edit into the confirmation.
-- Do not retrain or rewrite artifacts.
+- Do not spend another round on more seed-only legal-TTT confirmation; that question is now answered across all three locked saved export seeds.
+- Do not bundle `Parallel Muon` with `Parameter Banking`, different `BigramHash`, or a new evaluation path in the same first transfer.
+- Do not make legal-TTT the primary readout for the first `Parallel Muon` test; keep the training-side effect interpretable first.
 
 ## Execution Plan
-1. Reuse the exact `eval_002` run-local script unchanged.
-2. Run one managed 8-GPU eval-only no-TTT parity recovery on the saved seed-`42` export lineage.
-3. Only if parity passes, run one managed 8-GPU eval-only TTT-enabled eval on that exact same saved seed-`42` artifact source.
-4. Compare the seed-`42` gain against the seed-`1337` gain `-0.00240074`, the locked non-TTT references, and live SOTA.
+1. Fork the locked `arch_010` script into a new run directory.
+2. Implement only the `Parallel Muon` transfer needed for a controlled training-side comparison.
+3. Run one managed 8-GPU smoke if required by the implementation change.
+4. Run one managed 8-GPU full seed-`1337` training/export evaluation under the standard no-TTT exported readout.
+5. Compare the result directly against the locked seed-`1337` non-TTT baseline and against live SOTA context.
 
 ## Expected Effect
-If the transfer is robust, the next round should confirm that evaluation-side `Legal Score-First TTT` is the main remaining gap-closing lever on `arch_010`, not just a strong seed-`1337` landing.
+If `Parallel Muon` is the remaining missing training-side piece of the current `#1` stack, this round should produce a measurable no-TTT gain on the locked `arch_010` line and justify a later follow-up that evaluates the improved artifact under the already-locked legal-TTT regime.

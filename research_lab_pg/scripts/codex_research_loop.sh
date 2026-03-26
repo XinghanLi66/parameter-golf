@@ -199,7 +199,7 @@ push_dashboard() {
     return 0
   fi
 
-  git -C "$repo_root" commit -m "Auto-update dashboard and memory after ${round_tag} [skip ci]" \
+  git -C "$repo_root" commit -m "Auto-update dashboard and memory after ${round_tag}" \
     2>/dev/null
   git -C "$repo_root" push origin main 2>/dev/null \
     && echo "[push_dashboard] Pushed dashboard after ${round_tag}." \

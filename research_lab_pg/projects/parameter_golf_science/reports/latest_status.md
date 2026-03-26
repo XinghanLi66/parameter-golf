@@ -3,6 +3,23 @@
 Update this after each substantive round.
 
 ## Current Best Evidence
+- The real local `eval_004_arch010_legal_ttt_seed2024_confirm` comparison is now measured on one controlled third-seed evaluation-only transfer on top of the locked `arch_010` baseline: keep the saved seed-2024 `final_model.pt` / `final_model.int6.ptz` lineage fixed, keep the copied `eval_003` helper byte-identical, and change only evaluation mode from same-script no-TTT recovery to legal score-first TTT.
+- This third-seed confirmation is strongly positive and closes the last open robustness question from the prior round: the same-script no-TTT recovery scored `1.12225535`, only `+0.00000055` from the archived seed-2024 result, so the parity gate passed cleanly; the same-script legal TTT eval on that exact same saved artifact then scored `1.12027199` with unchanged artifact bytes `15761090`, unchanged helper code bytes `84059`, and total bytes `15845149`.
+- The `eval_004` helper remained fully controlled: the copied file stayed hash-identical to the seed-42 `eval_003` helper, the saved artifact lineage stayed fixed, there was no retraining and no artifact rewrite, and the TTT logs again preserved legality with `score_first=True`, `last_chunk_untrained=True`, `freeze_blocks=0`, `chunks=1893`, and `chunk_tokens=32768`.
+- Versus the recovered same-script no-TTT baseline, seed-2024 legal score-first TTT improved post-export `val_bpb` by `-0.00198336`; versus the seed-1337 TTT result `1.11971476`, the seed-2024 TTT result is `+0.00055723` worse in absolute BPB; versus the seed-42 TTT result `1.12032675`, it is `-0.00005476` better; versus the locked non-TTT 3-seed mean `1.12239493`, it improved by `-0.00212294`; versus live SOTA `1.1194`, the remaining gap is `+0.00087199`.
+- Eval wallclock is now recorded on the third saved export seed as well: same-script no-TTT took `86179ms`, legal score-first TTT took `400348ms`, and managed wallclock was `126s` vs `441s`, so the evaluation-side time cost is now measured across all three saved export seeds rather than one or two.
+- The three saved export seeds now support treating legal score-first TTT as fully locked evaluation-side behavior on locked `arch_010`: seed `1337` scored `1.11971476`, seed `42` scored `1.12032675`, seed `2024` scored `1.12027199`, and the resulting exact 3-seed TTT mean is `1.12010450`, only `+0.00070450` above live SOTA without any retraining or artifact rewrite.
+- The real local `eval_003_arch010_legal_ttt_seed42_confirm` comparison is now measured on one controlled second-seed evaluation-only transfer on top of the locked `arch_010` baseline: keep the saved seed-42 `final_model.pt` / `final_model.int6.ptz` lineage fixed, keep the copied `eval_002` helper byte-identical, and change only evaluation mode from same-script no-TTT recovery to legal score-first TTT.
+- This second-seed confirmation is strongly positive and answers the main open question from the last round: the same-script no-TTT recovery scored `1.12281449`, exactly matching the archived seed-42 result, so the parity gate passed cleanly; the same-script legal TTT eval on that exact same saved artifact then scored `1.12032675` with unchanged artifact bytes `15802352`, unchanged helper code bytes `84059`, and total bytes `15886411`.
+- The `eval_003` helper remained fully controlled: the copied file stayed hash-identical to the seed-1337 `eval_002` helper, the saved artifact lineage stayed fixed, there was no retraining and no artifact rewrite, and the TTT logs again preserved legality with `score_first=True`, `last_chunk_untrained=True`, `freeze_blocks=0`, `chunks=1893`, and `chunk_tokens=32768`.
+- Versus the recovered same-script no-TTT baseline, seed-42 legal score-first TTT improved post-export `val_bpb` by `-0.00248774`; versus the seed-1337 TTT result `1.11971476`, the seed-42 TTT result is only `+0.00061199` worse in absolute BPB while its gain is slightly stronger by `-0.00008700`; versus the locked non-TTT 3-seed mean `1.12239493`, it improved by `-0.00206818`; versus live SOTA `1.1194`, the remaining gap is `+0.00092675`.
+- Eval wallclock is now recorded on the second saved export seed as well: same-script no-TTT took `86107ms`, legal score-first TTT took `404338ms`, and managed wallclock was `128s` vs `444s`, so the evaluation-side time cost remains explicit and stable enough for future comparisons.
+- The first two saved export seeds now support treating legal score-first TTT as the stable evaluation-side regime on locked `arch_010`: seed `1337` scored `1.11971476`, seed `42` scored `1.12032675`, and the resulting 2-seed TTT mean is `1.12002076`, only `+0.00062076` above live SOTA without any retraining or artifact rewrite.
+- The real local `eval_002_arch010_legal_ttt_seed1337_export_eval` comparison is now measured on one controlled evaluation-only transfer on top of the locked `arch_010` baseline: keep the saved seed-1337 `final_model.pt` / `final_model.int6.ptz` lineage fixed, keep the copied `arch_010` script run-local, and change only evaluation mode from same-script no-TTT recovery to legal score-first TTT.
+- This evaluation-only transfer is strongly positive and is now the strongest local post-export readout: the same-script no-TTT recovery scored `1.12211550`, only `+0.00000001` from the archived `1.12211549`, so the parity gate passed cleanly; the same-script legal TTT eval on the exact same saved artifact then scored `1.11971476` with unchanged artifact bytes `15555121`, code bytes `84059`, and total bytes `15639180`.
+- The `eval_002` helper changed only by adding evaluation-side TTT support. The run-local script kept the saved artifact lineage fixed, did not retrain, did not write a new artifact, and the TTT logs explicitly preserved legality: `score_first=True`, `last_chunk_untrained=True`, `freeze_blocks=0`, `chunks=1893`, and `chunk_tokens=32768`.
+- Versus the recovered same-script no-TTT baseline, legal score-first TTT improved post-export `val_bpb` by `-0.00240074`; versus the locked non-TTT 3-seed mean `1.12239493`, it improved by `-0.00268017`; versus live SOTA `1.1194`, the remaining gap is now only `+0.00031476`.
+- Eval wallclock is now recorded for both modes on the same saved artifact source: no-TTT took `100456ms`, while legal score-first TTT took `396112ms`, so the evaluation-side gain is large but not free.
 - The real local `repro_007_record02_leakyrelu2_seed2024_confirm` comparison is now measured on one controlled third-seed follow-up on top of `arch_010`: keep the exact copied `train_gpt.py` byte-identical at `71265` code bytes, keep the cuDNN-only SDPA fallback and `LeakyReLU(0.5)^2` activation fixed, and change only `SEED=1337/42 -> 2024`.
 - This third-seed confirmation is positive and locks the local baseline: the full seed-2024 training run reached `step=6725` under `600.028s`, logged checkpoint `val_bpb=1.1389`, applied `EMA`, exported a direct-runtime `zstd` artifact at `15761090` bytes, and preserved exact roundtrip/load correctness; the missing final stride-64 exported metric was then recovered from the saved artifact with a separate managed 8-GPU eval-only helper at `1.12225480`, bringing total bytes to `15832355`.
 - The smoke and full seed-2024 runs again confirmed the same backend state as `arch_010`, not just the same requested flags: the probe logged `eligible_cudnn=True`, `eligible_flash=False`, `observed_backend=cudnn`, and cuDNN SDPA events including `aten::_scaled_dot_product_cudnn_attention`. Both managed runs wrote the required outputs before stalling afterward, so the scientific record relies on the on-disk results rather than clean runner exit codes.
@@ -19,7 +36,7 @@ Update this after each substantive round.
 - The exact `LeakyReLU(0.5)^2` recipe on the reproduced leaderboard-`#2` stack now has a local 2-seed mean of `1.12246499`, which is below the documented record-`#2` 3-seed mean near `1.1233` and supports treating `arch_010` as the stable local baseline for this lineage rather than a one-seed landing.
 - Versus documented record `#2` seed `1337=1.12278022`, the seed-42 rerun is only `+0.00003427` worse on post-export `val_bpb`; versus live SOTA `1.1194`, the seed-42 run sits at `+0.00341449`.
 - The real local `arch_010_record02_leakyrelu2_keep_cudnn_recipe` comparison is now measured on one controlled architecture-only transfer on top of `opt_008`: keep the reproduced leaderboard `#2` stack fixed, keep the cuDNN-only SDPA fallback fixed, keep the fallback wrapper fixed as `F.scaled_dot_product_attention(..., enable_gqa=True)`, and change only the MLP activation from `ReLU^2` to `LeakyReLU(0.5)^2`.
-- This activation-only transfer is positive and is the new active local baseline: the full seed-1337 run finished at `step=6734` under `599.994s`, logged checkpoint `val_bpb=1.1384`, applied `EMA` and exported a direct-runtime `zstd` artifact at `15555121` bytes, then scored `1.12211549` post-export under `sliding_window stride=64` at `15626386` total bytes with exact roundtrip/load correctness.
+- This activation-only transfer was the new active local non-TTT baseline before `eval_002`: the full seed-1337 run finished at `step=6734` under `599.994s`, logged checkpoint `val_bpb=1.1384`, applied `EMA` and exported a direct-runtime `zstd` artifact at `15555121` bytes, then scored `1.12211549` post-export under `sliding_window stride=64` at `15626386` total bytes with exact roundtrip/load correctness.
 - The smoke and full runs confirmed the same backend state as `opt_008`, not just the same requested flags: the probe again logged `eligible_cudnn=True`, `eligible_flash=False`, `observed_backend=cudnn`, and cuDNN SDPA events including `aten::_scaled_dot_product_cudnn_attention`.
 - Structural verification passed before launch, so this remained a controlled one-variable test: the copied script differed from `opt_008` by one activation line only, state-dict keys/shapes stayed identical at `121`, mixed-int6 export tensor keys stayed identical at `190`, and export meta keys/values stayed identical.
 - Versus `opt_008`, the activation transfer improved checkpoint `val_bpb` by `-0.0023`, post-EMA diagnostic `val_bpb` by `-0.0022`, post-export non-overlapping `val_bpb` by `-0.00222231`, and post-export `sliding_window stride=64 val_bpb` by `-0.00213695`; artifact bytes rose by `70206`, code bytes by `22`, total bytes by `70228`, and step geometry moved only modestly (`6796 -> 6734`, `88.29 -> 89.10 ms/step`).
@@ -27,7 +44,7 @@ Update this after each substantive round.
 - Versus documented record `#2` seed `1337=1.12278022`, the new local result is `-0.00066473` better on post-export `val_bpb`, though total bytes are `+71369` higher and step count is `-367` lower than the documented geometry. Versus live SOTA `1.1194`, the current local gap is now `+0.00271549`.
 - The real local `infra_002_record02_flashattention3_binding_audit` comparison is now measured as a controlled negative portability audit on top of the stabilized `opt_008` / `repro_005` reproduced leaderboard `#2` stack: before spending any more 8-GPU comparison budget, audit whether the exact native binding `flash_attn_interface.flash_attn_func` exists and minimally executes inside the validated shim-free `physicslm` environment.
 - This audit is negative in the only environment that would have counted for a controlled scored run: a managed 1-GPU `physicslm` audit via `tools/gpu_experiment_runner.py` reported `cuda_available=true`, `torch=2.10.0+cu128`, but `flash_attn_interface_spec=null`, `flash_attn_spec=null`, and `status=missing_flash_attn_interface`, then exited `2` without a valid native call path.
-- Because the prerequisite failed inside `physicslm`, no 8-GPU smoke pass and no full seed-`1337` scored comparison were launched this round. The active local best therefore remains `opt_008_record02_cudnn_sdpa_fallback_isolation` at `1.12425244` post-export, `15556158` total bytes, and `6796` steps.
+- Because the prerequisite failed inside `physicslm`, no 8-GPU smoke pass and no full seed-`1337` scored comparison were launched in that audit round. At that point the active local best still remained `opt_008_record02_cudnn_sdpa_fallback_isolation` at `1.12425244` post-export, `15556158` total bytes, and `6796` steps.
 - The bounded alternate-environment check does not rescue the controlled hypothesis: `loongflow_ml` also lacked top-level `flash_attn_interface`, lacked native `zstandard`, and an attempted import from its observed VLLM-packaged `vllm.vllm_flash_attn.flash_attn_interface` path failed for `flash_attn_func`. `physicslm` does expose `xformers.flash_attn_3`, but that is not the audited binding and would require a different implementation path than this reviewed refinement allowed.
 - The real local `repro_005_record02_cudnn_sdpa_seed42_confirm` comparison is now measured on one controlled seed-only follow-up on top of `opt_008`: keep the reproduced leaderboard `#2` stack fixed, keep the cuDNN-only SDPA fallback fixed, keep the fallback wrapper fixed as `F.scaled_dot_product_attention(..., enable_gqa=True)`, and change only `SEED=1337 -> 42`.
 - This seed-only confirmation is positive but not a new best: the full seed-42 run finished at `step=6796` under `600.040s`, logged checkpoint `val_bpb=1.1415`, applied `EMA` and exported a direct-runtime `zstd` artifact at `15715799` bytes, then scored `1.12484349` post-export under `sliding_window stride=64` at `15787042` total bytes with exact roundtrip/load correctness.
@@ -36,7 +53,7 @@ Update this after each substantive round.
 - Versus the old flash-only fallback baseline `repro_004`, the seed-42 confirmation still improved post-export `val_bpb` by `-0.00353571`, reduced total bytes by `-14550`, and recovered `+712` steps, so the cuDNN-backed gain remains clearly real on a second seed.
 - Versus documented record-`#2`, the seed-42 confirmation is about `+0.00124349` worse than the documented seed-42 readout near `1.1236` and `+0.00206327` worse than the documented seed-1337 best `1.12278022`; versus live SOTA `1.1194`, the seed-42 run sits at `+0.00544349`.
 - The real local `opt_008_record02_cudnn_sdpa_fallback_isolation` comparison is now measured on one controlled backend-only follow-up on top of `repro_004`: keep the reproduced leaderboard `#2` stack fixed, keep the fallback wrapper fixed as `F.scaled_dot_product_attention(..., enable_gqa=True)`, and change only the SDPA backend selector from flash-only to cuDNN-only.
-- This backend-only isolation is positive and is the new active local baseline: the full run finished at `step=6796` under `600.032s`, logged checkpoint `val_bpb=1.1407`, applied `EMA` and exported a direct-runtime `zstd` artifact at `15484915` bytes, then scored `1.12425244` post-export under `sliding_window stride=64` at `15556158` total bytes with exact roundtrip/load correctness.
+- This backend-only isolation was the new active local baseline before the later `LeakyReLU(0.5)^2` and TTT refinements: the full run finished at `step=6796` under `600.032s`, logged checkpoint `val_bpb=1.1407`, applied `EMA` and exported a direct-runtime `zstd` artifact at `15484915` bytes, then scored `1.12425244` post-export under `sliding_window stride=64` at `15556158` total bytes with exact roundtrip/load correctness.
 - The smoke and full runs both confirmed that cuDNN SDPA actually activated under the requested backend flags, rather than merely being requested: the probe logged `eligible_cudnn=True`, `eligible_flash=False`, `observed_backend=cudnn`, and cuDNN SDPA events including `aten::_scaled_dot_product_cudnn_attention`.
 - Versus the prior active local baseline `repro_004` at `1.12837920`, the cuDNN-only candidate improved post-export `val_bpb` by `-0.00412676`, reduced total bytes by `-245434`, reduced artifact bytes by `-248540`, and recovered `+712` steps.
 - Throughput improved materially under the same `600s` cap: steady-state `step_avg` improved from `98.62` to `88.29 ms`, which corresponds to roughly `7.97M -> 8.91M tokens/s` (`+11.70%`).
@@ -45,7 +62,7 @@ Update this after each substantive round.
 - This second-seed confirmation is positive on the submission objective: the full managed run stayed shim-free in `physicslm`, stopped at `step=6603` under `600.031s`, matched `swa:start step:5450`, applied `24` SWA checkpoints, logged checkpoint `val_bpb=1.1529`, and scored `1.14276256` post-export at `15694527` total bytes with direct-runtime `zstd` and exact roundtrip/load correctness.
 - Versus the clean seed-1337 baseline `1.14374449`, the transferred seed-1337 run improved post-export `val_bpb` by `-0.00098193` and checkpoint `val_bpb` by about `-0.0014`, while artifact bytes rose by `11104`, code bytes by `22`, total bytes by `11126`, and the candidate stayed under the cap by `305473`.
 - Versus the seed-42 transferred result `1.14068897`, the seed-1337 rerun regressed post-export `val_bpb` by `+0.00207359`, artifact and total bytes fell by `266946`, steps changed by `+6`, and the checkpoint-to-export gap stayed nearly unchanged at `-0.01013744` versus `-0.01021103`; this narrowly missed the brief's secondary `<=0.002` similarity band by `0.00007359`.
-- The updated transferred `LeakyReLU^2` 2-seed mean is now `1.14172576`, which beats the old clean local 2-seed mean `1.14348979` by `-0.00176403` and the archived clean 3-seed mean `1.14276` by `-0.00103424`. This is strong enough to promote `record06 + LeakyReLU^2 + SWA` to the new active local baseline, with mild seed variance noted explicitly.
+- The updated transferred `LeakyReLU^2` 2-seed mean became `1.14172576`, which beats the old clean local 2-seed mean `1.14348979` by `-0.00176403` and the archived clean 3-seed mean `1.14276` by `-0.00103424`. At that stage it was strong enough to promote `record06 + LeakyReLU^2 + SWA` to the active local baseline, with mild seed variance noted explicitly.
 - The real local `opt_007_record06_leakyrelu2_ema_warmdown3500` comparison is now measured on one controlled optimization transfer on top of `arch_009`: keep the `record06 + LeakyReLU(0.5)^2` architecture and mixed `int5/int6 + zstd-22` export fixed, disable late `SWA`, enable late `EMA`, and extend `WARMDOWN_ITERS` from `3000` to `3500`.
 - A managed 8-GPU smoke pass for `opt_007` completed instantiate/export/reload/eval successfully and confirmed exact schema parity versus `arch_009`: the candidate preserved identical `106` state-dict tensor keys/shapes/dtypes, identical `167` export tensor keys, identical export metadata, direct-runtime `zstd` via artifact header `28 b5 2f fd`, and exact roundtrip/load correctness.
 - This aggressive optimization transfer is clearly negative on the submission objective: the full run stayed shim-free in `physicslm`, stopped at `step=6058` under `600.061s`, started `EMA` at `4854`, applied `EMA decay=0.999`, logged checkpoint `val_bpb=1.1547`, and scored `1.15374139` post-export at `15735870` total bytes with direct-runtime `zstd` and exact roundtrip/load correctness.
@@ -85,44 +102,47 @@ Update this after each substantive round.
 - The real local `arch_006` comparison is now measured on one retrain that changed only architecture on top of `arch_005`: `XSA_LAST_N=4` with `11L`, `BigramHash(8192)`, `SmearGate`, `MUON_WEIGHT_DECAY=0.04`, late `SWA`, `sliding_window stride=64`, and regenerated `uniform int8 + zstd-22` otherwise fixed. A pre-flight smoke path passed with exact roundtrip/load correctness; the main retrain stopped at step `4507` under the same `600.099s` cap, the final scored checkpoint reached `1.19825960`, and regenerated `uniform int8 + zstd-22` scored `1.20101996` at `15913593` total bytes with quantization gap `+0.00276037`; artifact bytes fell to `15845227`, code bytes rose to `68366`, exact roundtrip/load validation passed, and the candidate stayed under the cap by `86407` bytes.
 
 ## Most Important Open Question
-Now that `arch_010` is supported by exact 3-seed evidence at mean `1.12239493`, which single-variable beyond-`#2` refinement should be tested next on top of that locked baseline?
+Now that legal score-first TTT is locked across all three saved `arch_010` export seeds, does the remaining current-`#1` training-side motif `Parallel Muon` transfer positively to the locked `arch_010` line under the standard no-TTT exported readout?
 
 ## Active Experiment ID
-`repro_007_record02_leakyrelu2_seed2024_confirm`
+`eval_004_arch010_legal_ttt_seed2024_confirm`
 
 ## Latest Result Summary
-- Completed `repro_007_record02_leakyrelu2_seed2024_confirm` in [/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/repro_007_record02_leakyrelu2_seed2024_confirm/summary.md](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/repro_007_record02_leakyrelu2_seed2024_confirm/summary.md).
-- Managed smoke run:
+- Completed `eval_004_arch010_legal_ttt_seed2024_confirm` in [/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_004_arch010_legal_ttt_seed2024_confirm/summary.md](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_004_arch010_legal_ttt_seed2024_confirm/summary.md).
+- Managed no-TTT parity eval:
   - environment: `physicslm`
   - versions: `Python 3.11.14`, `torch 2.10.0+cu128`, native `zstandard`
   - GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`
-  - result: exact roundtrip/load correctness, `eligible_cudnn=True`, `observed_backend=cudnn`, smoke post-export `final_int6_roundtrip_exact val_bpb=4.10666993`
-  - note: the smoke runner hung in distributed teardown after result capture; the required smoke evidence is preserved in [/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/repro_007_record02_leakyrelu2_seed2024_confirm/smoke_8gpu/logs/repro_007_record02_leakyrelu2_seed2024_confirm_smoke.txt](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/repro_007_record02_leakyrelu2_seed2024_confirm/smoke_8gpu/logs/repro_007_record02_leakyrelu2_seed2024_confirm_smoke.txt)
-- Managed full training run before recovery eval:
-  - environment: `physicslm`
-  - versions: `Python 3.11.14`, `torch 2.10.0+cu128`, native `zstandard`
-  - GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`
-  - checkpoint `val_bpb`: `1.1389`
-  - post-EMA diagnostic `val_bpb`: `1.1380`
-  - post-export non-overlapping `val_bpb`: `1.14585946`
-  - artifact bytes: `15761090`
-  - code bytes: `71265`
-  - total bytes: `15832355`
-  - `step=6725`, steady-state `89.22 ms/step`
-  - `swa:start=6050`
-  - `late_qat:enabled step=6206 scale=0.1498`
-  - exact roundtrip/load correctness: pass
-  - note: the runner stayed alive after the main metrics were written, so the final stride-64 exported metric was recovered from the saved artifact in a separate managed eval-only pass
-- Managed recovery eval:
+  - artifact source: locked seed-2024 `arch_010` `final_model.pt` + `final_model.int6.ptz`
+  - result: `eval_only_int6_sliding_window_exact val_bpb=1.12225535`, `val_loss=1.89487614`
+  - parity delta vs archived `1.12225480`: `+0.00000055`
+  - script eval wallclock: `86179ms`
+  - managed wallclock: `126s`
+  - parity gate: pass
+- Managed legal-TTT eval on the exact same saved artifact:
   - environment: `physicslm`
   - GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`
-  - recovered post-export `sliding_window stride=64 val_bpb`: `1.12225480`
-  - recovered post-export `sliding_window stride=64 val_loss`: `1.89487520`
-  - managed run metadata: [/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/repro_007_record02_leakyrelu2_seed2024_confirm/recovered_eval_8gpu/gpu_runner_metadata_eval.json](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/repro_007_record02_leakyrelu2_seed2024_confirm/recovered_eval_8gpu/gpu_runner_metadata_eval.json)
+  - TTT recipe: `TTT_LR=0.002`, `TTT_EPOCHS=3`, `TTT_CHUNK_TOKENS=32768`, `TTT_FREEZE_BLOCKS=0`, `TTT_MOMENTUM=0.9`, `TTT_BATCH_SEQS=32`, `TTT_GRAD_CLIP=1.0`
+  - legality: `score_first=True`, `last_chunk_untrained=True`
+  - chunking: `1893` chunks of `32768` tokens, `969088` total windows
+  - result: `legal_ttt_exact val_bpb=1.12027199`, `val_loss=1.89152732`
+  - gain vs recovered no-TTT baseline: `-0.00198336`
+  - delta vs seed-1337 TTT result `1.11971476`: `+0.00055723`
+  - delta vs seed-42 TTT result `1.12032675`: `-0.00005476`
+  - delta vs locked 3-seed mean `1.12239493`: `-0.00212294`
+  - delta vs current 2-seed TTT mean `1.12002076`: `+0.00025123`
+  - delta vs live SOTA `1.1194`: `+0.00087199`
+  - exact 3-seed TTT mean after this run: `1.12010450`
+  - script eval wallclock: `400348ms`
+  - managed wallclock: `441s`
+- Byte accounting:
+  - artifact bytes: `15761090` unchanged
+  - code bytes: `84059`
+  - total bytes: `15845149`
 - Decision:
-  - The `LeakyReLU(0.5)^2` gain survived the exact third-seed rerun.
-  - `arch_010` should now be treated as a locked 3-seed baseline on the reproduced leaderboard-`#2` stack.
-  - The next useful round is one controlled beyond-`#2` refinement on top of the stabilized line, not another seed-only confirmation.
+  - The copied eval helper remained hash-identical to the seed-42 helper and again passed the same-script parity gate cleanly.
+  - Legal score-first TTT transfers strongly to the third saved `arch_010` export seed; the gain is weaker than the first two seeds by about `+0.0004` to `+0.0005`, but it remains comfortably above the strong-positive threshold and does not collapse.
+  - The evidence now supports treating legal score-first TTT as fully locked evaluation-side behavior on locked `arch_010`; the next useful refinement is one new controlled beyond-SOTA variable, not more seed-only TTT confirmation.
 
 ## Recommended Next Step
-Use the now-locked `arch_010` 3-seed baseline for the next single-variable beyond-`#2` refinement. The seed-stability question is answered.
+Keep legal score-first TTT fixed as the locked evaluation-side regime on `arch_010` and move to one controlled new variable. The cleanest next round is a training-side `Parallel Muon` transfer on the locked `arch_010` stack with the standard no-TTT exported readout kept explicit so the training-side effect stays interpretable before any later TTT restacking.
