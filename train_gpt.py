@@ -75,6 +75,7 @@ class Hyperparameters:
     mlp_mult = int(os.environ.get("MLP_MULT", 2))
     tie_embeddings = bool(int(os.environ.get("TIE_EMBEDDINGS", "1")))
     rope_base = float(os.environ.get("ROPE_BASE", 10000.0))
+    rope_dims = int(os.environ.get("ROPE_DIMS", 0))
     logit_softcap = float(os.environ.get("LOGIT_SOFTCAP", 30.0))
 
     # Optimizer hyperparameters.
@@ -88,10 +89,25 @@ class Hyperparameters:
     muon_backend_steps = int(os.environ.get("MUON_BACKEND_STEPS", 5))
     muon_momentum_warmup_start = float(os.environ.get("MUON_MOMENTUM_WARMUP_START", 0.85))
     muon_momentum_warmup_steps = int(os.environ.get("MUON_MOMENTUM_WARMUP_STEPS", 500))
+    muon_weight_decay = float(os.environ.get("MUON_WEIGHT_DECAY", 0.0))
     beta1 = float(os.environ.get("BETA1", 0.9))
     beta2 = float(os.environ.get("BETA2", 0.95))
     adam_eps = float(os.environ.get("ADAM_EPS", 1e-8))
     grad_clip_norm = float(os.environ.get("GRAD_CLIP_NORM", 0.0))
+    swa_enabled = bool(int(os.environ.get("SWA_ENABLED", "0")))
+    swa_start_frac = float(os.environ.get("SWA_START_FRAC", 0.5))
+    swa_every = int(os.environ.get("SWA_EVERY", 50))
+    ema_enabled = bool(int(os.environ.get("EMA_ENABLED", "0")))
+    ema_start_frac = float(os.environ.get("EMA_START_FRAC", 0.5))
+    ema_decay = float(os.environ.get("EMA_DECAY", 0.999))
+
+    # Cheap local context features are disabled by default so the root baseline
+    # stays unchanged unless an experiment explicitly enables them.
+    bigram_hash_buckets = int(os.environ.get("BIGRAM_HASH_BUCKETS", 0))
+    bigram_hash_dim = int(os.environ.get("BIGRAM_HASH_DIM", 128))
+    use_smeargate = bool(int(os.environ.get("USE_SMEARGATE", "0")))
+    xsa_last_n = int(os.environ.get("XSA_LAST_N", 0))
+    ln_scale = bool(int(os.environ.get("LN_SCALE", "0")))
 
 # -----------------------------
 # MUON OPTIMIZER 
@@ -117,10 +133,24 @@ def zeropower_via_newtonschulz5(G: Tensor, steps: int = 10, eps: float = 1e-7) -
 
 
 class Muon(torch.optim.Optimizer):
-    def __init__(self, params, lr: float, momentum: float, backend_steps: int, nesterov: bool = True):
+    def __init__(
+        self,
+        params,
+        lr: float,
+        momentum: float,
+        backend_steps: int,
+        nesterov: bool = True,
+        weight_decay: float = 0.0,
+    ):
         super().__init__(
             params,
-            dict(lr=lr, momentum=momentum, backend_steps=backend_steps, nesterov=nesterov),
+            dict(
+                lr=lr,
+                momentum=momentum,
+                backend_steps=backend_steps,
+                nesterov=nesterov,
+                weight_decay=weight_decay,
+            ),
         )
 
     @torch.no_grad()
@@ -166,9 +196,12 @@ class Muon(torch.optim.Optimizer):
             if distributed:
                 dist.all_reduce(updates_flat, op=dist.ReduceOp.SUM)
 
+            wd = group.get("weight_decay", 0.0)
             curr = 0
             for p in params:
                 g = updates_flat[curr : curr + p.numel()].view_as(p).to(dtype=p.dtype)
+                if wd > 0:
+                    p.data.mul_(1.0 - lr * wd)
                 p.add_(g, alpha=-lr)
                 curr += p.numel()
 
@@ -821,9 +854,13 @@ def restore_low_dim_params_to_fp32(module: nn.Module) -> None:
 
 class Rotary(nn.Module):
     # Caches cos/sin tables per sequence length on the current device.
-    def __init__(self, dim: int, base: float = 10000.0):
+    def __init__(self, dim: int, base: float = 10000.0, rope_dims: int = 0):
         super().__init__()
-        inv_freq = 1.0 / (base ** (torch.arange(0, dim, 2, dtype=torch.float32) / dim))
+        if rope_dims <= 0:
+            rope_dims = dim
+        if rope_dims > dim or rope_dims % 2 != 0:
+            raise ValueError(f"rope_dims must be even and in [2, head_dim], got {rope_dims} for head_dim={dim}")
+        inv_freq = 1.0 / (base ** (torch.arange(0, rope_dims, 2, dtype=torch.float32) / rope_dims))
         self.register_buffer("inv_freq", inv_freq, persistent=False)
         self._seq_len_cached = 0
         self._cos_cached: Tensor | None = None
@@ -845,6 +882,13 @@ class Rotary(nn.Module):
 
 
 def apply_rotary_emb(x: Tensor, cos: Tensor, sin: Tensor) -> Tensor:
+    rope_dims = cos.size(-1) * 2
+    if rope_dims < x.size(-1):
+        x_rope, x_pass = x[..., :rope_dims], x[..., rope_dims:]
+        half = rope_dims // 2
+        x1, x2 = x_rope[..., :half], x_rope[..., half:]
+        x_rot = torch.cat((x1 * cos + x2 * sin, x1 * (-sin) + x2 * cos), dim=-1)
+        return torch.cat((x_rot, x_pass), dim=-1)
     half = x.size(-1) // 2
     x1, x2 = x[..., :half], x[..., half:]
     return torch.cat((x1 * cos + x2 * sin, x1 * (-sin) + x2 * cos), dim=-1)
@@ -858,6 +902,7 @@ class CausalSelfAttention(nn.Module):
         num_kv_heads: int,
         rope_base: float,
         qk_gain_init: float,
+        rope_dims: int = 0,
     ):
         super().__init__()
         if dim % num_heads != 0:
@@ -876,7 +921,19 @@ class CausalSelfAttention(nn.Module):
         self.proj = CastedLinear(dim, dim, bias=False)
         self.proj._zero_init = True
         self.q_gain = nn.Parameter(torch.full((num_heads,), qk_gain_init, dtype=torch.float32))
-        self.rotary = Rotary(self.head_dim, base=rope_base)
+        self.rotary = Rotary(self.head_dim, base=rope_base, rope_dims=rope_dims)
+        self.use_xsa = False
+
+    def _xsa_efficient(self, y: Tensor, v: Tensor) -> Tensor:
+        # Subtract the component of each head's output aligned with its own
+        # value vector, grouped without materializing repeated KV heads.
+        bsz, num_heads, seqlen, head_dim = y.shape
+        num_kv_heads = v.size(1)
+        group = num_heads // num_kv_heads
+        y_grouped = y.reshape(bsz, num_kv_heads, group, seqlen, head_dim)
+        value_unit = F.normalize(v, dim=-1).unsqueeze(2)
+        proj = (y_grouped * value_unit).sum(dim=-1, keepdim=True) * value_unit
+        return (y_grouped - proj).reshape(bsz, num_heads, seqlen, head_dim)
 
     def forward(self, x: Tensor) -> Tensor:
         bsz, seqlen, dim = x.shape
@@ -897,6 +954,8 @@ class CausalSelfAttention(nn.Module):
             is_causal=True,
             enable_gqa=(self.num_kv_heads != self.num_heads),
         )
+        if self.use_xsa:
+            y = self._xsa_efficient(y, v)
         y = y.transpose(1, 2).contiguous().reshape(bsz, seqlen, dim)
         return self.proj(y)
 
@@ -924,23 +983,59 @@ class Block(nn.Module):
         mlp_mult: int,
         rope_base: float,
         qk_gain_init: float,
+        rope_dims: int = 0,
+        layer_idx: int = 0,
+        ln_scale: bool = False,
     ):
         super().__init__()
         self.attn_norm = RMSNorm()
         self.mlp_norm = RMSNorm()
-        self.attn = CausalSelfAttention(dim, num_heads, num_kv_heads, rope_base, qk_gain_init)
+        self.attn = CausalSelfAttention(dim, num_heads, num_kv_heads, rope_base, qk_gain_init, rope_dims=rope_dims)
         self.mlp = MLP(dim, mlp_mult)
         self.attn_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
         self.mlp_scale = nn.Parameter(torch.ones(dim, dtype=torch.float32))
         self.resid_mix = nn.Parameter(torch.stack((torch.ones(dim), torch.zeros(dim))).float())
+        self.ln_scale_factor = 1.0 / math.sqrt(layer_idx + 1) if ln_scale else 1.0
 
     def forward(self, x: Tensor, x0: Tensor) -> Tensor:
         mix = self.resid_mix.to(dtype=x.dtype)
         x = mix[0][None, None, :] * x + mix[1][None, None, :] * x0
-        attn_out = self.attn(self.attn_norm(x))
+        ln_scale = self.ln_scale_factor
+        attn_out = self.attn(self.attn_norm(x) * ln_scale)
         x = x + self.attn_scale.to(dtype=x.dtype)[None, None, :] * attn_out
-        x = x + self.mlp_scale.to(dtype=x.dtype)[None, None, :] * self.mlp(self.mlp_norm(x))
+        x = x + self.mlp_scale.to(dtype=x.dtype)[None, None, :] * self.mlp(self.mlp_norm(x) * ln_scale)
         return x
+
+
+class BigramHash(nn.Module):
+    # Hash-table embedding for (prev_token, token) pairs, projected to model dim.
+    def __init__(self, num_buckets: int, hash_dim: int, model_dim: int):
+        super().__init__()
+        self.num_buckets = num_buckets
+        self.table = nn.Embedding(num_buckets, hash_dim)
+        self.proj = CastedLinear(hash_dim, model_dim, bias=False)
+        self.proj._zero_init = True
+        nn.init.normal_(self.table.weight, std=0.01)
+
+    def forward(self, input_ids: Tensor) -> Tensor:
+        prev_ids = torch.cat(
+            [torch.zeros(input_ids.size(0), 1, dtype=input_ids.dtype, device=input_ids.device), input_ids[:, :-1]],
+            dim=1,
+        )
+        hashed = ((prev_ids.long() * 92821 + input_ids.long()) % self.num_buckets).long()
+        return self.proj(self.table(hashed))
+
+
+class SmearGate(nn.Module):
+    # Per-dimension learned blend of the current and previous token embeddings.
+    def __init__(self, dim: int):
+        super().__init__()
+        self.gate = nn.Parameter(torch.full((dim,), 3.0, dtype=torch.float32))
+
+    def forward(self, x: Tensor) -> Tensor:
+        gate = torch.sigmoid(self.gate).to(dtype=x.dtype)
+        prev_x = torch.cat([torch.zeros_like(x[:, :1]), x[:, :-1]], dim=1)
+        return gate * x + (1.0 - gate) * prev_x
 
 
 class GPT(nn.Module):
@@ -957,6 +1052,12 @@ class GPT(nn.Module):
         logit_softcap: float,
         rope_base: float,
         qk_gain_init: float,
+        bigram_hash_buckets: int = 0,
+        bigram_hash_dim: int = 128,
+        use_smeargate: bool = False,
+        xsa_last_n: int = 0,
+        rope_dims: int = 0,
+        ln_scale: bool = False,
     ):
         super().__init__()
         if logit_softcap <= 0.0:
@@ -965,6 +1066,8 @@ class GPT(nn.Module):
         self.tied_embed_init_std = tied_embed_init_std
         self.logit_softcap = logit_softcap
         self.tok_emb = nn.Embedding(vocab_size, model_dim)
+        self.bigram_hash = BigramHash(bigram_hash_buckets, bigram_hash_dim, model_dim) if bigram_hash_buckets > 0 else None
+        self.smeargate = SmearGate(model_dim) if use_smeargate else None
         self.num_encoder_layers = num_layers // 2
         self.num_decoder_layers = num_layers - self.num_encoder_layers
         self.num_skip_weights = min(self.num_encoder_layers, self.num_decoder_layers)
@@ -978,10 +1081,16 @@ class GPT(nn.Module):
                     mlp_mult,
                     rope_base,
                     qk_gain_init,
+                    rope_dims=rope_dims,
+                    layer_idx=i,
+                    ln_scale=ln_scale,
                 )
                 for i in range(num_layers)
             ]
         )
+        if xsa_last_n > 0:
+            for i in range(max(0, num_layers - xsa_last_n), num_layers):
+                self.blocks[i].attn.use_xsa = True
         self.final_norm = RMSNorm()
         self.lm_head = None if tie_embeddings else CastedLinear(model_dim, vocab_size, bias=False)
         if self.lm_head is not None:
@@ -997,6 +1106,10 @@ class GPT(nn.Module):
 
     def forward(self, input_ids: Tensor, target_ids: Tensor, reduction: str = "mean") -> Tensor:
         x = self.tok_emb(input_ids)
+        if self.bigram_hash is not None:
+            x = x + self.bigram_hash(input_ids)
+        if self.smeargate is not None:
+            x = self.smeargate(x)
         x = F.rms_norm(x, (x.size(-1),))
         x0 = x
         skips: list[Tensor] = []
@@ -1134,6 +1247,12 @@ def main() -> None:
         logit_softcap=args.logit_softcap,
         rope_base=args.rope_base,
         qk_gain_init=args.qk_gain_init,
+        bigram_hash_buckets=args.bigram_hash_buckets,
+        bigram_hash_dim=args.bigram_hash_dim,
+        use_smeargate=args.use_smeargate,
+        xsa_last_n=args.xsa_last_n,
+        rope_dims=args.rope_dims,
+        ln_scale=args.ln_scale,
     ).to(device).bfloat16()
     for module in base_model.modules():
         if isinstance(module, CastedLinear):
@@ -1161,8 +1280,12 @@ def main() -> None:
     if base_model.skip_weights.numel() > 0:
         scalar_params.append(base_model.skip_weights)
     token_lr = args.tied_embed_lr if args.tie_embeddings else args.embed_lr
+    embed_params = [base_model.tok_emb.weight]
+    if base_model.bigram_hash is not None:
+        embed_params.append(base_model.bigram_hash.table.weight)
+        matrix_params.append(base_model.bigram_hash.proj.weight)
     optimizer_tok = torch.optim.Adam(
-        [{"params": [base_model.tok_emb.weight], "lr": token_lr, "base_lr": token_lr}],
+        [{"params": embed_params, "lr": token_lr, "base_lr": token_lr}],
         betas=(args.beta1, args.beta2),
         eps=args.adam_eps,
         fused=True,
@@ -1172,9 +1295,12 @@ def main() -> None:
         lr=args.matrix_lr,
         momentum=args.muon_momentum,
         backend_steps=args.muon_backend_steps,
+        weight_decay=args.muon_weight_decay,
     )
     for group in optimizer_muon.param_groups:
         group["base_lr"] = args.matrix_lr
+    if base_model.smeargate is not None:
+        scalar_params.append(base_model.smeargate.gate)
     optimizer_scalar = torch.optim.Adam(
         [{"params": scalar_params, "lr": args.scalar_lr, "base_lr": args.scalar_lr}],
         betas=(args.beta1, args.beta2),
@@ -1197,9 +1323,21 @@ def main() -> None:
     log0("sdp_backends:cudnn=False flash=True mem_efficient=False math=False")
     log0(f"attention_mode:gqa num_heads:{args.num_heads} num_kv_heads:{args.num_kv_heads}")
     log0(
+        f"feature_config:bigram_hash_buckets:{args.bigram_hash_buckets} "
+        f"bigram_hash_dim:{args.bigram_hash_dim} use_smeargate:{args.use_smeargate} "
+        f"xsa_last_n:{args.xsa_last_n} rope_dims:{args.rope_dims} ln_scale:{args.ln_scale}"
+    )
+    xsa_layers = [i for i, block in enumerate(base_model.blocks) if block.attn.use_xsa]
+    log0(f"xsa_layers:{xsa_layers}")
+    log0(
         f"tie_embeddings:{args.tie_embeddings} embed_lr:{token_lr} "
         f"head_lr:{args.head_lr if base_model.lm_head is not None else 0.0} "
         f"matrix_lr:{args.matrix_lr} scalar_lr:{args.scalar_lr}"
+    )
+    log0(
+        f"optimization_config:muon_weight_decay:{args.muon_weight_decay} "
+        f"swa_enabled:{args.swa_enabled} swa_start_frac:{args.swa_start_frac} swa_every:{args.swa_every} "
+        f"ema_enabled:{args.ema_enabled} ema_start_frac:{args.ema_start_frac} ema_decay:{args.ema_decay}"
     )
     log0(
         f"train_batch_tokens:{args.train_batch_tokens} train_seq_len:{args.train_seq_len} "
@@ -1259,12 +1397,18 @@ def main() -> None:
             model.require_backward_grad_sync = True
         train_loader = DistributedTokenLoader(args.train_files, rank, world_size, device)
 
+    if args.swa_enabled and args.ema_enabled:
+        raise ValueError("SWA and EMA are mutually exclusive in this script; enable only one averaging path")
+
     # -----------------------------
     # MAIN TRAINING LOOP
     # -----------------------------
 
     training_time_ms = 0.0
     stop_after_step: int | None = None
+    swa_state: dict[str, Tensor] | None = None
+    swa_count = 0
+    ema_state: dict[str, Tensor] | None = None
     torch.cuda.synchronize()
     t0 = time.perf_counter()
 
@@ -1336,6 +1480,24 @@ def main() -> None:
 
         step += 1
         approx_training_time_ms = training_time_ms + 1000.0 * (time.perf_counter() - t0)
+        if args.swa_enabled and scale < args.swa_start_frac and step % args.swa_every == 0:
+            if swa_state is None:
+                swa_state = {name: t.detach().cpu().clone() for name, t in base_model.state_dict().items()}
+                swa_count = 1
+                log0(f"swa:start step:{step}")
+            else:
+                for name, t in base_model.state_dict().items():
+                    swa_state[name] += t.detach().cpu()
+                swa_count += 1
+        if args.ema_enabled and scale < args.ema_start_frac:
+            current_state = base_model.state_dict()
+            if ema_state is None:
+                ema_state = {name: t.detach().cpu().clone() for name, t in current_state.items()}
+                log0(f"ema:start step:{step} decay:{args.ema_decay}")
+            else:
+                one_minus_decay = 1.0 - args.ema_decay
+                for name, t in current_state.items():
+                    ema_state[name].mul_(args.ema_decay).add_(t.detach().cpu(), alpha=one_minus_decay)
         should_log_train = (
             args.train_log_every > 0
             and (step <= 10 or step % args.train_log_every == 0 or stop_after_step is not None)
@@ -1359,6 +1521,22 @@ def main() -> None:
         f"peak memory allocated: {torch.cuda.max_memory_allocated() // 1024 // 1024} MiB "
         f"reserved: {torch.cuda.max_memory_reserved() // 1024 // 1024} MiB"
     )
+    if args.swa_enabled and swa_state is not None and swa_count > 1:
+        log0(f"swa:applying averaged {swa_count} checkpoints")
+        current_state = base_model.state_dict()
+        avg_state = {
+            name: (tensor / swa_count).to(dtype=current_state[name].dtype)
+            for name, tensor in swa_state.items()
+        }
+        base_model.load_state_dict(avg_state, strict=True)
+    if args.ema_enabled and ema_state is not None:
+        log0(f"ema:applying decay:{args.ema_decay}")
+        current_state = base_model.state_dict()
+        avg_state = {
+            name: tensor.to(dtype=current_state[name].dtype)
+            for name, tensor in ema_state.items()
+        }
+        base_model.load_state_dict(avg_state, strict=True)
 
     # -----------------------------
     # SERIALIZATION + ROUNDTRIP VALIDATION

@@ -3,83 +3,103 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Experiment ID
-`opt_003_arch_003_muon_wd004_plus_late_swa`
+`pending_eval_002_arch010_legal_ttt_seed42_confirm`
 
 ## Category
-- optimization
+- evaluation
+
+Operational subtype: `same-script second-seed TTT confirmation`
 
 ## Baseline / Comparison
-Locked local best byte-safe configuration after the successful `arch_003` feature-stack run:
-- checkpoint/export lineage:
-  - training checkpoint `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_003_bigramhash_4096_smeargate_under_export_006_protocol/final_model.pt`
-  - fixed scored export winner `/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_003_bigramhash_4096_smeargate_under_export_006_protocol/artifacts/final_model.mlp_int6_plus_attn_proj_int6_else_int8.zstd.ptz`
-- fixed evaluation standard `EVAL_MODE=sliding_window EVAL_STRIDE=64`
-- fixed export container `zstd-22`
-- fixed export policy for scoring: `mlp_int6_plus_attn_proj_int6_else_int8`
-- most relevant locked numbers:
-  - checkpoint `val_bpb=1.20992003`
-  - regenerated `uniform int8 + zstd-22` post-export `val_bpb=1.21486895`, total `18074538`
-  - regenerated `mlp_int6_else_int8 + zstd-22` post-export `val_bpb=1.21774203`, total `16084095`
-  - regenerated `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` post-export `val_bpb=1.21797944`, total `15564216`
+New strongest local evaluation result from this round:
+- `eval_002_arch010_legal_ttt_seed1337_export_eval`
+- same-script no-TTT recovery on saved seed-`1337` export lineage: `1.12211550`
+- same-script `Legal Score-First TTT` on the same saved seed-`1337` export lineage: `1.11971476`
+- TTT gain: `-0.00240074`
+- artifact bytes: `15555121`
+- code bytes: `84059`
+- total bytes: `15639180`
 
-Candidate:
-- retrain one `10L / MLP2x + BigramHash(4096) + SmearGate` model with bundled optimization changes `Muon decoupled weight decay = 0.04` plus one fixed late `SWA` window
-- score the same locked export readouts after retraining
+Exact non-TTT locked references:
+- `arch_010_record02_leakyrelu2_keep_cudnn_recipe` seed `1337`: `1.12211549`
+- `repro_006_record02_leakyrelu2_seed42_confirm` seed `42`: `1.12281449`
+- `repro_007_record02_leakyrelu2_seed2024_confirm` seed `2024`: `1.12225480`
+- locked exact 3-seed mean: `1.12239493`
+
+Relevant frontier references:
+- live `#1`: `1.1194`
+- documented record-`#2` seed `1337`: `1.12278022`
 
 ## Hypothesis
-If the new feature-stack checkpoint is quality-strong but not quantization-robust enough, then adding the nearby frontier optimization bundle `Muon WD=0.04 + late SWA` should recover export robustness and byte headroom efficiency, improving the locked exported readout or its quantization gap without giving back too much raw checkpoint quality.
+If the strong seed-`1337` evaluation-only TTT gain is a real transfer on the locked `arch_010` export lineage rather than a favorable one-seed landing, then applying the exact same same-script parity-plus-TTT protocol to the saved seed-`42` export lineage should again beat the recovered same-script no-TTT baseline by at least `-0.0008`.
 
 ## Why It Might Work
-Current leaderboard recipes repeatedly pair cheap feature additions with stronger compression-friendly optimization and late averaging. Local `arch_003` already proved that the feature stack improves raw and exported quality, but its quantization gap worsened materially and the old safe `mlp_int6_else_int8` readout crossed the byte cap. That makes the missing `WD + late averaging` bundle the clearest next lever.
+The seed-`1337` TTT result was not a marginal win; it was a clean parity-qualified gain of `-0.00240074`, which is close to the record-`#1` note’s reported `-0.0025`. That is large enough that the next most useful question is robustness of the evaluation-side transfer, not another new motif.
 
 ## Minimal Intervention
-Retrain once from the current `arch_003` recipe lineage and change only optimization behavior: apply `Muon weight decay = 0.04` in the matrix-parameter path and enable one fixed late `SWA` collection window. Keep architecture, evaluation protocol, and export protocol fixed.
+Keep the exact `eval_002` run-local script and the fixed TTT recipe unchanged. Change only the saved artifact lineage under evaluation from seed `1337` to seed `42`, and again run no-TTT parity before the TTT candidate.
 
 ## Variables To Change
-- optimization: set Muon decoupled weight decay to `0.04`
-- late averaging: enable `SWA`
-- SWA window: collect every `50` steps while the learning-rate multiplier is below `0.5`
+- saved export lineage under evaluation only: seed `1337 -> 42`
 
 ## Variables To Hold Fixed
-- architecture `10L / MLP2x + BigramHash(4096) + SmearGate`
-- tokenizer
-- dataset and validation shard pattern
-- optimizer family
-- `WARMDOWN_ITERS=3000`
-- `MUON_MOMENTUM_WARMUP_STEPS=1500`
-- wallclock-limited launch shape and 8-GPU execution pattern
-- evaluation mode `sliding_window`
-- evaluation stride `64`
-- export container `zstd-22`
-- export schema
-- scored export policies: regenerate `uniform int8`, `mlp_int6_else_int8`, and `mlp_int6_plus_attn_proj_int6_else_int8`
-- metric definitions and reporting format
+- exact `runs/eval_002_arch010_legal_ttt_seed1337_export_eval/train_gpt.py`
+- `TTT_ENABLED=0` parity pass before `TTT_ENABLED=1`
+- `TTT_LR=0.002`
+- `TTT_EPOCHS=3`
+- `TTT_CHUNK_TOKENS=32768`
+- `TTT_FREEZE_BLOCKS=0`
+- `TTT_MOMENTUM=0.9`
+- `TTT_BATCH_SEQS=32`
+- `TTT_GRAD_CLIP=1.0`
+- score-first legality rules and last-chunk-no-train rule
+- `LeakyReLU(0.5)^2`
+- cuDNN-backed SDPA fallback stack
+- `11L / 512 / 8 heads / 4 KV heads / MLP3x`
+- `XSA_LAST_N=4`
+- `ROPE_DIMS=16`
+- `LN_SCALE=1`
+- `VE128`
+- `BigramHash(2048,128)` and `SmearGate`
+- `EMA decay=0.997`
+- `SWA_EVERY=50`
+- `WARMDOWN_ITERS=3500`
+- late QAT threshold `0.15`
+- GPTQ-lite int6 export lineage
+- tokenizer/data paths
+- shim-free `physicslm`
+- managed 8-GPU launch
+- evaluation protocol `sliding_window stride=64`
+- no retraining
+- no new export
+- no artifact rewrite
 
 ## Success Metric
-Primary:
-- improve regenerated `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22` beyond `1.21797944`
-- reduce its quantization gap below `+0.00805941`
-- keep the locked best readout under the 16 MB cap
+Primary validity gate:
+- same-script recovered no-TTT eval on the saved seed-`42` artifact must match archived `1.12281449` within about `±0.0002`
 
-Secondary:
-- make regenerated `mlp_int6_else_int8 + zstd-22` byte-safe again
-- preserve the checkpoint-quality gain from `arch_003` as much as practical
-- preserve exact export roundtrip/load correctness
+Primary scientific readout:
+- same-script TTT-enabled eval must beat the recovered same-script no-TTT baseline on the seed-`42` artifact
+
+Interpretation thresholds:
+- strong positive: gain `<= -0.0015`
+- useful but modest positive: `-0.0015 < gain <= -0.0008`
+- weak / likely non-actionable: `-0.0008 < gain < 0`
+- negative or null: `>= 0`
 
 ## Failure Interpretation
-If `WD=0.04 + late SWA` does not improve export robustness on top of the successful feature-stack architecture, then this checkpoint family is likely bottlenecked less by this generic optimization layer and more by a stronger frontier stack such as `EMA`, `GPTQ-lite`, or a structural architecture/capacity change.
+If same-script no-TTT parity fails on seed `42`, treat the round as an implementation failure rather than evidence about TTT transfer. If parity passes but TTT gain collapses below about `-0.0008`, then the strong seed-`1337` landing should not yet be promoted to the new default evaluation regime without further explanation.
 
 ## Redundancy Check
-- This does not repeat the already-answered `BigramHash + SmearGate` architecture question.
-- This directly targets the newly exposed bottleneck from `arch_003`: worse quantization gap and reduced byte headroom on the stronger checkpoint.
-- Local work has not yet tested `WD=0.04`, `SWA`, or the exact `arch_003` retrain with this optimization bundle.
+- Do not change the TTT recipe while asking the second-seed robustness question.
+- Do not bundle another architecture, optimization, export, or runtime-path edit into the confirmation.
+- Do not retrain or rewrite artifacts.
 
 ## Execution Plan
-1. Reuse the `arch_003` recipe and change only the optimization bundle: `Muon weight decay = 0.04` plus one fixed late `SWA` window.
-2. Train via `tools/gpu_experiment_runner.py` on the same 8-GPU wallclock-limited setup.
-3. Evaluate the resulting checkpoint under `EVAL_MODE=sliding_window EVAL_STRIDE=64`.
-4. Regenerate `uniform int8 + zstd-22`, `mlp_int6_else_int8 + zstd-22`, and `mlp_int6_plus_attn_proj_int6_else_int8 + zstd-22`.
-5. Validate roundtrip/load correctness and compare bytes, totals, post-export `val_bpb`, and quantization gaps against the locked `arch_003` baseline.
+1. Reuse the exact `eval_002` run-local script unchanged.
+2. Run one managed 8-GPU eval-only no-TTT parity recovery on the saved seed-`42` export lineage.
+3. Only if parity passes, run one managed 8-GPU eval-only TTT-enabled eval on that exact same saved seed-`42` artifact source.
+4. Compare the seed-`42` gain against the seed-`1337` gain `-0.00240074`, the locked non-TTT references, and live SOTA.
 
 ## Expected Effect
-Best case: the bundled frontier optimization change keeps most of the `arch_003` raw-quality gain while making the exported readouts safer, ideally pulling the locked best readout back inside the old `+0.003` relative band and reopening some byte headroom.
+If the transfer is robust, the next round should confirm that evaluation-side `Legal Score-First TTT` is the main remaining gap-closing lever on `arch_010`, not just a strong seed-`1337` landing.
