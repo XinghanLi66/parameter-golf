@@ -14,15 +14,50 @@ This line is in **REFINEMENT phase**:
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest refinement round: `eval_039 promoted-line epoch-count check -> drift-stop on fresh control runtime`
+- newest refinement round: `eval_040 promoted-line duplicate-control check -> persistent-runtime-shift`
 - newest completed comparison-clean result remains `eval_038 candidate=0.19974237 vs fresh eval_038 control=0.20079897` with external delta `+3477ms`
 - official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
-- open problem: promoted-line scorer temperature is closed positively on this helper lineage, but the reopened epoch-count question is still unanswered on the new `EVAL_LOGIT_TEMP=1.0` line because `eval_039` never reached the `TTT_EPOCHS=3` candidate. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed operationally until a fresh in-gate control is re-established.
+- open problem: promoted-line scorer temperature is closed positively on this helper lineage, but the reopened epoch-count question is still unanswered on the new `EVAL_LOGIT_TEMP=1.0` line because the promoted runtime regime itself no longer reproduces cleanly. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed operationally, and diagnose the runtime shift before returning to `TTT_EPOCHS=4 -> 3`.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_039_eval038_ttt_epochs_pair`
+## Newest Critical Result - `eval_040_eval038_duplicate_control`
+
+- The reviewed refinement-phase duplicate-control reproducibility check completed as written with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled experiment scope stayed exactly inside the reviewed control-only lane:
+  - reused the exact locked `eval_031` helper with no edits
+  - reused the exact same checkpoint, artifact, runner path, environment, tokenizer, dataset, stride, legal TTT settings, and PR809 vectorized n-gram settings
+  - kept `EVAL_LOGIT_TEMP=1.0` fixed
+  - kept `TTT_LR=0.0025` fixed
+  - kept `TTT_EPOCHS=4` fixed
+  - launched `control A` and `control B` with only allowed operational identifier changes
+- Successful same-session controls on the pinned `0,1,2,3,4,5,6,7` GPU set scored:
+  - control A: `legal_ttt_exact val_loss=0.33725588`, `val_bpb=0.19974193`, script `1316129ms`, runner `1364893ms`, external `1365195ms`, any-match `0.98387585`, avg alpha `0.65459876`
+  - control B: `legal_ttt_exact val_loss=0.33725882`, `val_bpb=0.19974367`, script `1249634ms`, runner `1298509ms`, external `1298755ms`, any-match `0.98387585`, avg alpha `0.65459430`
+- Required comparisons versus promoted `eval_038`:
+  - control A: `-0.00000075 val_loss`, `-0.00000044 BPB`, `+727316ms` script, `+730208ms` runner, `+730269ms` external, `-0.00000035` avg alpha
+  - control B: `+0.00000219 val_loss`, `+0.00000130 BPB`, `+660821ms` script, `+663824ms` runner, `+663829ms` external, `-0.00000481` avg alpha
+- Required comparisons versus drifted `eval_039`:
+  - control A: `+0.00000053 val_loss`, `+0.00000032 BPB`, `+125652ms` script, `+127623ms` runner, `+127701ms` external
+  - control B: `+0.00000347 val_loss`, `+0.00000206 BPB`, `+59157ms` script, `+61239ms` runner, `+61261ms` external
+- Control B vs Control A:
+  - `+0.00000294 val_loss`
+  - `+0.00000174 BPB`
+  - `-66495ms` script
+  - `-66384ms` runner
+  - `-66440ms` external
+- Emitted telemetry stayed semantically identical to promoted `eval_038`:
+  - identical any-match fraction
+  - identical matched-order histogram
+  - avg alpha stayed within a few parts per million
+- Operational note:
+  - a root-owned external `run_humaneval.py` / `VLLM::EngineCore` workload overlapped GPU `0` during `control A`
+  - `control B` was launched only after that workload cleared and still remained deep in the slowdown regime
+- Decision label: `persistent-runtime-shift`.
+- Interpretation: this is no longer just a one-control drift stop. The exact promoted helper/checkpoint/artifact stack still reproduces semantics, but two same-session exact controls do not return to the promoted runtime band. There is within-shift jitter, but the round-level answer is that the promoted runtime regime is not presently reproducible, so `TTT_EPOCHS=4 -> 3` remains inadmissible.
+
+## Previous Critical Result - `eval_039_eval038_ttt_epochs_pair`
 
 - The reviewed refinement-phase epoch-count check on the promoted `eval_038` legality line stopped after the fresh control because the admissibility gate failed on runtime. No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled experiment scope stayed exactly inside the reviewed single-variable lane up to the stop:
