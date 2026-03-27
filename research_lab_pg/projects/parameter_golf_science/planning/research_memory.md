@@ -10,19 +10,58 @@ PR `#809` at `0.2952` remains legality-pending and is not the official target.
 This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - promoted quality baseline on the locked legality line is now `eval_038 candidate=0.19974237` with `EVAL_LOGIT_TEMP=1.0`
-- freshest admissible same-session control on the promoted line: `eval_038 control=0.20079897`
+- freshest admissible same-session control on the promoted line: `eval_045 control=0.19974186`
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest refinement round: `eval_044 same-session epoch-pair retry -> no-launch / clean-idle-gate-fail`
-- newest completed exact promoted-line control: `eval_042=0.19974395` with script `1507653ms`, runner `1555810ms`, external `1556076ms`
+- newest refinement round: `eval_045 same-session epoch-pair continuous-watch retry -> post-gate contamination / invalid same-session pair`
+- newest completed exact promoted-line control: `eval_045=0.19974186` with script `1306008ms`, runner `1350527ms`, external `1350805ms`
 - official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
-- open problem: promoted-line scorer temperature is closed positively on this helper lineage, and the only unanswered nearby refinement question remains the exact promoted-line `TTT_EPOCHS=4 -> 3` pair. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed, but do not relaunch until pinned GPUs `0..7` can be confirmed clean-idle again.
+- open problem: promoted-line scorer temperature is closed positively on this helper lineage, and the only unanswered nearby refinement question remains the exact promoted-line `TTT_EPOCHS=4 -> 3` pair. The continuous clean-idle gate is now proven achievable, but the pinned `0..7` set must also remain clean through the immediate post-control candidate handoff. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_044_eval038_ttt_epochs_pair_clean_idle_retry`
+## Newest Critical Result - `eval_045_eval038_ttt_epochs_pair_clean_idle_continuous_watch`
+
+- The reviewed refinement-phase exact promoted-line same-session `TTT_EPOCHS=4 -> 3` retry advanced farther than `eval_043` / `eval_044`: the required continuous clean-idle gate passed, the fresh exact control completed admissibly, but the immediate `TTT_EPOCHS=3` candidate was invalidated by post-gate contamination on pinned GPU `0` before child spawn.
+- No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The round stayed exactly inside the reviewed single-variable lane:
+  - re-read `context/reference_materials/latest_sota_snapshot.md`, `planning/next_experiment.md`, `planning/research_memory.md`, `planning/experiment_ledger.md`, `reports/latest_status.md`, `reports/comparison_summary.md`, the active helper, and the required `eval_042` / `eval_044` logs before any action
+  - re-verified helper, checkpoint, and artifact identities
+  - recovered the exact intended same-session control and candidate command family from `eval_042` and `eval_044`
+  - changed no helper code, no checkpoint, no artifact, no runner code, no export path, and no evaluation hyperparameters
+  - changed only fresh operational identifiers, one uninterrupted continuous clean-idle watch, synchronized telemetry, and the intended candidate-only semantic change `TTT_EPOCHS=4 -> 3`
+- Continuous clean-idle gate evidence:
+  - uninterrupted watch from `2026-03-27T12:58:42Z` through gate pass at `2026-03-27T13:05:27Z`
+  - samples `0..25` showed GPU `0` occupied by foreign PID `3922791` at about `74486 MiB` while GPUs `1..7` were idle
+  - sample `26` at `2026-03-27T13:05:27Z` showed all eight pinned GPUs clean with about `81007 MiB` free, `0 MiB` used, `0%` utilization, and no compute-app processes
+- Fresh exact control result:
+  - `legal_ttt_exact val_loss=0.33725577`
+  - `legal_ttt_exact val_bpb=0.19974186`
+  - script eval wallclock `1306008ms`
+  - runner-managed wallclock `1350527ms`
+  - external wallclock `1350805ms`
+  - `runner_start_to_child_spawn_ms=372`
+  - `child_runtime_ms=1350155`
+  - any-match fraction `0.98387585`
+  - avg alpha `0.65460155`
+  - matched-order histogram identical to promoted `eval_038` and fresh `eval_042`
+  - `ngram_postlookup_vectorized_elapsed_ms=1484092`
+- Control admissibility result:
+  - versus `eval_042`, BPB was `-0.00000209` with the same any-match fraction and the exact same matched-order histogram
+  - versus promoted `eval_038`, BPB was `-0.00000051`, any-match was identical, histogram was identical, and avg alpha stayed in-family
+  - therefore the fresh control passed the reviewed semantic admissibility gate
+- Immediate candidate failure mode:
+  - the immediate `TTT_EPOCHS=3` runner launch was attempted at `2026-03-27T13:29:49Z`, but the runner found only `7` GPUs meeting the `>=10 GiB free` requirement
+  - GPU `0` had only `6512 MiB` free, `74495 MiB` used, and `100%` utilization
+  - synchronized telemetry showed foreign PID `4112518` appear on GPU `0` during the late control tail, coexist briefly with the expected control PID, and then remain alone on GPU `0` through the candidate attempt while GPUs `1..7` stayed idle
+  - because the candidate never reached child spawn, no candidate `val_loss`, `val_bpb`, wallclock, any-match, avg alpha, histogram, or postlookup timing fields exist for this round
+- Commands, gate evidence, telemetry, and runner logs were recorded in `runs/eval_045_eval038_ttt_epochs_pair_clean_idle_continuous_watch/`.
+- Decision label: `post-gate contamination / invalid same-session pair`.
+- Interpretation: the new evidence is valuable even though the scientific pair is still unanswered. The longer continuous watch removed the previous prelaunch admissibility blocker and yielded a fresh admissible promoted-line control, so the remaining blocker has narrowed to keeping pinned GPUs clean through the immediate candidate handoff rather than merely obtaining one clean launch.
+
+## Previous Critical Result - `eval_044_eval038_ttt_epochs_pair_clean_idle_retry`
 
 - The reviewed refinement-phase exact promoted-line same-session `TTT_EPOCHS=4 -> 3` retry did not launch because the required clean-idle gate on pinned GPUs `0..7` never passed.
 - No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
