@@ -14,15 +14,47 @@ This line is in **REFINEMENT phase**:
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest refinement round: `eval_038 promoted-line temperature pair -> promote EVAL_LOGIT_TEMP=1.0`
-- newest comparison: `eval_038 candidate=0.19974237 vs fresh eval_038 control=0.20079897` with external delta `+3477ms`
+- newest refinement round: `eval_039 promoted-line epoch-count check -> drift-stop on fresh control runtime`
+- newest completed comparison-clean result remains `eval_038 candidate=0.19974237 vs fresh eval_038 control=0.20079897` with external delta `+3477ms`
 - official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
-- open problem: promoted-line scorer temperature is now closed positively on this helper lineage. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed operationally until a new single-variable refinement question is chosen on top of this stronger calibrated baseline.
+- open problem: promoted-line scorer temperature is closed positively on this helper lineage, but the reopened epoch-count question is still unanswered on the new `EVAL_LOGIT_TEMP=1.0` line because `eval_039` never reached the `TTT_EPOCHS=3` candidate. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed operationally until a fresh in-gate control is re-established.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_038_eval035_temperature_pair`
+## Newest Critical Result - `eval_039_eval038_ttt_epochs_pair`
+
+- The reviewed refinement-phase epoch-count check on the promoted `eval_038` legality line stopped after the fresh control because the admissibility gate failed on runtime. No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled experiment scope stayed exactly inside the reviewed single-variable lane up to the stop:
+  - reused the exact locked `eval_031` helper with no edits
+  - reused the exact same checkpoint, artifact, runner path, environment, tokenizer, dataset, stride, legal TTT settings, and PR809 vectorized n-gram settings
+  - kept `EVAL_LOGIT_TEMP=1.0` fixed
+  - kept `TTT_LR=0.0025` fixed
+  - kept `TTT_EPOCHS=4` fixed in the actual executed control
+  - planned but did not launch the immediate `TTT_EPOCHS=3` candidate after the fresh-control gate failed
+- The fresh runner-managed control in `physicslm` on the pinned `0,1,2,3,4,5,6,7` GPU set scored:
+  - `legal_ttt_exact val_loss=0.33725535`
+  - `legal_ttt_exact val_bpb=0.19974161`
+  - script eval wallclock `1190477ms`
+  - runner-managed wallclock `1237270ms`
+  - external top-level wallclock `1237494ms`
+  - any-match fraction `0.98387585`
+  - avg alpha on matched `0.65459666`
+- Required admissibility comparison versus promoted `eval_038`:
+  - `val_loss`: `0.33725663 -> 0.33725535` (`-0.00000128`)
+  - `val_bpb`: `0.19974237 -> 0.19974161` (`-0.00000076`)
+  - script eval wallclock: `588813ms -> 1190477ms` (`+601664ms`)
+  - runner-managed wallclock: `634685ms -> 1237270ms` (`+602585ms`)
+  - external top-level wallclock: `634926ms -> 1237494ms` (`+602568ms`)
+  - avg alpha on matched: `0.65459911 -> 0.65459666` (`-0.00000245`)
+- Emitted telemetry stayed semantically identical to the promoted line:
+  - identical any-match fraction
+  - identical matched-order histogram
+  - essentially identical avg alpha
+- Decision label: `drift-stop`.
+- Interpretation: this is not evidence for or against `TTT_EPOCHS=3` on the promoted `EVAL_LOGIT_TEMP=1.0` line. The control reproduced the same quality regime but not the same runtime regime, so the reviewed same-session comparison became inadmissible before the candidate could be launched.
+
+## Previous Critical Result - `eval_038_eval035_temperature_pair`
 
 - The reviewed refinement-phase promoted-line temperature pair executed cleanly as a same-session two-arm comparison with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after both runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
