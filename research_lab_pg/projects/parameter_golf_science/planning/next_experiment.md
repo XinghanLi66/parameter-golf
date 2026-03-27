@@ -3,49 +3,46 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase same-session promoted-line `TTT_EPOCHS=4 -> 3` evaluation retry with the required single continuous clean-idle watch, but the round still stopped short of a valid pair because post-gate GPU contamination blocked the immediate candidate launch after an admissible fresh control.
+Completed on `2026-03-27` as the reviewed refinement-phase same-session promoted-line `TTT_EPOCHS=4 -> 3` retry on the fixed `7-GPU` subset `1..7`, but the round terminated before any admissible control metric because the locked helper rejects `WORLD_SIZE=7`.
 
-- Executed the reviewed brief through the required file re-read, exact promoted-command recovery, helper/checkpoint/artifact identity verification, one uninterrupted clean-idle acquisition window, synchronized telemetry capture, and the fresh `TTT_EPOCHS=4` control launch.
+- Executed the reviewed brief through the required file re-read, promoted-command recovery, helper/checkpoint/artifact identity verification, 7-GPU clean-idle acquisition on `1..7`, and the fresh 7-GPU control launch attempt.
 - No code edits were made in this round.
-- The clean-idle gate passed within the continuous watch.
-- The fresh control launched and finished admissibly.
-- The immediate `TTT_EPOCHS=3` candidate did not launch because the pinned set was no longer clean at candidate launch time.
-- The round therefore remains an invalid same-session pair rather than an epoch-count decision.
+- The clean-idle gate on GPUs `1..7` passed immediately.
+- The fresh control did not reach evaluation because `torchrun --nproc_per_node=7` failed at helper startup with `ValueError: WORLD_SIZE=7 must divide 8 so grad_accum_steps stays integral`.
+- The immediate `TTT_EPOCHS=3` candidate was therefore not attempted.
+- The round is a controlled `operationally blocked` result on the reviewed 7-GPU launch path, not an epoch-count comparison.
 
 ## Experiment ID
-`eval_045_eval038_ttt_epochs_pair_clean_idle_continuous_watch`
+`eval_046_eval045_ttt_epochs_pair_7gpu_subset`
 
 ## Category
 - evaluation
 
-Operational subtype: `same-session promoted-line epoch-pair continuous clean-idle watch`
+Operational subtype: `same-session promoted-line epoch-pair 7-GPU launch-path check`
 
 ## Baseline / Comparison
 Intended primary comparison:
-- fresh same-session control on the exact promoted line with `TTT_EPOCHS=4`
-- immediate same-session candidate on the exact promoted line with only `TTT_EPOCHS=3`
+- fresh same-session 7-GPU surrogate control on the exact promoted line with `TTT_EPOCHS=4`
+- immediate same-session 7-GPU surrogate candidate on the same subset with only `TTT_EPOCHS=3`
 
 Interpretation anchors:
-- promoted `eval_038=0.19974237`, script `588813ms`, runner `634685ms`, external `634926ms`
-- current-regime clean-idle control `eval_042=0.19974395`, script `1507653ms`, runner `1555810ms`, external `1556076ms`
-- older same-family result `eval_034`: `TTT_EPOCHS=3` was `+0.00004098` BPB worse and about `70s` faster on the older `EVAL_LOGIT_TEMP=0.95` line
+- promoted 8-GPU line `eval_038=0.19974237`
+- fresh admissible 8-GPU control `eval_045 control=0.19974186`
 
 Actual comparison obtained this round:
-- required clean-idle gate versus observed pinned-GPU occupancy during the continuous prelaunch watch
-- fresh admissible `TTT_EPOCHS=4` control versus the exact promoted-line control family
-- immediate candidate launch admissibility versus actual post-control pinned-GPU state
+- clean-idle admissibility of the fixed `1..7` subset
+- reviewed 7-GPU control launch request versus the locked helper’s startup invariants
 
 ## Hypothesis
-On the exact promoted `EVAL_LOGIT_TEMP=1.0`, `NGRAM_EVAL_BUCKETS=2097152` legality line, reducing only `TTT_EPOCHS` from `4` to `3` would preserve `val_bpb` within `+0.00005` of the same-session control while saving meaningful wallclock under the current runtime regime.
+If the repeated blocker was specifically GPU `0` contamination rather than the epoch-count hypothesis itself, then moving the same-session pair to the persistently cleaner subset `1..7` would produce a valid surrogate control, after which a fresh same-session `TTT_EPOCHS=3` candidate could answer the epoch-count question.
 
-Operational blocker falsifier for this round:
-- if a clean-idle gate on pinned GPUs `0..7` cannot be obtained, or if post-gate contamination prevents the immediate candidate launch, the pair cannot be launched interpretably and the round must stop as an invalid comparison
+Operational falsifier for this round:
+- if the fixed-helper launch path itself cannot execute at `WORLD_SIZE=7`, the 7-GPU surrogate regime cannot be used to answer the epoch-count question without an explicitly reviewed helper or topology change
 
 ## Why It Might Work
-- The live `#1` snapshot line uses legal score-first TTT with `3` epochs, so this remains the cleanest matched evaluation-side SOTA motif left on the locked local stack.
-- `eval_034` already showed `TTT_EPOCHS=3` is a real runtime lever on the older same-family line.
-- `eval_042` re-established that the promoted stack is semantically stable and that current slowdown interpretation should be anchored to the current regime rather than to historical promoted runtime.
-- This remains the smallest refinement-phase intervention: no architecture, optimization, export, or code-path changes.
+- GPUs `1..7` had repeatedly appeared clean while GPU `0` was the recurring blocker.
+- The reviewed brief kept every semantic evaluation variable fixed except the intended candidate epoch count.
+- This remained the narrowest operationally motivated retry of the strongest current leaderboard-aligned evaluation motif.
 
 ## Minimal Intervention
 No helper, checkpoint, artifact, runner, eval-hyperparameter, or export changes were made.
@@ -54,11 +51,10 @@ Intended semantic change:
 - candidate `TTT_EPOCHS: 4 -> 3`
 
 Actual executed changes:
-- fresh operational identifiers for the control and candidate
-- one continuous clean-idle verification window on pinned GPUs `0..7`
-- synchronized runtime telemetry during the control and candidate handoff
-- fresh same-session control launch at `TTT_EPOCHS=4`
-- immediate candidate launch attempt at `TTT_EPOCHS=3`, blocked before child spawn
+- fresh operational identifiers for a new run namespace
+- launch subset changed from pinned `0..7` to pinned `1..7`
+- runner request count changed from `8` to `7`
+- attempted control launch used `torchrun --nproc_per_node=7`
 
 ## Variables To Change
 Intended semantic change:
@@ -68,13 +64,13 @@ Operational-only:
 - fresh `RUN_ID`
 - fresh runner `--log-dir`
 - fresh runner `--run-name`
-- one uninterrupted clean-idle acquisition window
-- synchronized telemetry capture across the admissible control and attempted candidate handoff
+- launch subset `CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7`
+- runner request count `7`
+- `torchrun --nproc_per_node=7`
 
 Actual executed this round:
-- continuous clean-idle gate watch
-- fresh control with `TTT_EPOCHS=4`
-- immediate candidate launch attempt with `TTT_EPOCHS=3`, blocked prelaunch
+- 7-GPU clean-idle gate on `1..7`
+- fresh 7-GPU control launch attempt with `TTT_EPOCHS=4`
 
 ## Variables To Hold Fixed
 - helper path `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`
@@ -99,7 +95,6 @@ Actual executed this round:
 - `NGRAM_EVAL_BATCH_TORCH_STATS=1`
 - `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`
 - tokenizer, dataset, cwd, `physicslm`
-- pinned GPU set `0,1,2,3,4,5,6,7`
 - launcher `tools/gpu_experiment_runner.py`
 
 ## Identity Checks
@@ -117,108 +112,87 @@ Actual executed this round:
   - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 
 Identity status:
-- helper unchanged before vs after the round
-- checkpoint unchanged before vs after the round
-- artifact unchanged before vs after the round
+- helper unchanged before launch
+- checkpoint unchanged before launch
+- artifact unchanged before launch
 
 ## Commands Actually Run
-The round executed the required single continuous prelaunch clean-idle watch on pinned GPUs `0..7`, recorded in:
-- `runs/eval_045_eval038_ttt_epochs_pair_clean_idle_continuous_watch/clean_idle_gate.log`
+The exact intended 7-GPU control and candidate commands were recorded in:
+- `runs/eval_046_eval045_ttt_epochs_pair_7gpu_subset/command.txt`
 
-The exact intended control and candidate commands were recorded in:
-- `runs/eval_045_eval038_ttt_epochs_pair_clean_idle_continuous_watch/command.txt`
+The 7-GPU clean-idle gate evidence was recorded in:
+- `runs/eval_046_eval045_ttt_epochs_pair_7gpu_subset/clean_idle_gate.log`
 
-The fresh control command was actually launched and completed via:
-- `tools/gpu_experiment_runner.py` in `physicslm` on pinned GPUs `0,1,2,3,4,5,6,7`
-- runner log dir `runs/eval_045_eval038_ttt_epochs_pair_clean_idle_continuous_watch/runner_control_8gpu/`
+The fresh 7-GPU control command was actually launched via:
+- `tools/gpu_experiment_runner.py` in `physicslm`
+- pinned subset `1,2,3,4,5,6,7`
+- runner log dir `runs/eval_046_eval045_ttt_epochs_pair_7gpu_subset/runner_control_7gpu/`
 
-The immediate candidate command was attempted via the same runner path and pinned GPU set, but it failed prelaunch GPU selection before child spawn because only 7 GPUs met the free-memory gate.
+The immediate candidate command was intentionally not launched after the control failed at startup.
 
 ## Clean-Idle Gate Result
 - gate status: `pass`
-- continuous watch interval: `2026-03-27T12:58:42Z` through gate pass at `2026-03-27T13:05:27Z`
-- the pinned set began dirty only on GPU `0`, with foreign `PID 3922791` using `74486 MiB` and leaving `6512 MiB` free while GPUs `1..7` stayed idle
-- samples `0..25` kept that same single-GPU blocker pattern with GPUs `1..7` clean
-- sample `26` at `2026-03-27T13:05:27Z` showed all eight GPUs back to about `81007 MiB` free, `0 MiB` used, `0%` utilization, and no compute-app entries
+- gate sample time: `2026-03-27T13:56:56Z`
+- GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization
+- GPU `0` remained occupied by a foreign process at about `74486 MiB`, but that was outside the reviewed `1..7` gate set
 - because the gate passed:
-  - synchronized telemetry was started
-  - the fresh `TTT_EPOCHS=4` control launched immediately
+  - the fresh 7-GPU control launch was attempted immediately
 
-## Control Result
-- control admissibility: `pass`
-- exact result:
-  - `legal_ttt_exact val_loss=0.33725577`
-  - `legal_ttt_exact val_bpb=0.19974186`
-  - script eval wallclock `1306008ms`
-  - runner-managed wallclock `1350527ms`
-  - external wallclock `1350805ms`
-  - `runner_start_to_child_spawn_ms=372`
-  - `child_runtime_ms=1350155`
-- telemetry family check versus `eval_042` / `eval_038`:
-  - any-match `0.98387585`, exactly unchanged
-  - matched-order histogram exactly unchanged
-  - avg alpha `0.65460155`, still in-family
-  - `ngram_postlookup_vectorized_elapsed_ms=1484092`
-- comparison versus `eval_042` clean-idle control:
-  - `val_loss -0.00000352`
-  - `val_bpb -0.00000209`
-  - script `-201645ms`
-  - runner `-205283ms`
-  - external `-205271ms`
-- comparison versus promoted `eval_038`:
-  - `val_loss -0.00000086`
-  - `val_bpb -0.00000051`
-  - script `+717195ms`
-  - runner `+715842ms`
-  - external `+715879ms`
+## Control Launch Result
+- control launch status: `blocked at helper startup`
+- exact runner launch start: `2026-03-27T13:57:15Z`
+- runner selected GPUs `1,2,3,4,5,6,7` successfully
+- no evaluation metric was produced because the child failed before model evaluation
+- root startup failure on every rank:
+  - `ValueError: WORLD_SIZE=7 must divide 8 so grad_accum_steps stays integral`
+- runner timing:
+  - external wallclock `34.181s`
+  - runner-managed wallclock `33914ms`
+  - `runner_start_to_child_spawn_ms=424`
+  - `child_runtime_ms=33489`
+- child process status:
+  - torchrun exited with `ChildFailedError`
+  - first observed root-cause failure was rank `5`
+  - runner metadata exit code `1`
 
 ## Candidate Launch Result
-- candidate launch status: `blocked before child spawn`
-- attempted launch time: `2026-03-27T13:29:49Z`
-- runner failure:
-  - `Requested 8 GPU(s), but only found 7 meeting the requirement of 10.0 GiB free memory.`
-- candidate metadata showed:
-  - GPU `0`: `6512 MiB` free, `74495 MiB` used, `100%` utilization
-  - GPUs `1..7`: about `81007 MiB` free, `0 MiB` used, `0%` utilization
-- synchronized telemetry around the handoff showed post-gate contamination on GPU `0`:
-  - `2026-03-27T13:28:32Z` and `13:28:52Z`: expected control PID plus foreign `PID 4112518` on GPU `0`
-  - `2026-03-27T13:29:13Z` onward: only foreign `PID 4112518` remained on GPU `0` using `74486 MiB`, while GPUs `1..7` were idle
-- because the immediate candidate never launched:
-  - no candidate `val_loss`
-  - no candidate `val_bpb`
-  - no candidate script / runner / external wallclock
-  - no candidate any-match / avg alpha / matched-order histogram / postlookup timing
+- candidate launch status: `not attempted`
+- reason:
+  - the control never reached an admissible surrogate-regime result
+  - the reviewed brief explicitly allowed candidate launch only if the control was admissible
+- therefore no candidate `val_loss`, `val_bpb`, script wallclock, runner wallclock, or external wallclock exist for this round
 
 ## Success Metric
 Primary success required:
-- fresh same-session `TTT_EPOCHS=4` control launches on a valid clean-idle gate
-- immediate `TTT_EPOCHS=3` candidate launches in the same session
-- candidate finishes within `+0.00005 BPB` of the fresh control
-
-Secondary success required:
-- candidate saves at least `50s` external wallclock versus the fresh control
+- 7-GPU control launches and finishes
+- 7-GPU control is admissible as a surrogate regime
+- immediate 7-GPU `TTT_EPOCHS=3` candidate also launches and finishes
 
 Actual status:
-- clean-idle gate: `pass`
-- fresh control launch: `completed and admissible`
-- candidate launch: `attempted but blocked before child spawn`
-- decision on `hold 4` vs `runtime-only 3` vs `promote 3`: `unanswered`
+- clean-idle gate on `1..7`: `pass`
+- control launch on `1..7`: `failed before evaluation`
+- surrogate-regime admissibility: `not measurable`
+- candidate launch: `not attempted`
+- epoch-count decision: `unanswered`
 
 ## Expected Effect
-If the gate and immediate handoff had both remained clean, the exact same-session pair would have cleanly answered whether reducing only `TTT_EPOCHS` from `4` to `3` is a promotable runtime-quality trade on the current runtime regime.
+If the 7-GPU subset were both clean and executable on the locked helper, the fresh control would establish whether the `1..7` regime is an acceptable surrogate, after which the immediate `TTT_EPOCHS=3` candidate could answer the epoch-count question without GPU `0`.
 
 ## Actual Result
-- The continuous clean-idle watch passed and the fresh exact promoted-line control completed successfully.
-- The control stayed semantically in-family and was materially faster than `eval_042`, so the control admissibility requirement passed.
-- The immediate candidate did not launch because post-gate contamination reoccupied GPU `0` before candidate launch, leaving only 7 eligible GPUs for the runner gate.
-- The round therefore produced a valid fresh control but not a valid same-session epoch pair.
+- The fixed `1..7` subset was clean and the runner selected it successfully.
+- The control did not reach evaluation because the locked helper enforces `8 % WORLD_SIZE == 0` before any eval-only logic runs.
+- A true 7-process launch therefore fails immediately under the reviewed no-code-change constraints.
+- Because the control never produced BPB or telemetry, the candidate was not attempted.
 
 ## Interpretation
-- Decision label: `post-gate contamination / invalid same-session pair`
-- This round supersedes the earlier bounded-watch blocker reports by showing that the single continuous watch requirement can pass and that the fresh control remains admissible.
-- It still does not answer the promoted-line `TTT_EPOCHS=4 -> 3` question, because the immediate candidate never launched.
-- The key new evidence is operational: the pinned set can clear long enough for a valid control, but a foreign `GPU 0` workload can reappear before the candidate handoff, invalidating the pair.
-- Under the reviewed refinement brief, retrying the candidate after this failed handoff would have forced an invalid comparison, so the correct action was to stop.
+- Decision label: `operationally blocked`
+- This round answered the reviewed operational question negatively: excluding GPU `0` is not sufficient on the locked helper because the helper itself is not compatible with `WORLD_SIZE=7`.
+- The scientific `TTT_EPOCHS=4 -> 3` question remains unanswered.
+- Under the reviewed minimal-intervention rules, silently switching to a different process topology or patching the helper would have mixed in an unreviewed extra change, so the correct action was to stop here.
 
 ## Next Step
-Retry the exact same promoted-line same-session `TTT_EPOCHS=4 -> 3` pair again when pinned GPUs `0..7` can remain clean not only through the continuous prelaunch gate but also through the immediate post-control candidate handoff. Keep the helper/checkpoint/artifact and all non-epoch variables fixed, reuse the fresh-control admissibility criteria established here, and do not infer `hold 4` / `runtime-only 3` / `promote 3` from this invalidated pair.
+Do not spend another immediate round on the exact reviewed 7-GPU surrogate path unless a new reviewed brief explicitly authorizes one of these helper-compatible changes:
+- patching the locked helper to support non-divisor world sizes in eval-only mode, or
+- using a different reviewed operational topology that keeps the epoch-count comparison interpretable.
+
+Until then, treat the promoted-line `TTT_EPOCHS=4 -> 3` question as blocked by launch-shape incompatibility rather than by GPU `0` cleanliness alone.

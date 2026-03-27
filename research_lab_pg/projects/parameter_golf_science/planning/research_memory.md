@@ -11,18 +11,47 @@ This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - promoted quality baseline on the locked legality line is now `eval_038 candidate=0.19974237` with `EVAL_LOGIT_TEMP=1.0`
 - freshest admissible same-session control on the promoted line: `eval_045 control=0.19974186`
+- newest refinement round: `eval_046 7-GPU subset retry -> operationally blocked at helper startup`
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest refinement round: `eval_045 same-session epoch-pair continuous-watch retry -> post-gate contamination / invalid same-session pair`
 - newest completed exact promoted-line control: `eval_045=0.19974186` with script `1306008ms`, runner `1350527ms`, external `1350805ms`
 - official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
-- open problem: promoted-line scorer temperature is closed positively on this helper lineage, and the only unanswered nearby refinement question remains the exact promoted-line `TTT_EPOCHS=4 -> 3` pair. The continuous clean-idle gate is now proven achievable, but the pinned `0..7` set must also remain clean through the immediate post-control candidate handoff. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed.
+- open problem: promoted-line scorer temperature is closed positively on this helper lineage, and the only unanswered nearby refinement question remains the exact promoted-line `TTT_EPOCHS=4 -> 3` pair. The attempted 7-GPU surrogate path removed GPU `0` from the gate successfully but exposed a harder launch constraint: the locked helper refuses `WORLD_SIZE=7` before eval-only mode. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed, and do not retry the 7-GPU path without a newly reviewed helper-compatible plan.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_045_eval038_ttt_epochs_pair_clean_idle_continuous_watch`
+## Newest Critical Result - `eval_046_eval045_ttt_epochs_pair_7gpu_subset`
+
+- The reviewed refinement-phase exact promoted-line same-session `TTT_EPOCHS=4 -> 3` retry on the fixed `1..7` subset did not reach a surrogate-regime control because the locked helper rejects `WORLD_SIZE=7` before any evaluation work begins.
+- No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The round stayed exactly inside the reviewed single-variable lane up to the operational stop:
+  - re-read `context/reference_materials/latest_sota_snapshot.md`, `planning/next_experiment.md`, `planning/research_memory.md`, `planning/experiment_ledger.md`, `reports/latest_status.md`, `reports/comparison_summary.md`, and the required `eval_045` command/gate artifacts before any action
+  - re-verified helper, checkpoint, and artifact identities
+  - recovered the exact intended same-session command family from `eval_045`
+  - changed no helper code, no checkpoint, no artifact, no runner code, no export path, and no evaluation hyperparameters
+  - changed only the reviewed operational launch subset to `1,2,3,4,5,6,7`, the runner request count to `7`, and the intended candidate-only semantic change `TTT_EPOCHS=4 -> 3`
+- 7-GPU clean-idle gate evidence:
+  - gate sample at `2026-03-27T13:56:56Z`
+  - GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization
+  - GPU `0` remained occupied by a foreign process at about `74486 MiB`, which was acceptable because the reviewed gate set was only `1..7`
+- Fresh 7-GPU control launch result:
+  - runner launch start `2026-03-27T13:57:15Z`
+  - runner selected GPUs `1,2,3,4,5,6,7` successfully
+  - `torchrun --standalone --nproc_per_node=7` then failed before evaluation with `ValueError: WORLD_SIZE=7 must divide 8 so grad_accum_steps stays integral`
+  - runner metadata recorded external wallclock `34.181s`, runner total `33914ms`, `runner_start_to_child_spawn_ms=424`, `child_runtime_ms=33489`, and exit code `1`
+  - torchrun surfaced `ChildFailedError`, with the first observed root-cause failure at rank `5`
+- Because the control never reached an admissible surrogate-regime result:
+  - no control `val_loss`
+  - no control `val_bpb`
+  - no control scorer telemetry
+  - no candidate launch
+- Commands, gate evidence, and runner logs were recorded in `runs/eval_046_eval045_ttt_epochs_pair_7gpu_subset/`.
+- Decision label: `operationally blocked`.
+- Interpretation: this round narrows the blocker beyond GPU cleanliness. The `1..7` subset itself is usable, but the locked helper cannot execute a true 7-process launch under the reviewed no-code-change rules, so the 7-GPU surrogate regime is not currently a valid path to answering the epoch-count question.
+
+## Previous Critical Result - `eval_045_eval038_ttt_epochs_pair_clean_idle_continuous_watch`
 
 - The reviewed refinement-phase exact promoted-line same-session `TTT_EPOCHS=4 -> 3` retry advanced farther than `eval_043` / `eval_044`: the required continuous clean-idle gate passed, the fresh exact control completed admissibly, but the immediate `TTT_EPOCHS=3` candidate was invalidated by post-gate contamination on pinned GPU `0` before child spawn.
 - No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
