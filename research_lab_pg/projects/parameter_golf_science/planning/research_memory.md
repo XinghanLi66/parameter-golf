@@ -11,17 +11,46 @@ This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - promoted quality baseline on the locked legality line: `eval_035=0.20079980`
 - freshest admissible runner-managed control on the promoted line: `eval_036 control=0.20079853`
+- freshest attempted control on the promoted line: `eval_037 control=0.20079880`, but it failed the reviewed external-wallclock gate
 - previous same-helper promoted anchor on the same helper lineage: `eval_035=0.20079980`
 - previous legality baseline: `eval_027=0.29117839`
-- newest scored refinement round: `eval_036 TTT_LR=0.0020 candidate -> hold on promoted eval_035 line`
-- newest comparison: `eval_036 candidate=0.20081880 vs fresh control=0.20079853 with runner delta=+7889ms and external delta about +8096ms`
+- newest refinement round: `eval_037 promoted-line temperature check -> drift-stop before candidate`
+- newest comparison: `eval_037 control=0.20079880 vs promoted eval_035=0.20079980 with external drift +23201ms`
 - official-anchor gap on the active legality line: `0.20079980 - 0.4416 = -0.24080020`
-- open problem: scalar-temperature tuning, launcher bypass, TTT epoch count, refreshed bucket geometry, and downward `TTT_LR` retuning are now all closed on this helper lineage; future refinement rounds should hold `EVAL_LOGIT_TEMP=0.95`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed unless the next brief explicitly reopens one of them.
+- open problem: launcher bypass, TTT epoch count, refreshed bucket geometry, and downward `TTT_LR` retuning are closed on this helper lineage, but promoted-line scorer-temperature testing remains unanswered because `eval_037` stopped on the fresh-control external gate. Until that question is rerun cleanly, hold `EVAL_LOGIT_TEMP=0.95`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed operationally.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_036_eval035_ttt_lr_pair`
+## Newest Critical Result - `eval_037_eval035_temperature_pair`
+
+- The reviewed refinement-phase promoted-line temperature check executed cleanly through the required fresh-control gate with no code edits, but it stopped before the candidate because the control failed admissibility on external wallclock. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the control run at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
+  - reused the exact locked `eval_031` helper with no edits
+  - reused the exact same checkpoint, artifact, runner path, environment, tokenizer, dataset, stride, legal TTT settings, and PR809 vectorized n-gram settings
+  - kept `TTT_LR=0.0025` fixed
+  - kept `TTT_EPOCHS=4` fixed
+  - kept `NGRAM_EVAL_BUCKETS=2097152` fixed
+  - planned to change only `EVAL_LOGIT_TEMP` between `0.95` and `1.0`
+  - actually ran only the fresh `0.95` control because the reviewed gate failed before candidate launch
+- The fresh runner-managed control in `physicslm` on GPUs `0,1,2,3,4,5,6,7` scored:
+  - `legal_ttt_exact val_loss=0.33904036`
+  - `legal_ttt_exact val_bpb=0.20079880`
+  - script eval wallclock `603417ms`
+  - runner-managed wallclock `648159ms`
+  - external top-level wallclock `648378ms`
+- Required comparisons:
+  - control vs promoted `eval_035`: `-0.00000100 BPB`, `+21145ms` script, `+23146ms` runner-managed, `+23201ms` external
+  - control vs fresh `eval_036` control: `+0.00000027 BPB`, `+21405ms` script, `+22112ms` runner-managed, `+22331ms` external
+  - control vs historical `eval_015`: `+0.00105678 BPB`
+- Emitted telemetry stayed in-family with the promoted line:
+  - any-match fraction `0.98387585`
+  - avg alpha on matched `0.63990743`
+  - order histogram identical to the promoted `2097152`-bucket pattern
+- Decision label: `drift-stop`.
+- Interpretation: semantics stayed in-family, but the fresh control exceeded the reviewed `+15000ms` external tolerance by `8201ms`, so the `EVAL_LOGIT_TEMP=1.0` candidate was not launched. This round is not evidence for or against changing the promoted-line temperature default; it is only evidence that fresh-control runtime drift prevented a clean answer.
+
+## Previous Critical Result - `eval_036_eval035_ttt_lr_pair`
 
 - The reviewed refinement-phase TTT-learning-rate pair executed cleanly on the promoted `eval_035` legality lineage with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after both runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
@@ -324,5 +353,5 @@ This line is in **REFINEMENT phase**:
 
 ## Best Next Step
 
-Keep the locked `eval_031` legality line with promoted `EVAL_LOGIT_TEMP=0.95` and quality-default `TTT_EPOCHS=4` as the active baseline.  
-Remember `TTT_EPOCHS=3` only as a runtime-optimized operational variant, and do not spend the next round on nearby scalar-temperature sweeps, launcher-path reruns, or more epoch-count repetitions on this line. Move the next refinement round to a genuinely different single-variable question.
+Keep the promoted `eval_035` legality line as the active baseline with `EVAL_LOGIT_TEMP=0.95`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152`.  
+Remember `TTT_EPOCHS=3` only as a runtime-optimized operational variant, and remember that downward `TTT_LR` retuning and launcher-path reruns are already answered on this lineage. The one still-open nearby question is the promoted-line temperature check `0.95 -> 1.0`, but it must be retried only after obtaining a fresh in-gate control.
