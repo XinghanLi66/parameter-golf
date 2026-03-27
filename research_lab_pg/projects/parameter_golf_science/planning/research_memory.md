@@ -9,19 +9,49 @@ PR `#809` at `0.2952` remains legality-pending and is not the official target.
 
 This line is in **REFINEMENT phase**:
 - strongest completed measured local run is now `eval_050=0.14602989`, but it came from a candidate-only operational diagnosis and is **not** yet a promoted default
+- newest executed refinement round is now `eval_051`, a fresh same-session patched-helper bucket confirmation pair whose control was admissible but whose candidate was invalidated by post-handoff contamination on GPUs `1..7`
 - promoted quality baseline on the locked legality line is now `eval_038 candidate=0.19974237` with `EVAL_LOGIT_TEMP=1.0`
 - freshest admissible same-session control on the promoted line: `eval_045 control=0.19974186`
-- newest completed refinement round: `eval_050` patched-helper 7-GPU candidate-only operational diagnosis with `NGRAM_EVAL_BUCKETS=1048576` -> completed cleanly
+- newest completed clean candidate metric remains `eval_050` patched-helper 7-GPU candidate-only operational diagnosis with `NGRAM_EVAL_BUCKETS=1048576` -> completed cleanly
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest completed exact promoted-line control on the validated surrogate path: `eval_049 control=0.19974316` with script `616057ms`, runner `661647ms`, external `661.929s`
+- newest completed exact promoted-line control on the validated surrogate path is now `eval_051 control=0.19974343` with script `617197ms`, runner `665584ms`, external `665.848s`
 - newest completed promoted-line candidate attempt on the validated surrogate path: `eval_050 candidate 1048576` completed with `val_bpb=0.14602989`, script `618438ms`, runner `666370ms`, external `666.594s`
 - official-anchor gap on the newest completed run: `0.14602989 - 0.4416 = -0.29557011`
-- open problem: the exact promoted-line `NGRAM_EVAL_BUCKETS=2097152 -> 1048576` **promotability** question is still unanswered on the patched `1..7` surrogate path. `eval_050` removed the operational blocker by finishing cleanly, but a later reviewed fresh same-session control/candidate pair is still required before treating `1048576` as a promoted bucket setting.
+- open problem: the exact promoted-line `NGRAM_EVAL_BUCKETS=2097152 -> 1048576` **promotability** question is still unanswered on the patched `1..7` surrogate path. `eval_050` removed the operational blocker by finishing cleanly, `eval_051` revalidated the fresh control and immediate handoff, but the candidate arm became contaminated after launch, so a later reviewed clean pair is still required before treating `1048576` as a promoted bucket setting.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
+
+## Newest Critical Result - `eval_051_eval050_buckets_pair_confirm_patched_7gpu`
+
+- The reviewed refinement-phase fresh same-session patched-helper `2097152 -> 1048576` bucket confirmation pair was executed, but the round finished as `invalid pair` because the candidate arm became contaminated after a clean handoff on GPUs `1..7`.
+- No code changes were introduced beyond copying the already-validated patched helper into a fresh run directory:
+  - copied helper stayed at `126026` bytes with SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`
+  - saved checkpoint stayed fixed at `106178569` bytes / `b8291ad1...`
+  - saved artifact stayed fixed at `15555121` bytes / `eb062c96...`
+- The round stayed exactly inside the reviewed control/candidate lane:
+  - re-read `context/reference_materials/latest_sota_snapshot.md`, the urgent n-gram note, the planning/reporting files, and the required lineage command/helper files before any action
+  - re-verified helper, checkpoint, and artifact identities
+  - recorded a clean initial gate on GPUs `1..7`
+  - launched the fresh `2097152` control through `tools/gpu_experiment_runner.py`
+  - checked the control against `eval_049` and `eval_048` before touching the candidate
+  - recorded an immediate clean handoff sample, launched the `1048576` candidate, and captured separate external telemetry for both arms
+- Fresh gate and control result:
+  - initial gate passed at `2026-03-27T16:39:09Z`, with GPUs `1..7` all clean at about `81007 MiB` free, `0 MiB` used, and `0%` utilization
+  - fresh control launched at `2026-03-27T16:40:02Z` and completed with `legal_ttt_exact val_loss=0.33725841`, `val_bpb=0.19974343`, script `617197ms`, runner `665584ms`, external `665.848s`, `runner_start_to_child_spawn_ms=649`, `child_runtime_ms=664935`, any-match `0.98387585`, avg alpha `0.65461559`, matched-order histogram `order_2=60166`, `order_3=346841`, `order_4=373090`, `order_5=332096`, `order_6=395043`, `order_7=644544`, `order_8=1634957`, `order_9=57234849`, `ngram_batch_lookup_elapsed_ms=17414`, `ngram_torch_stats_elapsed_ms=4366`, `ngram_postlookup_vectorized_elapsed_ms=1109722`, and `ngram_update_batch_timing elapsed_ms=30758`
+  - the control remained admissible versus `eval_049` with only `+0.00000027 BPB` and versus `eval_048` with only `+0.00000005 BPB`
+- Candidate handoff and contamination result:
+  - immediate handoff sample at `2026-03-27T16:51:56Z` was still clean on GPUs `1..7`
+  - candidate launched at `2026-03-27T16:52:21Z`
+  - the first contamination evidence arrived at `2026-03-27T16:53:37Z`, when foreign PIDs `1873822..1873828` appeared on GPUs `1..7` alongside the candidate PIDs `1869880..1869886`
+  - contamination escalated across later samples; by `2026-03-27T16:58:43Z` and `16:58:48Z`, GPUs `1..7` were at `100%` utilization with about `36.5..38.9 GiB` of foreign memory plus about `5.3..5.6 GiB` of candidate memory per GPU
+  - I interrupted the candidate rather than let a dirty comparison finish
+  - latest captured candidate stdout only reached chunk `221/1893` at running `bpb=0.509815`, any-match `0.860559`, avg alpha `0.629725`, helper chunk-time `321.8s`
+  - no candidate `metadata.json` or final post-export metric was produced
+- Decision label: `invalid pair`
+- Interpretation: `eval_051` confirms the control side and immediate handoff remain scientifically valid, but the bucket-geometry question is still open because the candidate arm lost comparison cleanliness after launch. The partial candidate log is operational evidence only and must not be treated as promotability evidence.
 
 ## Newest Critical Result - `eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu`
 

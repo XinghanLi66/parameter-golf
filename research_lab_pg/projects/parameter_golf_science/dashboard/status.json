@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-03-27T16:30:24Z",
+  "generated_at_utc": "2026-03-27T17:08:04Z",
   "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
   "repo_root": "/newcpfs/lxh/parameter-golf",
   "external_sota_bpb": 1.1194,
@@ -28,31 +28,34 @@
   },
   "gap_to_sota": -0.97337,
   "latest_status_sections": {
-    "Current Best Evidence": "- The strongest completed local metric is now `eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu` at `legal_ttt_exact val_bpb=0.14602989`, but this came from a candidate-only operational diagnosis and is **not** yet a promoted default.\n- The active promoted 8-GPU anchor remains `eval_038_eval035_temperature_pair` at `0.19974237`, and the last completed validated patched-helper `2097152` control on the `1..7` surrogate path remains `eval_049` at `0.19974316`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest refinement round is `eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu`, which ran the reviewed candidate-only operational diagnosis of the patched-helper `NGRAM_EVAL_BUCKETS=1048576` path on GPUs `1..7`.\n- The helper/checkpoint/artifact guardrail stayed exact:\n  - patched helper `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/train_gpt.py`: `126026` bytes, SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n  - source helper from `eval_049` and `eval_047`: `126026` bytes, SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n  - checkpoint `final_model.pt`: `106178569` bytes, SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - artifact `final_model.int6.ptz`: `15555121` bytes, SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- Fresh gate and launch result:\n  - the first fresh gate sample at `2026-03-27T16:10:03Z` failed because a foreign 8-GPU workload occupied GPUs `1..7`\n  - the bounded gate watch then passed at `2026-03-27T16:10:35Z`, with GPUs `1..7` clean at about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n  - the candidate launched under run directory timestamp `20260327T161117Z` and finished cleanly\n- Completed candidate metrics:\n  - `legal_ttt_exact val_loss=0.24656535`\n  - `legal_ttt_exact val_bpb=0.14602989`\n  - script wallclock `618438ms`\n  - runner-managed wallclock `666370ms`\n  - external wallclock `666.594s`\n  - `runner_start_to_child_spawn_ms=395`\n  - `child_runtime_ms=665975`\n  - any-match fraction `0.98387635`\n  - avg alpha `0.66088724`\n  - matched-order histogram:\n    - `order_2=17786`\n    - `order_3=95312`\n    - `order_4=113192`\n    - `order_5=124743`\n    - `order_6=175760`\n    - `order_7=309994`\n    - `order_8=810348`\n    - `order_9=59374482`\n  - `ngram_batch_lookup_elapsed_ms=14132`\n  - `ngram_torch_stats_elapsed_ms=4303`\n  - `ngram_postlookup_vectorized_elapsed_ms=1108473`\n  - `ngram_update_batch_timing elapsed_ms=29799`\n- Comparison against the prior failed `eval_049` candidate:\n  - `eval_049` failed late at chunk `1521/1893` with `torch.AcceleratorError: CUDA error: unspecified launch failure` inside `score_segments()` and never wrote `metadata.json`\n  - `eval_050` reached the same chunk with the same running `bpb=0.161550`, the same any-match `0.979712`, and nearly identical avg alpha `0.659664`, but did so at `487.0s` instead of `637.6s`, then finished cleanly and wrote `metadata.json`\n  - the prior crash therefore did not reproduce on the exact rerun path\n- External telemetry result:\n  - near the end of the run at `2026-03-27T16:22:19Z`, GPUs `1..7` were using about `5367..5627 MiB` with `68..82%` utilization\n  - after completion, telemetry at `16:22:24Z` and `16:22:30Z` showed GPUs `1..7` back at `0 MiB` used, about `81007 MiB` free, and `subset_apps=none`\n- Interpretation:\n  - this round is `operationally viable`\n  - the late `1048576` crash from `eval_049` is not reproducible enough to close the setting as unstable on the patched `1..7` path\n  - promotability is still unanswered because this round intentionally omitted a fresh same-session `2097152` control arm\n  - the unexpectedly large completed BPB shift makes a later reviewed same-session control/candidate rerun more valuable, not less",
-    "Most Important Open Question": "Does a later fresh same-session patched-helper `2097152 -> 1048576` control/candidate pair confirm the dramatic completed `eval_050` metric on the validated `1..7` path, or does that candidate-only operational completion turn out to be non-promotable under comparison-clean conditions?",
-    "Active Experiment ID": "`eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu`",
-    "Latest Result Summary": "- Completed the reviewed candidate-only operational diagnosis on the patched-helper `NGRAM_EVAL_BUCKETS=1048576` path.\n- Controlled intervention actually executed:\n  - required file re-read\n  - exact patched-helper reuse from `eval_049`\n  - helper/checkpoint/artifact byte and SHA-256 verification\n  - one fresh gate sample plus a bounded clean launch watch on GPUs `1..7`\n  - full external GPU telemetry capture during the attempt\n  - one exact candidate-only `NGRAM_EVAL_BUCKETS=1048576` rerun through `tools/gpu_experiment_runner.py`\n  - on-disk recording of command, gate evidence, telemetry, stdout, stderr, and runner metadata in `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/`\n- Managed launch results:\n  - environment `physicslm`\n  - GPU allocation at launch: `7x NVIDIA L20Z`, specifically `1,2,3,4,5,6,7`\n  - final `legal_ttt_exact val_bpb=0.14602989`\n  - final `legal_ttt_exact val_loss=0.24656535`\n  - artifact bytes stayed unchanged at `15555121`\n  - patched helper code bytes stayed `126026`\n  - total bytes on this evaluation-helper line stayed `15681147`\n  - byte status remains under cap by `318853`\n- Decision:\n  - `1048576 operationally viable but needs fresh same-session comparison`\n  - the prior late crash did not reproduce\n  - the setting can now be evaluated in a later comparison-clean promotability round",
-    "Recommended Next Step": "If the bucket question remains important, require a later reviewed fresh same-session patched-helper `2097152 -> 1048576` control/candidate comparison on the validated `1..7` surrogate path. If not, move the next refinement round to a different single-variable evaluation question and keep `eval_050` classified as operational evidence rather than a promotion."
+    "Current Best Evidence": "- The strongest completed local metric remains `eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu` at `legal_ttt_exact val_bpb=0.14602989`, but this came from a candidate-only operational diagnosis and is **not** yet a promoted default.\n- The active promoted 8-GPU anchor remains `eval_038_eval035_temperature_pair` at `0.19974237`, and the freshest admissible patched-helper `2097152` control on the `1..7` surrogate path is now `eval_051` at `0.19974343`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest refinement round is `eval_051_eval050_buckets_pair_confirm_patched_7gpu`, which ran the reviewed fresh same-session patched-helper `2097152 -> 1048576` bucket confirmation pair on GPUs `1..7`.\n- The helper/checkpoint/artifact guardrail stayed exact:\n  - patched helper `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/train_gpt.py`: `126026` bytes, SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n  - source helper from `eval_049` and `eval_050`: `126026` bytes, SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n  - checkpoint `final_model.pt`: `106178569` bytes, SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - artifact `final_model.int6.ptz`: `15555121` bytes, SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- Fresh gate, control, and handoff result:\n  - the initial gate passed at `2026-03-27T16:39:09Z`, with GPUs `1..7` clean at about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n  - the fresh `2097152` control launched under run directory timestamp `20260327T164002Z` and finished cleanly\n  - the immediate post-control handoff sample also passed at `2026-03-27T16:51:56Z`\n- Fresh control metrics:\n  - `legal_ttt_exact val_loss=0.33725841`\n  - `legal_ttt_exact val_bpb=0.19974343`\n  - script wallclock `617197ms`\n  - runner-managed wallclock `665584ms`\n  - external wallclock `665.848s`\n  - `runner_start_to_child_spawn_ms=649`\n  - `child_runtime_ms=664935`\n  - any-match fraction `0.98387585`\n  - avg alpha `0.65461559`\n  - matched-order histogram:\n    - `order_2=60166`\n    - `order_3=346841`\n    - `order_4=373090`\n    - `order_5=332096`\n    - `order_6=395043`\n    - `order_7=644544`\n    - `order_8=1634957`\n    - `order_9=57234849`\n  - `ngram_batch_lookup_elapsed_ms=17414`\n  - `ngram_torch_stats_elapsed_ms=4366`\n  - `ngram_postlookup_vectorized_elapsed_ms=1109722`\n  - `ngram_update_batch_timing elapsed_ms=30758`\n- Control admissibility:\n  - versus `eval_049`, BPB was only `+0.00000027`\n  - versus `eval_048`, BPB was only `+0.00000005`\n  - any-match stayed identical to both, the matched-order histogram stayed identical, and the timing fields stayed in-family\n- Candidate invalidation evidence:\n  - the candidate launched cleanly at `2026-03-27T16:52:21Z`, but the first contamination sample arrived at `2026-03-27T16:53:37Z`\n  - foreign PIDs `1873822..1873828` appeared on GPUs `1..7` alongside the candidate PIDs `1869880..1869886`\n  - contamination escalated across later samples; by `2026-03-27T16:58:43Z` and `16:58:48Z`, GPUs `1..7` were at `100%` utilization with about `36.5..38.9 GiB` foreign memory plus about `5.3..5.6 GiB` candidate memory per GPU\n  - I interrupted the candidate rather than allow a dirty final metric\n  - latest captured candidate stdout only reached chunk `221/1893` at running `bpb=0.509815`, any-match `0.860559`, avg alpha `0.629725`, helper chunk-time `321.8s`\n  - no candidate `metadata.json`, final `val_loss`, or final `val_bpb` was produced\n- Interpretation:\n  - this round is `invalid pair`\n  - the fresh `2097152` control remains admissible on the patched `1..7` surrogate path\n  - the `2097152 -> 1048576` bucket question is still unanswered because the candidate arm lost comparison cleanliness after a clean handoff\n  - partial dirty candidate logs must not be treated as promotability evidence",
+    "Most Important Open Question": "Can a later fresh same-session patched-helper `2097152 -> 1048576` control/candidate pair be kept clean through both arms on the validated `1..7` path, so the bucket-geometry question can finally be answered without contamination?",
+    "Active Experiment ID": "`eval_051_eval050_buckets_pair_confirm_patched_7gpu`",
+    "Latest Result Summary": "- Completed the reviewed fresh same-session patched-helper bucket confirmation pair.\n- Controlled intervention actually executed:\n  - required file re-read\n  - exact patched-helper reuse from `eval_049`\n  - helper/checkpoint/artifact byte and SHA-256 verification\n  - one fresh clean gate on GPUs `1..7`\n  - one fresh `2097152` control through `tools/gpu_experiment_runner.py`\n  - immediate admissibility check versus `eval_049` / `eval_048`\n  - one immediate clean handoff sample\n  - one immediate `1048576` candidate launch through `tools/gpu_experiment_runner.py`\n  - separate external telemetry capture for both arms\n  - on-disk recording of command, gate evidence, handoff evidence, telemetry, stdout, stderr, and runner metadata where available in `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/`\n- Managed control results:\n  - environment `physicslm`\n  - GPU allocation at launch: `7x NVIDIA L20Z`, specifically `1,2,3,4,5,6,7`\n  - final control `legal_ttt_exact val_bpb=0.19974343`\n  - final control `legal_ttt_exact val_loss=0.33725841`\n  - artifact bytes stayed unchanged at `15555121`\n  - patched helper code bytes stayed `126026`\n  - total bytes on this evaluation-helper line stayed `15681147`\n  - byte status remains under cap by `318853`\n- Decision:\n  - `invalid pair`\n  - the fresh control was admissible, but the candidate arm became contaminated after a clean handoff\n  - the bucket-geometry question remains open because no clean final candidate metric was allowed",
+    "Recommended Next Step": "If the bucket question remains important, require a later reviewed fresh same-session patched-helper `2097152 -> 1048576` control/candidate comparison on the validated `1..7` surrogate path only when GPUs `1..7` can remain isolated through both arms. Do not treat `eval_051` as evidence to promote or reject `1048576`; it is an invalidated pair with a valid control."
   },
   "next_experiment_sections": {
-    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase candidate-only operational diagnosis of the patched-helper `NGRAM_EVAL_BUCKETS=1048576` path on GPUs `1..7`.\n\n- Executed the reviewed brief in the narrowed operational lane:\n  - re-read the required SOTA, urgent n-gram, planning, reporting, and `eval_049` lineage files before changing anything\n  - re-verified helper, checkpoint, and artifact bytes/SHA against the validated `eval_049` lineage\n  - reused the exact patched helper unchanged in a fresh `eval_050` run directory\n  - recorded a fresh gate sample, then a bounded launch-ready clean-idle watch on GPUs `1..7`\n  - captured full external GPU telemetry during the rerun\n  - launched exactly one candidate-only `NGRAM_EVAL_BUCKETS=1048576` rerun through `tools/gpu_experiment_runner.py`\n- The operational question is now answered:\n  - the prior late `1048576` failure from `eval_049` did **not** reproduce\n  - the rerun passed the old failure locus at chunk `1521/1893`\n  - it finished cleanly, wrote `metadata.json`, and emitted final post-export metrics\n- Because this round intentionally omitted a fresh same-session control arm, the result is `operationally viable`, **not** `promote`.",
-    "Experiment ID": "`eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu`",
-    "Category": "- evaluation\n\nOperational subtype: `evaluation-path operational diagnosis`",
-    "Baseline / Comparison": "Primary comparison for this round:\n- prior failed `eval_049` candidate at `NGRAM_EVAL_BUCKETS=1048576`\n- one exact rerun on the same patched-helper / checkpoint / artifact / GPU-subset path with only fresh operational identifiers\n\nContext anchors retained but not rerun this round:\n- `eval_049` patched-helper admissible control at `NGRAM_EVAL_BUCKETS=2097152`\n- `eval_048` patched-helper admissible control at `NGRAM_EVAL_BUCKETS=2097152`\n- `eval_047` patched-helper admissible control at `NGRAM_EVAL_BUCKETS=2097152`",
-    "Hypothesis": "On the validated patched `1..7` surrogate regime, the `NGRAM_EVAL_BUCKETS=1048576` path is either:\n- operationally unstable in a reproducible way, in which case one exact rerun should fail again with comparable late-path evidence, or\n- operationally viable, in which case one exact rerun should finish cleanly and produce a final post-export metric.\n\nThis round tests stability only, not promotability.",
-    "Why It Might Work": "- `eval_049` already provided the fresh admissible patched-helper control, so repeating another control would not answer a new question.\n- The only unresolved variable was whether the `1048576` candidate itself is reproducibly broken on this patched `1..7` path.\n- Even a negative result would have been scientifically useful because it would have closed `1048576` as operationally unstable on this path.",
-    "Minimal Intervention": "No helper-code change beyond copying the already-validated patched helper into a fresh run directory:\n- copied `runs/eval_049_eval048_buckets_pair_patched_7gpu/train_gpt.py`\n- kept helper bytes/hash identical to `eval_049`, `eval_048`, and `eval_047`\n- launched only the candidate-only `NGRAM_EVAL_BUCKETS=1048576` path\n\nNo changes to:\n- model weights\n- checkpoint bytes\n- artifact bytes\n- scorer math\n- cache/update logic\n- export logic\n- tokenizer\n- validation data\n- runner path\n- TTT settings\n- GPU subset `1..7`",
-    "Variables To Change": "Operational-only changes:\n- fresh `RUN_ID`\n- fresh runner log directory\n- fresh run name\n- fresh gate logs\n- fresh external telemetry log\n\nScientific variable under test:\n- `NGRAM_EVAL_BUCKETS=1048576` candidate rerun on the patched helper path",
-    "Variables To Hold Fixed": "- exact patched eval-only helper logic from `eval_049`\n- helper bytes/hash\n- checkpoint bytes/hash\n- artifact bytes/hash\n- `EVAL_ONLY=1`\n- `EVAL_LOGIT_TEMP=1.0`\n- `TTT_ENABLED=1`\n- `TTT_LR=0.0025`\n- `TTT_EPOCHS=4`\n- `TTT_CHUNK_TOKENS=32768`\n- `TTT_FREEZE_BLOCKS=0`\n- `TTT_MOMENTUM=0.9`\n- `TTT_BATCH_SEQS=32`\n- `TTT_GRAD_CLIP=1.0`\n- `EVAL_STRIDE=64`\n- `NGRAM_EVAL_ENABLED=1`\n- `NGRAM_EVAL_MIN_ORDER=2`\n- `NGRAM_EVAL_MAX_ORDER=9`\n- `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`\n- `NGRAM_EVAL_BATCH_TORCH_STATS=1`\n- `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`\n- tokenizer, validation data, environment, runner path, and GPU subset `1..7`",
-    "Identity Checks": "- Patched helper:\n  - path: `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/train_gpt.py`\n  - bytes: `126026`\n  - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n- Reference helper from `eval_049` and `eval_047`:\n  - path: `runs/eval_049_eval048_buckets_pair_patched_7gpu/train_gpt.py`\n  - bytes: `126026`\n  - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n- Saved checkpoint:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`\n  - bytes: `106178569`\n  - SHA-256: `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n- Saved artifact:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz`\n  - bytes: `15555121`\n  - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n\nIdentity status:\n- copied helper matches `eval_049` and `eval_047` exactly\n- checkpoint unchanged before launch\n- artifact unchanged before launch",
-    "Commands Actually Run": "Exact candidate rerun command was recorded in:\n- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/command.txt`\n\nGate evidence was recorded in:\n- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/clean_idle_gate.log`\n- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/gate_watch.log`\n\nExternal telemetry was recorded in:\n- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/external_gpu_telemetry.log`\n\nCandidate runner directory:\n- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/runner_candidate_7gpu/20260327T161117Z_eval_050_runner_candidate_7gpu_t1p00_e4_b1048576_lr0025/`",
-    "Clean-Idle Gate Result": "- initial fresh sample status: `fail`\n- initial sample time: `2026-03-27T16:10:03Z`\n- first sample showed GPUs `1..7` occupied by a foreign 8-GPU workload:\n  - about `37543..39141 MiB` used on the selected subset\n  - about `41866..43464 MiB` free\n  - `100%` utilization on each selected GPU\n- bounded watch then recovered a clean launch window:\n  - launch-ready pass sample time: `2026-03-27T16:10:35Z`\n  - GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n  - no compute-app processes were present on the selected subset at the pass sample",
-    "Candidate Launch Result": "- candidate launch status: `completed cleanly`\n- run directory timestamp: `2026-03-27T16:11:17Z`\n- runner selected GPUs `1,2,3,4,5,6,7` successfully\n- compatibility log emitted:\n  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`\n- exact failure locus from `eval_049` was crossed cleanly:\n  - old failed locus: chunk `1521/1893` at running `bpb=0.161550`, any-match `0.979712`, avg alpha `0.659670`, helper chunk-time `637.6s`\n  - rerun at the same locus: chunk `1521/1893` at running `bpb=0.161550`, any-match `0.979712`, avg alpha `0.659664`, helper chunk-time `487.0s`\n  - rerun then continued through the remaining `372` chunks and finished\n- final metrics:\n  - `legal_ttt_exact val_loss=0.24656535`\n  - `legal_ttt_exact val_bpb=0.14602989`\n  - script wallclock `618438ms`\n  - runner-managed wallclock `666370ms`\n  - external wallclock `666.594s`\n  - `runner_start_to_child_spawn_ms=395`\n  - `child_runtime_ms=665975`\n  - any-match fraction `0.98387635`\n  - avg alpha `0.66088724`\n  - matched-order histogram:\n    - `order_2=17786`\n    - `order_3=95312`\n    - `order_4=113192`\n    - `order_5=124743`\n    - `order_6=175760`\n    - `order_7=309994`\n    - `order_8=810348`\n    - `order_9=59374482`\n  - `ngram_batch_lookup_elapsed_ms=14132`\n  - `ngram_torch_stats_elapsed_ms=4303`\n  - `ngram_postlookup_vectorized_elapsed_ms=1108473`\n  - `ngram_update_batch_timing elapsed_ms=29799`\n- runner metadata:\n  - exit code `0`\n  - timeout `false`\n  - `metadata.json` written successfully\n- external GPU telemetry near the finish showed a normal active tail rather than a crash pattern:\n  - at `2026-03-27T16:22:19Z`, GPUs `1..7` were using about `5367..5627 MiB` with `68..82%` utilization\n  - at `2026-03-27T16:22:24Z` and `2026-03-27T16:22:30Z`, GPUs `1..7` had returned to `0 MiB` used, about `81007 MiB` free, and `0%` utilization with `subset_apps=none`",
-    "Success Metric": "Required outcomes:\n- if the path were unstable, the rerun should fail again with comparable late-path evidence\n- if the path were viable, the rerun should finish cleanly and emit final post-export metrics\n\nActual status:\n- repeated late failure: `not reproduced`\n- clean completion: `pass`\n- final post-export metric emitted: `pass`\n- metadata written: `pass`\n- decision basis: `the exact rerun completed cleanly on the same patched-helper lineage, so the prior late failure is not reproducible enough to close the setting as operationally unstable`",
-    "Expected Effect": "If the prior `eval_049` failure was path-level instability, the rerun should fail again near the same late chunk. If it was transient, the rerun should finish and reopen the bucket question for a later fresh same-session comparison.",
-    "Actual Result": "- The first fresh gate sample was dirty, but the selected `1..7` subset became clean under a bounded watch and the candidate launched on the exact reviewed path.\n- The rerun matched the prior failed candidate’s live trajectory through the old failure zone, then cleanly exceeded it:\n  - same chunk `1521/1893`\n  - same running `bpb=0.161550`\n  - same any-match `0.979712`\n  - effectively identical avg alpha\n  - but about `150.6s` faster at that locus, with no crash\n- The candidate then finished, wrote `metadata.json`, and produced final post-export metrics.\n- Relative to the last completed patched-helper `2097152` control from `eval_049`, the completed `1048576` rerun was contextually:\n  - `-0.09069261` lower on `val_loss`\n  - `-0.05371327` lower on `val_bpb`\n  - `+2381ms` slower on script wallclock\n  - `+4723ms` slower on runner-managed wallclock\n  - `+4.665s` slower on external wallclock\n- Those control deltas are informative context only; they are **not** promotability evidence for this round because no fresh same-session control arm was rerun here.",
-    "Interpretation": "- Decision label: `1048576 operationally viable but needs fresh same-session comparison`\n- The exact `eval_049` late crash is not reproducible enough to close `1048576` as operationally unstable on the patched `1..7` path.\n- The candidate-only operational diagnosis therefore succeeds: this setting can finish on the validated patched-helper path.\n- Promotability is still unanswered because this round intentionally omitted a fresh same-session `2097152` control.\n- The unexpectedly large completed BPB shift relative to the last completed `2097152` control makes a later reviewed same-session control/candidate pair more useful, not less, because the operational blocker is now removed but the scientific bucket conclusion still needs a comparison-clean rerun.",
-    "Next Step": "If the bucket question still matters, schedule a later reviewed same-session patched-helper `2097152 -> 1048576` control/candidate comparison on the validated `1..7` surrogate path, keeping helper/checkpoint/artifact lineage and all non-bucket settings fixed.\n\nIf that question is no longer the highest-priority refinement target, move the next reviewed round to a different single-variable evaluation question; do not treat `eval_050` alone as a promotion."
+    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase fresh same-session patched-helper bucket confirmation pair on GPUs `1..7`.\n\n- Executed the reviewed brief as written:\n  - re-read the required SOTA, urgent n-gram, planning, reporting, and lineage files before changing anything\n  - re-verified helper, checkpoint, and artifact bytes/SHA against the validated patched lineage\n  - copied the exact patched helper bytes into a fresh `eval_051` run directory with no helper edits\n  - recorded a clean initial gate on GPUs `1..7`\n  - launched the fresh `2097152` control through `tools/gpu_experiment_runner.py`\n  - checked the control against `eval_049` and `eval_048` before touching the candidate arm\n  - recorded an immediate clean handoff sample and then launched the `1048576` candidate\n  - captured separate external telemetry for both arms\n- The round did not yield a promotability decision because the candidate arm became contaminated after a clean handoff:\n  - the control completed admissibly\n  - the candidate launched cleanly but a foreign workload appeared on GPUs `1..7` during the candidate arm\n  - I stopped the candidate rather than force a dirty comparison\n- Final round label: `invalid pair`",
+    "Experiment ID": "`eval_051_eval050_buckets_pair_confirm_patched_7gpu`",
+    "Category": "- evaluation\n\nSubtype: `fresh same-session bucket confirmation pair`",
+    "Baseline / Comparison": "Primary decision baseline for this round:\n- fresh same-session patched-helper control at `NGRAM_EVAL_BUCKETS=2097152` on GPUs `1..7`\n\nImmediate candidate:\n- same patched-helper path with only `NGRAM_EVAL_BUCKETS=1048576`\n\nContext anchors:\n- `eval_049` patched-helper admissible control at `0.19974316`\n- `eval_050` candidate-only operational rerun at `0.14602989`",
+    "Hypothesis": "If `NGRAM_EVAL_BUCKETS=1048576` is a real improvement on the validated patched `1..7` surrogate path, then a fresh same-session pair should show:\n- an admissible fresh `2097152` control\n- a clean `1048576` candidate completion\n- a candidate post-export `val_bpb` improvement over the fresh control by at least `0.00010`\n\nIf the dramatic `eval_050` metric was not comparison-clean evidence, then the candidate should either fail again, get invalidated operationally, or fail to clear the decision floor.",
+    "Why It Might Work": "- `eval_049` already validated the patched `2097152` control path.\n- `eval_050` already showed that `1048576` can finish on the same patched lineage.\n- The missing evidence was the exact same-session control/candidate comparison with only bucket count changed.",
+    "Minimal Intervention": "No model-code or evaluation-logic edits were made.\n\nOnly these changes were introduced:\n- fresh run directory and fresh operational identifiers\n- copied patched helper bytes unchanged from `eval_049`\n- control arm `NGRAM_EVAL_BUCKETS=2097152`\n- candidate arm `NGRAM_EVAL_BUCKETS=1048576`\n- fresh gate evidence, handoff evidence, and external telemetry capture",
+    "Variables To Change": "- `RUN_ID`\n- runner log dirs\n- run names\n- gate and telemetry logs\n- scientific variable: `NGRAM_EVAL_BUCKETS 2097152 -> 1048576`",
+    "Variables To Hold Fixed": "- exact patched helper bytes/hash from `eval_049` and `eval_050`\n- checkpoint bytes/hash\n- artifact bytes/hash\n- `EVAL_ONLY=1`\n- `EVAL_LOGIT_TEMP=1.0`\n- `TTT_ENABLED=1`\n- `TTT_LR=0.0025`\n- `TTT_EPOCHS=4`\n- `TTT_CHUNK_TOKENS=32768`\n- `TTT_FREEZE_BLOCKS=0`\n- `TTT_MOMENTUM=0.9`\n- `TTT_BATCH_SEQS=32`\n- `TTT_GRAD_CLIP=1.0`\n- `EVAL_STRIDE=64`\n- vectorized chunk-based n-gram path: batched lookup, batched torch stats, vectorized postlookup\n- GPUs `1,2,3,4,5,6,7`",
+    "Identity Checks": "- Patched helper copy:\n  - path: `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/train_gpt.py`\n  - bytes: `126026`\n  - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n- Saved checkpoint:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`\n  - bytes: `106178569`\n  - SHA-256: `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n- Saved artifact:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz`\n  - bytes: `15555121`\n  - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n\nIdentity status:\n- copied helper matches `eval_049` and `eval_050` exactly\n- checkpoint unchanged before launch\n- artifact unchanged before launch",
+    "Commands Actually Run": "Exact control and candidate commands were recorded in:\n- `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/command.txt`\n\nGate evidence was recorded in:\n- `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/clean_idle_gate.log`\n- `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/gate_watch.log`\n- `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/candidate_handoff_gate.log`\n\nExternal telemetry was recorded in:\n- `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/external_gpu_telemetry_control.log`\n- `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/external_gpu_telemetry_candidate.log`\n\nRunner outputs were recorded in:\n- `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/runner_control_7gpu/20260327T164002Z_eval_051_runner_control_7gpu_t1p00_e4_b2097152_lr0025/`\n- `runs/eval_051_eval050_buckets_pair_confirm_patched_7gpu/runner_candidate_7gpu/20260327T165221Z_eval_051_runner_candidate_7gpu_t1p00_e4_b1048576_lr0025/`",
+    "Clean-Idle Gate Result": "- initial fresh sample status: `pass`\n- gate sample time: `2026-03-27T16:39:09Z`\n- GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n- no compute-app processes were present on the selected subset",
+    "Control Launch Result": "- control launch status: `completed cleanly`\n- run directory timestamp: `2026-03-27T16:40:02Z`\n- runner selected GPUs `1,2,3,4,5,6,7` successfully\n- compatibility log emitted:\n  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`\n- final metrics:\n  - `legal_ttt_exact val_loss=0.33725841`\n  - `legal_ttt_exact val_bpb=0.19974343`\n  - script wallclock `617197ms`\n  - runner-managed wallclock `665584ms`\n  - external wallclock `665.848s`\n  - `runner_start_to_child_spawn_ms=649`\n  - `child_runtime_ms=664935`\n  - any-match fraction `0.98387585`\n  - avg alpha `0.65461559`\n  - matched-order histogram:\n    - `order_2=60166`\n    - `order_3=346841`\n    - `order_4=373090`\n    - `order_5=332096`\n    - `order_6=395043`\n    - `order_7=644544`\n    - `order_8=1634957`\n    - `order_9=57234849`\n  - `ngram_batch_lookup_elapsed_ms=17414`\n  - `ngram_torch_stats_elapsed_ms=4366`\n  - `ngram_postlookup_vectorized_elapsed_ms=1109722`\n  - `ngram_update_batch_timing elapsed_ms=30758`\n- runner metadata:\n  - exit code `0`\n  - timeout `false`\n  - `metadata.json` written successfully\n- external telemetry showed a normal active tail at `2026-03-27T16:51:01Z` with about `5367..5627 MiB` used and `69..84%` utilization on GPUs `1..7`, followed by clean release at `16:51:07Z`",
+    "Control Admissibility": "The fresh control passed the reviewed admissibility requirement.\n\nVersus `eval_049` patched-helper control:\n- `+0.00000027` BPB\n- `+0.00000045` val_loss\n- `+1140ms` script wallclock\n- `+3937ms` runner-managed wallclock\n- `+3.919s` external wallclock\n- `+259ms` `runner_start_to_child_spawn_ms`\n- `+3679ms` `child_runtime_ms`\n- `+0.00000000` any-match\n- `-0.00000168` avg alpha\n- identical matched-order histogram\n- `-738ms` n-gram batch lookup elapsed\n- `+32ms` torch-stats elapsed\n- `-2602ms` postlookup elapsed\n- `+269ms` update-batch elapsed\n\nVersus `eval_048` patched-helper control:\n- `+0.00000005` BPB\n- `+0.00000009` val_loss\n- `-6605ms` script wallclock\n- `-4325ms` runner-managed wallclock\n- `-4.293s` external wallclock\n- `+238ms` `runner_start_to_child_spawn_ms`\n- `-4563ms` `child_runtime_ms`\n- `+0.00000000` any-match\n- `+0.00000025` avg alpha\n- identical matched-order histogram\n- `+228ms` n-gram batch lookup elapsed\n- `-25ms` torch-stats elapsed\n- `+4309ms` postlookup elapsed\n- `-91ms` update-batch elapsed",
+    "Candidate Handoff Gate Result": "- immediate handoff sample time: `2026-03-27T16:51:56Z`\n- GPUs `1..7` each still showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n- no compute-app processes were present at the handoff sample\n- handoff status: `pass`",
+    "Candidate Contamination Result": "- candidate launch started cleanly under run directory timestamp `2026-03-27T16:52:21Z`\n- the candidate was not allowed to produce a decision metric because the pair became dirty after launch:\n  - first contamination evidence arrived at `2026-03-27T16:53:37Z`\n  - foreign PIDs `1873822..1873828` appeared on GPUs `1..7` while candidate PIDs `1869880..1869886` were already active\n  - initial foreign memory footprint was already nonzero on every reviewed GPU, about `714..756 MiB`\n  - contamination then escalated through later samples; by `2026-03-27T16:58:43Z` and `16:58:48Z`, GPUs `1..7` were at `100%` utilization with about `36.5..38.9 GiB` foreign memory plus about `5.3..5.6 GiB` candidate memory per GPU\n- because the same-session comparison was no longer clean, I interrupted the candidate instead of forcing a dirty final metric\n- candidate partial progress before interruption:\n  - latest captured stdout reached chunk `221/1893`\n  - running `bpb=0.509815`\n  - any-match `0.860559`\n  - avg alpha `0.629725`\n  - helper chunk-time `321.8s`\n- candidate runner directory did not write `metadata.json`\n- no final post-export `val_loss`\n- no final post-export `val_bpb`",
+    "Success Metric": "Required outcomes:\n- fresh control completes and is admissible\n- only then immediate candidate launches\n- candidate must remain comparison-clean and finish with final post-export metrics\n\nActual status:\n- control admissibility: `pass`\n- handoff cleanliness: `pass`\n- candidate comparison cleanliness: `fail`\n- candidate completion with final metrics: `not valid`\n- final decision basis: `the candidate arm became contaminated after a clean handoff, so the same-session pair is invalid`",
+    "Expected Effect": "If `1048576` were a real clean same-session improvement, the candidate should have remained isolated and produced a final post-export metric that beat the fresh control by at least `0.00010 BPB`.",
+    "Actual Result": "- The exact patched helper, checkpoint, and artifact identities stayed fixed and correct.\n- The fresh `2097152` control completed cleanly and remained admissible versus both `eval_049` and `eval_048`.\n- The immediate handoff sample was clean, so launching the candidate was justified.\n- The candidate then lost interpretability because a foreign workload appeared on GPUs `1..7` after launch and persisted, materially occupying the same reviewed subset.\n- I stopped the candidate once the contamination was clearly persistent rather than let a dirty run finish and masquerade as bucket evidence.",
+    "Interpretation": "- Decision label: `invalid pair`\n- The control result is valid and confirms the patched `2097152` path remains admissible.\n- The round does **not** answer the `2097152 -> 1048576` promotability question because the candidate arm was contaminated after a clean handoff.\n- The partial candidate stdout and dirty telemetry are operational evidence only; they are not promotability evidence and should not be compared against the fresh control as if this were a clean pair.",
+    "Next Step": "If the bucket question still matters, rerun the same reviewed patched-helper `2097152 -> 1048576` pair only when GPUs `1..7` can remain isolated through both arms, with the same helper/checkpoint/artifact lineage and no semantic changes.\n\nDo not treat this round as evidence to `promote 1048576`, `hold 2097152`, or classify `1048576 unstable`; the correct label for `eval_051` is `invalid pair`."
   },
   "experiment_rows": [
     {
@@ -323,6 +326,158 @@
     }
   ],
   "comparison_rows_all": [
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: required clean-idle gate on GPUs `1..7` vs `eval_051` launch",
+      "Metric": "prelaunch clean-idle gate on `1,2,3,4,5,6,7`",
+      "Baseline": "`required: GPUs 1..7 idle, no subset compute apps, >=10 GiB free each`",
+      "Candidate": "`pass at 2026-03-27T16:39:09Z`",
+      "Delta": "`valid subset gate`",
+      "Notes": "GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization before the control launch."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.19974316`",
+      "Candidate": "`0.19974343`",
+      "Delta": "`+0.00000027`",
+      "Notes": "Fresh control stayed comfortably inside the reviewed admissibility band."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_048` admissible control vs fresh `eval_051` control",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.19974338`",
+      "Candidate": "`0.19974343`",
+      "Delta": "`+0.00000005`",
+      "Notes": "Fresh control also stayed admissible versus the other patched-helper control anchor."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "post-export `val_loss`",
+      "Baseline": "`0.33725796`",
+      "Candidate": "`0.33725841`",
+      "Delta": "`+0.00000045`",
+      "Notes": "Loss stayed fully in-family."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "script eval wallclock",
+      "Baseline": "`616057ms`",
+      "Candidate": "`617197ms`",
+      "Delta": "`+1140ms`",
+      "Notes": "Script timing remained close enough to keep the control admissible."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "runner-managed wallclock",
+      "Baseline": "`661647ms`",
+      "Candidate": "`665584ms`",
+      "Delta": "`+3937ms`",
+      "Notes": "Runner-managed timing also stayed in-family."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`661.929s`",
+      "Candidate": "`665.848s`",
+      "Delta": "`+3.919s`",
+      "Notes": "External timing remained compatible with the patched surrogate path."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "any-match fraction",
+      "Baseline": "`0.98387585`",
+      "Candidate": "`0.98387585`",
+      "Delta": "`+0.00000000`",
+      "Notes": "Match coverage remained identical."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "avg alpha on matched",
+      "Baseline": "`0.65461727`",
+      "Candidate": "`0.65461559`",
+      "Delta": "`-0.00000168`",
+      "Notes": "Avg alpha stayed in-family."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "matched-order histogram",
+      "Baseline": "`exact promoted-line histogram`",
+      "Candidate": "`exact promoted-line histogram`",
+      "Delta": "`unchanged`",
+      "Notes": "Orders `2..9` matched exactly."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "n-gram batch lookup elapsed",
+      "Baseline": "`18152ms`",
+      "Candidate": "`17414ms`",
+      "Delta": "`-738ms`",
+      "Notes": "Lookup timing improved slightly while staying in-family."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "n-gram torch-stats elapsed",
+      "Baseline": "`4334ms`",
+      "Candidate": "`4366ms`",
+      "Delta": "`+32ms`",
+      "Notes": "Torch-stats timing remained essentially flat."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "vectorized postlookup elapsed",
+      "Baseline": "`1112324ms`",
+      "Candidate": "`1109722ms`",
+      "Delta": "`-2602ms`",
+      "Notes": "Postlookup timing stayed stable enough to preserve control admissibility."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: `eval_049` admissible control vs fresh `eval_051` control",
+      "Metric": "update-batch elapsed",
+      "Baseline": "`30489ms`",
+      "Candidate": "`30758ms`",
+      "Delta": "`+269ms`",
+      "Notes": "Update timing stayed in-family."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: post-control handoff vs immediate candidate launch",
+      "Metric": "subset cleanliness on `1,2,3,4,5,6,7`",
+      "Baseline": "`pass at 2026-03-27T16:51:56Z`",
+      "Candidate": "`candidate launched at 2026-03-27T16:52:21Z`",
+      "Delta": "`clean handoff`",
+      "Notes": "The handoff sample showed GPUs `1..7` idle with no compute apps before the candidate launch."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: clean handoff vs first contaminated candidate telemetry",
+      "Metric": "subset occupancy on `1,2,3,4,5,6,7`",
+      "Baseline": "`0 MiB used / 0% util / no apps at 2026-03-27T16:51:56Z`",
+      "Candidate": "`foreign PIDs 1873822..1873828 appeared by 2026-03-27T16:53:37Z`",
+      "Delta": "`pair invalidated 76s after launch`",
+      "Notes": "The candidate began cleanly but lost same-session interpretability once the foreign workload appeared on the reviewed subset."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: contaminated candidate telemetry escalation",
+      "Metric": "foreign memory on reviewed subset GPUs",
+      "Baseline": "`initial foreign footprint about 714..756 MiB per GPU at 2026-03-27T16:53:37Z`",
+      "Candidate": "`about 36.5..38.9 GiB per GPU at 2026-03-27T16:58:43Z and 16:58:48Z`",
+      "Delta": "`foreign workload ramped sharply`",
+      "Notes": "By the time the candidate was interrupted, GPUs `1..7` were at `100%` utilization with both the candidate and a foreign workload co-resident."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: fresh control vs immediate `1048576` candidate",
+      "Metric": "candidate decision eligibility",
+      "Baseline": "`eligible`",
+      "Candidate": "`ineligible`",
+      "Delta": "`invalid pair`",
+      "Notes": "Because the candidate arm became contaminated after launch and was manually interrupted, no final `metadata.json`, `val_loss`, or `val_bpb` exists for the candidate."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU bucket confirmation pair: control live trajectory vs contaminated candidate live trajectory",
+      "Metric": "latest comparable captured chunk in this round",
+      "Baseline": "`chunk 221/1893, bpb=0.772135, any_match=0.860559, avg_alpha=0.571812, time=81.9s`",
+      "Candidate": "`chunk 221/1893, bpb=0.509815, any_match=0.860559, avg_alpha=0.629725, time=321.8s`",
+      "Delta": "`partial dirty trace only`",
+      "Notes": "This is not promotability evidence because the candidate was already inside a contaminated arm when the trace continued."
+    },
     {
       "Comparison": "Local PR `#809` patched 7-GPU bucket operational diagnosis: initial `eval_050` gate sample vs launch-ready gate",
       "Metric": "prelaunch clean-idle gate on `1,2,3,4,5,6,7`",
@@ -5158,41 +5313,54 @@
         "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_024.worker.prompt.txt",
         "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_024.worker.final.txt",
         "worker_exit_code": "0"
+      },
+      "round_025.meta": {
+        "round": "25",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.worker.final.txt",
+        "worker_exit_code": "0"
       }
     },
     "phase_meta": {
       "planner": {
         "phase": "planner",
-        "round": "25",
-        "start_time": "2026-03-27T16:02:40Z",
-        "end_time": "2026-03-27T16:05:21Z",
+        "round": "26",
+        "start_time": "2026-03-27T16:31:03Z",
+        "end_time": "2026-03-27T16:33:48Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.planner.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.planner.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.planner.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.planner.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.planner.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.planner.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.planner.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.planner.final.txt"
       },
       "review": {
         "phase": "review",
-        "round": "25",
-        "start_time": "2026-03-27T16:05:21Z",
-        "end_time": "2026-03-27T16:07:29Z",
+        "round": "26",
+        "start_time": "2026-03-27T16:33:48Z",
+        "end_time": "2026-03-27T16:35:48Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.review.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.review.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.review.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.review.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.review.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.review.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.review.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.review.final.txt"
       },
       "worker": {
         "phase": "worker",
-        "round": "25",
-        "start_time": "2026-03-27T16:07:30Z",
-        "end_time": "2026-03-27T16:30:20Z",
+        "round": "26",
+        "start_time": "2026-03-27T16:35:48Z",
+        "end_time": "2026-03-27T17:08:00Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.worker.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.worker.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.worker.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_025.worker.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.worker.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.worker.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.worker.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_026.worker.final.txt"
       }
     }
   },
@@ -5200,11 +5368,11 @@
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z",
       "configured_rounds": 50,
-      "completed_rounds": 25,
-      "latest_round": "25",
+      "completed_rounds": 26,
+      "latest_round": "26",
       "latest_phase": "worker",
       "state": "in progress",
-      "latest_timestamp": "2026-03-27T16:30:20Z"
+      "latest_timestamp": "2026-03-27T17:08:00Z"
     },
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z",
@@ -5254,6 +5422,30 @@
   ],
   "training_runs": [
     {
+      "name": "eval_051_eval050_buckets_pair_confirm_patched_7gpu_runner_candidate",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_051_eval050_buckets_pair_confirm_patched_7gpu_runner_candidate.txt",
+      "updated_at_utc": "2026-03-27T16:58:48Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
+      "name": "eval_051_eval050_buckets_pair_confirm_patched_7gpu_runner_control",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_051_eval050_buckets_pair_confirm_patched_7gpu_runner_control.txt",
+      "updated_at_utc": "2026-03-27T16:51:04Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
       "name": "eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu_runner_candidate",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu_runner_candidate.txt",
       "updated_at_utc": "2026-03-27T16:22:20Z",
@@ -5293,30 +5485,6 @@
       "name": "eval_048_eval047_ttt_epochs_pair_patched_7gpu_runner_candidate",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_048_eval047_ttt_epochs_pair_patched_7gpu_runner_candidate.txt",
       "updated_at_utc": "2026-03-27T15:06:19Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_048_eval047_ttt_epochs_pair_patched_7gpu_runner_control",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_048_eval047_ttt_epochs_pair_patched_7gpu_runner_control.txt",
-      "updated_at_utc": "2026-03-27T14:48:32Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_047_eval045_patched_helper_7gpu_control_runner_control",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_047_eval045_patched_helper_7gpu_control_runner_control.txt",
-      "updated_at_utc": "2026-03-27T14:24:16Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -5665,14 +5833,14 @@
       "docs/sota_records/sota_records_index.md            |   30 +-",
       ".../reference_materials/latest_sota_snapshot.md    |    2 +-",
       ".../planning/experiment_ledger.md                  |    1 +",
-      ".../planning/next_experiment.md                    |  296 ++--",
-      ".../planning/research_memory.md                    |   67 +-",
-      ".../reports/comparison_summary.md                  |   12 +",
-      ".../reports/latest_status.md                       |  127 +-",
+      ".../planning/next_experiment.md                    |  323 ++--",
+      ".../planning/research_memory.md                    |   36 +-",
+      ".../reports/comparison_summary.md                  |   19 +",
+      ".../reports/latest_status.md                       |  119 +-",
       ".../tools/gpu_experiment_runner.py                 |   31 +-",
       "research_lab_pg/scripts/codex_research_loop.sh     |    3 +-",
       ".../scripts/start_parameter_golf_iteration.sh      |    5 +-",
-      "21 files changed, 261 insertions(+), 13064 deletions(-)"
+      "21 files changed, 320 insertions(+), 13000 deletions(-)"
     ]
   }
 }
