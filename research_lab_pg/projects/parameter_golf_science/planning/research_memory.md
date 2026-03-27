@@ -10,18 +10,53 @@ PR `#809` at `0.2952` remains legality-pending and is not the official target.
 This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - promoted quality baseline on the locked legality line: `eval_035=0.20079980`
-- freshest admissible runner-managed control on the promoted line: `eval_035 control=0.29081449`
-- previous promoted baseline on the same helper lineage: `eval_032=0.29081271`
+- freshest admissible runner-managed control on the promoted line: `eval_036 control=0.20079853`
+- previous same-helper promoted anchor on the same helper lineage: `eval_035=0.20079980`
 - previous legality baseline: `eval_027=0.29117839`
-- newest scored refinement round: `eval_035 buckets=2097152 candidate -> promote on promoted eval_031 T=0.95 line`
-- newest promoted comparison: `eval_035 candidate=0.20079980 vs fresh control=0.29081449 with external delta=-9456ms`
+- newest scored refinement round: `eval_036 TTT_LR=0.0020 candidate -> hold on promoted eval_035 line`
+- newest comparison: `eval_036 candidate=0.20081880 vs fresh control=0.20079853 with runner delta=+7889ms and external delta about +8096ms`
 - official-anchor gap on the active legality line: `0.20079980 - 0.4416 = -0.24080020`
-- open problem: scalar-temperature tuning, launcher bypass, and TTT epoch count are closed on this helper lineage; bucket geometry is now reopened and promoted at `2097152`, so future refinement rounds should hold that setting fixed unless they are explicitly rechecking stability.
+- open problem: scalar-temperature tuning, launcher bypass, TTT epoch count, refreshed bucket geometry, and downward `TTT_LR` retuning are now all closed on this helper lineage; future refinement rounds should hold `EVAL_LOGIT_TEMP=0.95`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed unless the next brief explicitly reopens one of them.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_035_eval031_bucket_geometry_pair`
+## Newest Critical Result - `eval_036_eval035_ttt_lr_pair`
+
+- The reviewed refinement-phase TTT-learning-rate pair executed cleanly on the promoted `eval_035` legality lineage with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after both runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
+  - reused the exact locked `eval_031` helper with no edits
+  - reused the exact same checkpoint, artifact, runner path, environment, tokenizer, dataset, stride, legal TTT settings, and PR809 vectorized n-gram settings
+  - kept `EVAL_LOGIT_TEMP=0.95` fixed
+  - kept `NGRAM_EVAL_BUCKETS=2097152` fixed
+  - changed only `TTT_LR` between `0.0025` and `0.0020`
+  - changed only operational identifiers such as `RUN_ID`, runner log dir, and runner run name
+- The fresh runner-managed control in `physicslm` on GPUs `0,1,2,3,4,5,6,7` scored:
+  - `legal_ttt_exact val_loss=0.33903990`
+  - `legal_ttt_exact val_bpb=0.20079853`
+  - script eval wallclock `582012ms`
+  - runner-managed wallclock `626047ms`
+  - external top-level wallclock `626047ms` via runner-total proxy, with metadata UTC timestamps independently implying about `626000ms`
+- The fresh control passed the reviewed admissibility gate versus promoted `eval_035`:
+  - `val_bpb` drift `-0.00000127`
+  - external wallclock drift `+870ms`
+- The fresh runner-managed candidate with `TTT_LR=0.0020` scored:
+  - `legal_ttt_exact val_loss=0.33907413`
+  - `legal_ttt_exact val_bpb=0.20081880`
+  - script eval wallclock `591247ms`
+  - runner-managed wallclock `633936ms`
+  - external top-level wallclock `634143ms`
+- Required comparisons:
+  - candidate vs fresh control: `+0.00002027 BPB`, `+9235ms` script, `+7889ms` runner-managed, `+8096ms` external
+  - control vs promoted `eval_035`: `-0.00000127 BPB`, `-260ms` script, `+1034ms` runner-managed, `+870ms` external
+  - candidate vs historical `eval_015`: `+0.00107678 BPB`
+- Emitted telemetry stayed essentially flat across the pair:
+  - any-match fraction `0.98387585 -> 0.98387585`
+  - avg alpha on matched `0.63990797 -> 0.63995303`
+- Decision label: `hold`.
+- Interpretation: the promoted `2097152`-bucket legality line still prefers `TTT_LR=0.0025`. Downward TTT-LR retuning is now closed negatively on this helper lineage unless a future round changes the operating point materially.
+
+## Previous Critical Result - `eval_035_eval031_bucket_geometry_pair`
 
 - The reviewed refinement-phase bucket-geometry pair executed cleanly on the locked promoted `eval_031` legality lineage at `EVAL_LOGIT_TEMP=0.95` with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after both runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
