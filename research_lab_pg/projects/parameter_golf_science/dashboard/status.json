@@ -1,62 +1,59 @@
 {
-  "generated_at_utc": "2026-03-27T03:14:01Z",
+  "generated_at_utc": "2026-03-27T03:41:49Z",
   "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
   "repo_root": "/newcpfs/lxh/parameter-golf",
-  "external_sota_bpb": 0.4416,
+  "external_sota_bpb": 1.1194,
   "latest_sota": {
-    "source": "https://github.com/openai/parameter-golf/pulls",
-    "top_run": "Complementary Training + Backoff N-gram + TTT",
-    "top_author": "community",
-    "top_score": 0.4416,
+    "source": "https://raw.githubusercontent.com/openai/parameter-golf/main/README.md",
+    "top_run": "LeakyReLU² + Legal Score-First TTT + Parallel Muon",
+    "top_author": "abaybektursun",
+    "top_score": 1.1194,
     "entries": [
-      "1. `Complementary Training + Backoff N-gram + TTT` | score `0.4416` | community | 2026-03-26 | PR #803: CURRENT TARGET — train loss weighted by bigram-predictability, backoff n-gram orders 2-10 at eval, AdamW TTT (LR=5e-4, 4 epochs/chunk, Polyak EMA 0.998, freeze 9/11 blocks)",
-      "2. `X-WING 3D Cubric + Complementary Training` | score `0.4820` | community | 2026-03-26 | PR #814: cubric architecture + complementary training",
-      "3. `Order-Adaptive Entropy Gating + BackoffNgramMixer` | score `0.5466` | community | 2026-03-26 | PR #798: per-order entropy thresholds + drift-free TTT",
-      "4. `BackoffNgramMixer baseline` | score `0.6671` | community | 2026-03-26 | PR #813: simplest n-gram backoff, orders 2-10, entropy-adaptive alpha — good first target"
+      "1. `LeakyReLU² + Legal Score-First TTT + Parallel Muon` | score `1.1194` | abaybektursun | 2026-03-23 | On PR #549: LeakyReLU(0.5)^2 + TTT + Parallel Muon on the PR #414 stack",
+      "2. `11L EMA + GPTQ-lite + warmdown3500` | score `1.1228` | signalrush | 2026-03-22 | On PR #374: GPTQ-lite clip search + EMA, plus warmdown3500 and QAT@0.15",
+      "3. `11L Partial RoPE + LN Scale + EMA + XSA4` | score `1.1248` | jfprincz | 2026-03-21 | On PR #287: Partial RoPE (16/64) + layerwise LN scale",
+      "4. `11L XSA4 + EMA + Int6 MLP3x` | score `1.1271` | jfprincz | 2026-03-20 | On PR #198: XSA on the last 4 layers + EMA replacing SWA"
     ],
     "motifs": [
-      "`N-gram backoff cache (eval-time)` is the single biggest technique in ALL top 2026-03-26 entries.",
-      "`Entropy-adaptive alpha mixing` appears in all n-gram entries: mix more when model is uncertain.",
-      "`Score-first legality`: all n-gram caches are backward-looking (updated after scoring, not before).",
-      "`TTT (Test-Time Training)` still adds value but is now secondary to n-gram cache."
+      "`Int6 quantization` appears in 4 of the current top 8 leaderboard entries.",
+      "`EMA` appears in 3 of the current top 8 leaderboard entries.",
+      "`MLP3x` appears in 3 of the current top 8 leaderboard entries.",
+      "`XSA` appears in 3 of the current top 8 leaderboard entries."
     ]
   },
   "local_best_bpb": {
     "val_bpb": 0.29117839,
     "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
-    "matched_text": "Local PR `#809` runtime refinement: batched torch stats `eval_026` vs vectorized post-lookup `eval_027` | Candidate: `0.29117839`"
+    "matched_text": "Local PR `#809` orchestration-only refinement: `eval_027` vs official-eval-only `eval_028` | Baseline: `0.29117839`"
   },
-  "gap_to_sota": -0.150422,
+  "gap_to_sota": -0.828222,
   "latest_status_sections": {
-    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, but the active legality baseline on the locked PR `#809` line is now `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest controlled runtime-only result is now `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`.\n- The helper/artifact guardrail for `eval_027` passed cleanly. The copied source helper from `eval_026` was `119346` bytes with SHA-256 `62c19517ea4278a89f4b89f93277f176452a72e55edd315db352df36b4ea25ba`; the edited `eval_027` helper stayed fixed before and after launch at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`; the saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged before and after the run at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.\n- The exact implementation diff versus `eval_026` stayed within the reviewed single-variable scope:\n  - added one env var `NGRAM_EVAL_VECTORIZE_POSTLOOKUP`\n  - preserved exact `eval_026` behavior when the switch is `0`\n  - changed only `score_segments()` so the switch `1` path vectorizes the remaining post-lookup matched-order, alpha, probability-mixing, byte-accounting, and histogram work across the scorer batch\n  - left `NgramEvalCache`, scorer-batch lookup batching, batch torch-stats extraction, score-first scheduling, TTT, and accounting semantics unchanged\n  - added only the requested vectorized-postlookup telemetry\n- The required disabled parity gate passed at `1.11934901`, only `-0.00000039` versus the locked `eval_026` disabled-parity reference `1.11934940`.\n- The required enabled same-helper held-out control also passed:\n  - exact `val_bpb=1.20586072`\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=1769`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=469`\n  - `ngram_postlookup_vectorized_batches=0`\n  - `ngram_postlookup_vectorized_elapsed_ms=0`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1139`\n- The enabled vectorized held-out screen also stayed controlled:\n  - exact `val_bpb=1.20586294`\n  - delta vs same-helper control: `+0.00000222`\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=1866`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=480`\n  - `ngram_postlookup_vectorized_batches=1040`\n  - `ngram_postlookup_vectorized_positions_total=2097152`\n  - `ngram_postlookup_vectorized_elapsed_ms=40753`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1157`\n- The full official `eval_027` run scored `legal_ttt_exact val_loss=0.49164251`, `legal_ttt_exact val_bpb=0.29117839`.\n- Delta summary for `eval_027`:\n  - vs `eval_026=0.29117999`: `-0.00000160`\n  - vs official snapshot target `0.4416`: `-0.15042161`\n- Final `eval_027` lookup, scorer-stats, vectorized-postlookup, and match statistics:\n  - `ngram_ctx_key_precompute resident_bytes=1984692256 elapsed_ms=20904`\n  - `ngram_batch_lookup_call_count=30770`\n  - `ngram_batch_lookup_elapsed_ms=20336`\n  - `ngram_batch_lookup_positions_total=62021632`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=30770`\n  - `ngram_torch_stats_elapsed_ms=3223`\n  - `ngram_torch_stats_scored_positions_total=62021632`\n  - `ngram_postlookup_vectorized_batches=30770`\n  - `ngram_postlookup_vectorized_positions_total=62021632`\n  - `ngram_postlookup_vectorized_elapsed_ms=1177650`\n  - `ngram_update_batch_timing calls=63 elapsed_ms=32130`\n  - any-match fraction `0.98387524`\n  - average applied alpha on matched positions `0.64247077`\n  - matched-order histogram `{\"order_2\":120864,\"order_3\":808024,\"order_4\":915947,\"order_5\":767349,\"order_6\":844813,\"order_7\":1317753,\"order_8\":3289964,\"order_9\":52956834}`\n- Runtime improved materially and now recovers script legality. The enabled `eval_027` full-val run took `574202ms` script eval wallclock and `615s` managed wallclock, which is `-32123ms` and `-32s` versus `eval_026`. The script path is now legal by `25798ms`, while managed wallclock remains `15s` above `600s`.",
-    "Most Important Open Question": "Now that the locked PR `#809` evaluator is script-legal, is any further runtime work even necessary, and if so, should it target `update_batch()` / managed-path overhead rather than scorer-side post-lookup bookkeeping?",
-    "Active Experiment ID": "`eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`",
-    "Latest Result Summary": "- Completed `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337` in [summary.md](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/summary.md).\n- Controlled intervention actually executed:\n  - copied the exact `eval_026` helper into a fresh `eval_027` run directory\n  - reused the exact saved seed-`1337` `arch_010` checkpoint/export lineage unchanged\n  - changed only scorer-side post-lookup bookkeeping through a default-off `NGRAM_EVAL_VECTORIZE_POSTLOOKUP` switch layered on top of the locked scorer-batch lookup and batched torch-stats paths\n  - kept `NgramEvalCache`, score-first scheduling, TTT, alpha math, chunking, tokenizer, dataset, and artifact bytes fixed\n  - added only minimal vectorized-postlookup telemetry\n  - ran one disabled parity eval, one enabled same-helper held-out control, one enabled held-out screen, and one enabled managed full-val candidate on `8x NVIDIA L20Z` in `physicslm`\n- Managed runs:\n  - environment: `physicslm`\n  - GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`\n  - disabled parity result: `legal_ttt_exact val_bpb=1.11934901`, `val_loss=1.88996891`\n  - held-out control result: `legal_ttt_exact val_bpb=1.20586072`, `val_loss=2.03664882`\n  - held-out candidate result: `legal_ttt_exact val_bpb=1.20586294`, `val_loss=2.03665257`\n  - final enabled result: `legal_ttt_exact val_bpb=0.29117839`, `val_loss=0.49164251`\n  - bytes: artifact `15555121`, code `125178`, total `15680299`\n  - byte status: under cap by `319701`\n- Timing:\n  - final script eval wallclock: `574202ms`\n  - final managed wallclock: `615s`\n  - vs `eval_026` script eval wallclock `606325ms`: `-32123ms`\n  - practical budget status: final result is script-legal by `25798ms`; managed wallclock remains `15s` over `600s`\n- Decision:\n  - helper/artifact identity stayed locked and all controls passed, so the result is directly comparable to `eval_026`\n  - scorer-side vectorized post-lookup accounting preserved BPB while recovering the remaining script-time miss\n  - `eval_027` should replace `eval_026` as the active legality baseline on the locked PR `#809` line",
-    "Recommended Next Step": "Keep `eval_027` fixed as the active legality baseline. If more runtime margin is still useful, target a different non-overlapping cost center such as `update_batch()` or managed-path overhead rather than scorer-side post-lookup work again."
+    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, but the active legality baseline on the locked PR `#809` line remains `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest controlled runtime-only result is now `eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`.\n- The `eval_028` helper/artifact guardrail stayed clean. The copied `eval_027` helper was `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`; the edited `eval_028` helper was `126904` bytes with SHA-256 `e1e55335df5a188738545811fe6a03516a4629bb343ebd3e57f847598eb0d5b3`; the saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.\n- The exact implementation diff versus `eval_027` stayed within the reviewed orchestration-only scope:\n  - added one env var `NGRAM_EVAL_OFFICIAL_ONLY`\n  - changed only top-level `main()` / eval-only orchestration\n  - suppressed inherited code-dump / `nvidia-smi` / train-shard logging on the official-only path\n  - added one coarse `official_eval_only_phase_timing` log\n  - left scorer, TTT, n-gram lookup/update, tokenizer, dataset, checkpoint lineage, and artifact bytes unchanged\n- The full official `eval_028` run scored `legal_ttt_exact val_loss=0.49164748`, `legal_ttt_exact val_bpb=0.29118133`.\n- Delta summary for `eval_028` vs active baseline `eval_027`:\n  - `val_bpb`: `+0.00000294`\n  - script eval wallclock: `574202ms -> 579356ms` (`+5154ms`)\n  - managed wallclock: `615s -> 616s` (`+1s`)\n  - managed minus script overhead: `40.798s -> 36.644s` (`-4.154s`)\n- The new helper-local phase split for `eval_028` was:\n  - process start to official-eval start: `14940ms`\n  - official-eval duration: `579356ms`\n  - official-eval end to process exit: `547ms`\n  - helper total process time: `594842ms`\n  - inferred runner-managed overhead outside helper: `21158ms`\n- Interpretation: the orchestration-only fast path reduced helper-local pre/post work to about `15.5s`, but managed legality still failed because a larger residual remains outside the helper in the managed runner path. `eval_028` is therefore informative but non-promotable.",
+    "Most Important Open Question": "If managed legality is still worth pursuing on the already script-legal `eval_027` line, can the remaining roughly `21s` of runner-managed overhead outside the helper be reduced without touching the locked scorer path?",
+    "Active Experiment ID": "`eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`",
+    "Latest Result Summary": "- Completed `eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337` in [summary.md](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337/summary.md).\n- Controlled intervention actually executed:\n  - copied the exact `eval_027` helper into a fresh `eval_028` run directory\n  - reused the exact saved seed-`1337` `arch_010` checkpoint/export lineage unchanged\n  - added only one default-off orchestration switch `NGRAM_EVAL_OFFICIAL_ONLY`\n  - changed only top-level logging/setup on the `EVAL_ONLY` path and added coarse pre/eval/post timings\n  - ran one enabled managed full official candidate on `8x NVIDIA L20Z` in `physicslm`\n- Managed run:\n  - environment: `physicslm`\n  - GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`\n  - final enabled result: `legal_ttt_exact val_bpb=0.29118133`, `val_loss=0.49164748`\n  - bytes: artifact `15555121`, code `126904`, total `15682025`\n  - byte status: under cap by `317975`\n- Timing:\n  - final script eval wallclock: `579356ms`\n  - final managed wallclock: `616s`\n  - final managed minus script overhead: `36.644s`\n  - helper-local phase split:\n    - pre-eval `14940ms`\n    - official eval `579356ms`\n    - post-eval `547ms`\n    - helper total `594842ms`\n  - inferred runner-managed overhead outside helper: `21158ms`\n- Decision:\n  - BPB stayed within the reviewed guardrail, so the result is scientifically comparable to `eval_027`\n  - helper-local orchestration trimming was real but insufficient\n  - `eval_028` should not replace `eval_027` as the active legality baseline\n  - the remaining runtime target, if pursued, is runner-managed overhead outside the helper rather than more scorer or helper-harness trimming",
+    "Recommended Next Step": "Keep `eval_027` fixed as the active legality baseline. If another runtime round is still necessary, target runner-managed overhead outside the helper rather than revisiting scorer-side code or another top-level helper-orchestration trim."
   },
   "next_experiment_sections": {
-    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase scorer-side post-lookup vectorization follow-up on the locked `eval_026` PR `#809` legality line.\n\n- Executed the reviewed brief materially as written:\n  - created `runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`\n  - copied the exact `eval_026` helper into the new run directory\n  - changed only one scorer-side runtime lever: the remaining post-lookup accounting path in `score_segments()` is now optionally vectorized across the scorer batch after the already-validated batch lookup and batch torch-stats steps\n  - kept the saved seed-`1337` checkpoint/export lineage unchanged\n  - ran one disabled full-val parity check\n  - ran one enabled same-helper held-out control with `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=0`\n  - ran one enabled held-out candidate screen with `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`\n  - ran one enabled full official eval in `physicslm` on `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`",
-    "Experiment ID": "`eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`",
-    "Category": "- evaluation\n\nOperational subtype: `runtime-only scorer-side post-lookup accounting vectorization on locked PR #809 legality line`",
-    "Baseline / Comparison": "Primary runtime baseline:\n- `eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337`\n  - `val_bpb=0.29117999`\n  - script eval wallclock `606325ms`\n  - managed wallclock `647s`\n\nRequired semantic control anchors:\n- disabled parity from `eval_026`: `1.11934940`\n- continuity held-out reference from `eval_026`: `1.20584731`\n- same-helper held-out control for this round: `1.20586072`\n\nExternal comparison:\n- official snapshot target `PR #803`: `0.4416`",
-    "Hypothesis": "If the remaining `6325ms` legality miss after `eval_026` is dominated by Python-side post-lookup scorer bookkeeping, then vectorizing matched-order selection, alpha selection, probability mixing, byte accounting, and histogram updates across the scorer batch will recover the missing script time without materially changing BPB.",
-    "Why It Might Work": "- `eval_025` already removed most outer lookup-call overhead.\n- `eval_026` already removed repeated per-row exact neural-stat extraction.\n- The remaining clean residual cost was the Python row loop after lookup results and exact batch neural stats already existed.",
-    "Minimal Intervention": "Copy the exact `eval_026` helper into a fresh run directory, add one default-off env switch, and change only the enabled scorer path in `score_segments()` so the remaining post-lookup accounting is vectorized across the scorer batch. Keep checkpoint/export lineage, lookup behavior, TTT behavior, alpha math, chunking, tokenizer, dataset, and export path fixed.",
-    "Variables To Change": "- new env control: `NGRAM_EVAL_VECTORIZE_POSTLOOKUP`\n- reviewed candidate setting: `1`\n- scorer behavior when enabled:\n  - build one scorer-batch score mask\n  - flatten scorer positions and targets once\n  - keep lookup batched through the existing `cache.batch_lookup()` by-batch path\n  - compute matched-order / alpha / probability mixing in vectorized form\n  - reduce byte/token counters in batch form\n  - update the matched-order histogram from batched counts\n- minimal telemetry:\n  - `ngram_postlookup_vectorized_batches`\n  - `ngram_postlookup_vectorized_positions_total`\n  - `ngram_postlookup_vectorized_elapsed_ms`",
-    "Variables To Hold Fixed": "- exact saved seed-`1337` `final_model.pt` and `final_model.int6.ptz`\n- exact `eval_026` helper outside the new scorer switch\n- exact `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`\n- exact `NGRAM_EVAL_BATCH_TORCH_STATS=1`\n- exact `NgramEvalCache` lookup/update semantics\n- `NGRAM_EVAL_MIN_ORDER=2`\n- `NGRAM_EVAL_MAX_ORDER=9`\n- `NGRAM_EVAL_BUCKETS=4194304`\n- `NGRAM_EVAL_MIN_COUNT=2`\n- `NGRAM_EVAL_CHUNK_TOKENS=1000000`\n- locked alpha / entropy / order-mult settings\n- legal score-first TTT settings\n- tokenizer, dataset, eval protocol, export bytes\n- no retraining\n- no export rewrite\n- no order / bucket / chunk / backend / lookup-policy / scorer-batch-size sweep",
-    "Exact Implementation Diff Versus `eval_026`": "- added one env var in `Hyperparameters`:\n  - `ngram_eval_vectorize_postlookup = bool(int(os.environ.get(\"NGRAM_EVAL_VECTORIZE_POSTLOOKUP\", \"0\")))`\n- changed the legal scorer log line to expose `vectorize_postlookup`\n- added scorer-side vectorized-postlookup telemetry accumulators:\n  - `postlookup_vectorized_batches`\n  - `postlookup_vectorized_positions_total`\n  - `postlookup_vectorized_elapsed_ms`\n- changed only `score_segments()` to:\n  - preserve exact `eval_026` behavior when the switch is `0`\n  - when the switch is `1`, and only on top of the already-enabled batch-lookup plus batch-torch-stats path, compute post-lookup accounting on one flattened scorer batch instead of in the per-row Python loop\n  - keep `NgramEvalCache`, TTT, lookup policy, and all held-fixed settings unchanged",
-    "Identity Checks": "- Source helper from `eval_026` before copy:\n  - `train_gpt.py`: `119346` bytes\n  - SHA-256 `62c19517ea4278a89f4b89f93277f176452a72e55edd315db352df36b4ea25ba`\n- New helper before launch and after all runs:\n  - `runs/eval_027.../train_gpt.py`: `125178` bytes\n  - SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`\n- Saved artifact lineage stayed unchanged before and after all runs:\n  - `final_model.pt`: `106178569` bytes, `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - `final_model.int6.ptz`: `15555121` bytes, `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`",
-    "Disabled Parity": "- Full-val exact result:\n  - `val_loss=1.88996891`\n  - `val_bpb=1.11934901`\n- Delta vs `eval_026` disabled parity `1.11934940`: `-0.00000039`\n- Script eval wallclock: `468349ms`\n- Managed wallclock: `511s`\n- Parity decision: `pass`",
-    "Enabled Same-Helper Held-Out Control": "- Frozen held-out exact result:\n  - `val_loss=2.03664882`\n  - `val_bpb=1.20586072`\n- Telemetry:\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=1769`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=469`\n  - `ngram_postlookup_vectorized_batches=0`\n  - `ngram_postlookup_vectorized_elapsed_ms=0`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1139`\n- Script eval wallclock: `24971ms`\n- Managed wallclock: `66s`\n- Control decision: `pass`",
-    "Enabled Held-Out Screen": "- Frozen held-out exact result:\n  - `val_loss=2.03665257`\n  - `val_bpb=1.20586294`\n- Delta vs same-helper control `1.20586072`: `+0.00000222`\n- Telemetry:\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=1866`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=480`\n  - `ngram_postlookup_vectorized_batches=1040`\n  - `ngram_postlookup_vectorized_positions_total=2097152`\n  - `ngram_postlookup_vectorized_elapsed_ms=40753`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1157`\n- Script eval wallclock: `24453ms`\n- Managed wallclock: `67s`\n- Screen decision: `controlled, proceed to full eval`",
-    "Enabled Full Official Eval": "- Exact result:\n  - `val_loss=0.49164251`\n  - `val_bpb=0.29117839`\n- Script eval wallclock: `574202ms`\n- Managed wallclock: `615s`\n- Telemetry:\n  - context-key precompute `resident_bytes=1984692256 elapsed_ms=20904`\n  - `ngram_batch_lookup_call_count=30770`\n  - `ngram_batch_lookup_elapsed_ms=20336`\n  - `ngram_batch_lookup_positions_total=62021632`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=30770`\n  - `ngram_torch_stats_elapsed_ms=3223`\n  - `ngram_torch_stats_scored_positions_total=62021632`\n  - `ngram_postlookup_vectorized_batches=30770`\n  - `ngram_postlookup_vectorized_positions_total=62021632`\n  - `ngram_postlookup_vectorized_elapsed_ms=1177650`\n  - `ngram_update_batch_timing calls=63 elapsed_ms=32130`\n  - any-match fraction `0.98387524`\n  - average alpha on matched positions `0.64247077`\n  - matched-order histogram:\n    - `order_2=120864`\n    - `order_3=808024`\n    - `order_4=915947`\n    - `order_5=767349`\n    - `order_6=844813`\n    - `order_7=1317753`\n    - `order_8=3289964`\n    - `order_9=52956834`",
-    "Delta Summary": "- Vs `eval_026`:\n  - `val_bpb`: `-0.00000160`\n  - script eval wallclock: `-32123ms`\n  - managed wallclock: `-32s`\n  - `ngram_ctx_key_precompute elapsed_ms`: `-407ms`\n  - `ngram_batch_lookup_elapsed_ms`: `+462ms`\n  - `ngram_torch_stats_elapsed_ms`: `-34ms`\n  - `ngram_update_batch_timing elapsed_ms`: `-237ms`\n  - `ngram_postlookup_vectorized_elapsed_ms`: `0 -> 1177650`\n- Vs script budget:\n  - `600000ms -> 574202ms` (`-25798ms`, legal)\n- Vs official target `0.4416`:\n  - `val_bpb`: `-0.15042161`",
-    "Bytes": "- Artifact bytes: `15555121`\n- Code bytes: `125178`\n- Total bytes: `15680299`\n- Headroom under `16,000,000`: `319701`",
-    "Success Metric": "Primary success criterion:\n- script eval wallclock `<= 600000ms`\n\nSecondary success criterion:\n- improve by at least `6325ms` vs `eval_026`\n\nQuality guardrails:\n- disabled parity within `+-0.0002`\n- enabled held-out candidate within `+-0.0001` of same-helper control\n- full official `val_bpb` within `+-0.0005` of `eval_026`\n\nOutcome:\n- all required controls passed\n- full official BPB stayed effectively locked\n- script eval improved by `32123ms` and is now legal\n- managed wallclock improved by `32s` but remains `15s` above `600s`",
-    "Expected Effect": "- Recover the remaining legality gap on the locked `eval_026` line without materially changing BPB.",
-    "Actual Result": "- The intervention preserved semantics and improved BPB slightly.\n- The official script eval crossed from `606325ms` to `574202ms`, so legality was recovered on the script metric.\n- Other measured cost centers stayed near-locked, which supports the reviewed interpretation that the removed row-by-row Python post-lookup path was the residual bottleneck.",
-    "Interpretation": "This reviewed refinement-phase runtime-only follow-up succeeded. `eval_027` should replace `eval_026` as the active legality baseline on the locked PR `#809` evaluator line.\n\nThe new `ngram_postlookup_vectorized_elapsed_ms` counter is an absolute cumulative timing for the replacement block, not a before/after delta against the old loop. The decisive evidence is the end-to-end wallclock recovery with near-flat lookup / torch-stats / update timings.",
-    "Next Step": "Keep `eval_027` fixed as the new active legality baseline. If more runtime headroom is still useful, target a different non-overlapping cost center such as `update_batch()` or the managed-path overhead rather than scorer-side post-lookup accounting again."
+    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase orchestration-only follow-up on top of the locked `eval_027` PR `#809` legality line.\n\n- Executed the reviewed brief materially as written:\n  - created `runs/eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`\n  - copied the exact `eval_027` helper into the new run directory\n  - added one default-off top-level env switch `NGRAM_EVAL_OFFICIAL_ONLY=1`\n  - changed only top-level orchestration/reporting inside `main()`\n  - kept the saved seed-`1337` checkpoint/export lineage unchanged\n  - ran one full official candidate in `physicslm` on `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`\n  - recorded coarse helper phase timings around the single official `legal_ttt_exact` eval",
+    "Experiment ID": "`eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`",
+    "Category": "- evaluation\n\nOperational subtype: `runtime-only helper-orchestration trim on locked PR #809 legality line`",
+    "Baseline / Comparison": "Primary runtime baseline:\n- `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`\n  - `val_bpb=0.29117839`\n  - script eval wallclock `574202ms`\n  - managed wallclock `615s`\n  - managed minus script overhead `40.798s`\n\nExternal comparison:\n- official snapshot target `PR #803`: `0.4416`\n- legality-pending reference `PR #809`: `0.2952`",
+    "Hypothesis": "If the remaining `15s` managed overrun after `eval_027` is mostly outside the locked scorer path, then an official-eval-only fast path will reduce managed wallclock to `<=600s` while keeping `val_bpb` within `±0.0001` of `eval_027` and leaving script eval roughly unchanged.",
+    "Why It Might Work": "- `eval_026 -> eval_027` recovered `32123ms` of script time while managed minus script overhead stayed large.\n- That pointed away from the locked scorer hot path and toward helper startup, teardown, or inherited run-local work around the single scored official call.",
+    "Minimal Intervention": "Copy the exact `eval_027` helper into a fresh run directory, add one default-off env switch, and change only top-level orchestration/reporting so the enabled path runs only the final official `legal_ttt_exact` evaluation on the saved artifact and emits coarse pre/eval/post timings.",
+    "Variables To Change": "- new env control: `NGRAM_EVAL_OFFICIAL_ONLY`\n- reviewed candidate setting: `1`\n- top-level behavior when enabled:\n  - skip full code dump to log\n  - skip `nvidia-smi` logging\n  - skip training-shard counting/logging\n  - keep only the saved-artifact load plus final official eval path\n  - emit:\n    - `process_to_official_eval_start_ms`\n    - `official_eval_duration_ms`\n    - `official_eval_end_to_process_exit_ms`\n    - `process_total_ms`",
+    "Variables To Hold Fixed": "- exact `eval_027` scorer code and n-gram mechanism\n- exact saved seed-`1337` `final_model.pt` and `final_model.int6.ptz`\n- exact `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`\n- exact `NGRAM_EVAL_BATCH_TORCH_STATS=1`\n- exact `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`\n- exact `NGRAM_EVAL_MIN_ORDER=2`\n- exact `NGRAM_EVAL_MAX_ORDER=9`\n- exact `NGRAM_EVAL_BUCKETS=4194304`\n- exact `NGRAM_EVAL_MIN_COUNT=2`\n- exact `NGRAM_EVAL_CHUNK_TOKENS=1000000`\n- locked alpha / entropy / order-mult settings\n- locked legal TTT settings\n- tokenizer, dataset, stride `64`, export bytes\n- no retraining\n- no export rewrite\n- no scorer-side algorithm change",
+    "Exact Implementation Diff Versus `eval_027`": "- added one env var in `Hyperparameters`:\n  - `ngram_eval_official_only = bool(int(os.environ.get(\"NGRAM_EVAL_OFFICIAL_ONLY\", \"0\")))`\n- changed only `main()` / top-level eval-only orchestration so the official-only path:\n  - suppresses inherited code-dump / `nvidia-smi` / train-shard logs\n  - keeps only val-token setup, artifact load, and the locked final official eval\n  - records coarse helper phase timing around the single official eval\n- left `score_segments()`, `NgramEvalCache`, TTT math, lookup/update semantics, tokenizer, dataset, and artifact handling unchanged",
+    "Identity Checks": "- Source helper before copy:\n  - `runs/eval_027.../train_gpt.py`: `125178` bytes\n  - SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`\n- New helper after edit:\n  - `runs/eval_028.../train_gpt.py`: `126904` bytes\n  - SHA-256 `e1e55335df5a188738545811fe6a03516a4629bb343ebd3e57f847598eb0d5b3`\n- Saved artifact lineage stayed unchanged:\n  - `final_model.pt`: `106178569` bytes, `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - `final_model.int6.ptz`: `15555121` bytes, `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`",
+    "Enabled Full Official Eval": "- Exact result:\n  - `val_loss=0.49164748`\n  - `val_bpb=0.29118133`\n- Script eval wallclock: `579356ms`\n- Managed wallclock: `616s`\n- Managed minus script overhead: `36.644s`\n- Helper-local phase timings:\n  - process start to official-eval start: `14940ms`\n  - official-eval duration: `579356ms`\n  - official-eval end to process exit: `547ms`\n  - helper total process time: `594842ms`\n- Inferred runner-managed overhead outside helper:\n  - `616000ms - 594842ms = 21158ms`\n- Reused scorer telemetry:\n  - `ngram_ctx_key_precompute resident_bytes=1984692256 elapsed_ms=20645`\n  - `ngram_batch_lookup_call_count=30770`\n  - `ngram_batch_lookup_elapsed_ms=20226`\n  - `ngram_torch_stats_batches=30770`\n  - `ngram_torch_stats_elapsed_ms=3297`\n  - `ngram_postlookup_vectorized_batches=30770`\n  - `ngram_postlookup_vectorized_elapsed_ms=1171231`\n  - `ngram_update_batch_timing calls=63 elapsed_ms=32505`\n  - any-match fraction `0.98387524`\n  - average alpha on matched positions `0.64246944`",
+    "Delta Summary": "- Vs `eval_027`:\n  - `val_bpb`: `+0.00000294`\n  - script eval wallclock: `+5154ms`\n  - managed wallclock: `+1s`\n  - managed minus script overhead: `-4.154s`\n- Vs managed budget:\n  - `600s -> 616s` (`+16s`, still illegal)\n- Vs helper-local `600000ms` process budget:\n  - `594842ms` (`-5158ms`, helper itself is now under budget)\n- Vs official target `0.4416`:\n  - `val_bpb`: `-0.15041867`",
+    "Bytes": "- Artifact bytes: `15555121`\n- Code bytes: `126904`\n- Total bytes: `15682025`\n- Headroom under `16,000,000`: `317975`",
+    "Success Metric": "Primary success criterion:\n- managed wallclock `<=600s`\n\nQuality guardrail:\n- full official `val_bpb` within `±0.0001` of `eval_027`\n\nSecondary runtime guardrails:\n- script eval wallclock no worse than `eval_027` by more than `5000ms`\n- managed minus script overhead reduced to `<=26s`\n\nOutcome:\n- quality guardrail passed\n- managed wallclock target failed\n- script eval stayed close but missed the `+5000ms` tolerance by `154ms`\n- helper-local total process time fell below `600s`\n- remaining miss localizes mostly to managed-path overhead outside the helper rather than more scorer or helper-harness trimming",
+    "Expected Effect": "- Keep BPB locked while reducing managed wallclock below `600s`.",
+    "Actual Result": "- BPB stayed effectively locked.\n- The helper-local fast path reduced helper pre/post work to about `15.5s` total and kept helper total process time under `600s`.\n- Managed wallclock still finished at `616s`, so the round did not achieve full managed legality.",
+    "Interpretation": "This is a controlled negative refinement result. `eval_028` should not replace `eval_027` as the active legality baseline.\n\nThe new phase split is still useful: the remaining `36.644s` managed minus script gap now decomposes into about `15.487s` of helper-local pre/post work and about `21.158s` outside the helper in the managed runner path.",
+    "Next Step": "If another runtime round is warranted, target runner-managed overhead outside the helper rather than another scorer-side or helper-orchestration trim on the locked `eval_027` line."
   },
   "experiment_rows": [
     {
@@ -327,6 +324,46 @@
     }
   ],
   "comparison_rows_all": [
+    {
+      "Comparison": "Local PR `#809` orchestration-only refinement: `eval_027` vs official-eval-only `eval_028`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.29117839`",
+      "Candidate": "`0.29118133`",
+      "Delta": "`+0.00000294`",
+      "Notes": "The helper-only fast path stayed well inside the reviewed BPB guardrail, so the runtime comparison remains scientifically interpretable."
+    },
+    {
+      "Comparison": "Local PR `#809` orchestration-only refinement: `eval_027` vs official-eval-only `eval_028`",
+      "Metric": "script eval wallclock",
+      "Baseline": "`574202ms`",
+      "Candidate": "`579356ms`",
+      "Delta": "`+5154ms`",
+      "Notes": "Script time stayed very close to the locked baseline but missed the secondary `+5000ms` tolerance by `154ms`, so the helper trim did not buy any scorer-path speedup."
+    },
+    {
+      "Comparison": "Local PR `#809` orchestration-only refinement: `eval_027` vs official-eval-only `eval_028`",
+      "Metric": "managed wallclock",
+      "Baseline": "`615s`",
+      "Candidate": "`616s`",
+      "Delta": "`+1s`",
+      "Notes": "Managed runtime did not improve on the real `8x NVIDIA L20Z` path, so this round is a controlled negative for full managed legality."
+    },
+    {
+      "Comparison": "Local PR `#809` orchestration-only refinement: `eval_027` vs official-eval-only `eval_028`",
+      "Metric": "managed minus script overhead",
+      "Baseline": "`40.798s`",
+      "Candidate": "`36.644s`",
+      "Delta": "`-4.154s`",
+      "Notes": "Some helper-local overhead was removed, but the reduction is far smaller than what would have been needed to cross the `600s` managed budget."
+    },
+    {
+      "Comparison": "Local PR `#809` orchestration-only refinement: `eval_028` helper-local pre/post overhead vs inferred runner-managed overhead outside helper",
+      "Metric": "residual managed overhead within `eval_028`",
+      "Baseline": "`helper pre+post 15.487s`",
+      "Candidate": "`runner-managed outside helper 21.158s`",
+      "Delta": "`runner +5.671s`",
+      "Notes": "The new phase split localizes the remaining miss: more overhead now sits outside the helper than inside it, so another helper-only trim is unlikely to be the right next move."
+    },
     {
       "Comparison": "Local PR `#809` semantic gate: `eval_027` same-helper held-out control vs vectorized held-out candidate",
       "Metric": "post-export `val_bpb`",
@@ -3218,40 +3255,54 @@
   ],
   "latest_run": {
     "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z",
-    "round_summary": {},
+    "round_summary": {
+      "round_001.meta": {
+        "round": "1",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.final.txt",
+        "worker_exit_code": "0"
+      }
+    },
     "phase_meta": {
       "planner": {
         "phase": "planner",
-        "round": "1",
-        "start_time": "2026-03-27T02:33:20Z",
-        "end_time": "2026-03-27T02:37:05Z",
+        "round": "2",
+        "start_time": "2026-03-27T03:14:41Z",
+        "end_time": "2026-03-27T03:18:16Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.planner.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.planner.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.planner.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.planner.final.txt"
       },
       "review": {
         "phase": "review",
-        "round": "1",
-        "start_time": "2026-03-27T02:37:05Z",
-        "end_time": "2026-03-27T02:38:40Z",
+        "round": "2",
+        "start_time": "2026-03-27T03:18:17Z",
+        "end_time": "2026-03-27T03:20:39Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.review.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.review.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.review.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.review.final.txt"
       },
       "worker": {
         "phase": "worker",
-        "round": "1",
-        "start_time": "2026-03-27T02:38:41Z",
-        "end_time": "2026-03-27T03:13:59Z",
+        "round": "2",
+        "start_time": "2026-03-27T03:20:39Z",
+        "end_time": "2026-03-27T03:41:47Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.worker.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.worker.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.worker.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_002.worker.final.txt"
       }
     }
   },
@@ -3259,11 +3310,11 @@
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z",
       "configured_rounds": 50,
-      "completed_rounds": 1,
-      "latest_round": "1",
+      "completed_rounds": 2,
+      "latest_round": "2",
       "latest_phase": "worker",
       "state": "in progress",
-      "latest_timestamp": "2026-03-27T03:13:59Z"
+      "latest_timestamp": "2026-03-27T03:41:47Z"
     },
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z",
@@ -3312,6 +3363,18 @@
     }
   ],
   "training_runs": [
+    {
+      "name": "eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337_final_official_only",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337_final_official_only.txt",
+      "updated_at_utc": "2026-03-27T03:35:18Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": false,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
     {
       "name": "eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_final_vectorized_on",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_final_vectorized_on.txt",
@@ -3363,18 +3426,6 @@
     {
       "name": "eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_final_batch_torch_on",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/final_batch_torch_on_8gpu/logs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_final_batch_torch_on.txt",
-      "updated_at_utc": "2026-03-27T02:40:22Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_screen_batch_torch_on",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/screen_batch_torch_on_8gpu/logs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_screen_batch_torch_on.txt",
       "updated_at_utc": "2026-03-27T02:40:22Z",
       "latest_step": 0,
       "total_steps": 0,
@@ -3490,6 +3541,12 @@
     }
   },
   "eval_runs": [
+    {
+      "run": "eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337",
+      "val_bpb": 0.0001,
+      "wallclock_ms": 574202,
+      "over_budget": false
+    },
     {
       "run": "eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337",
       "val_bpb": 0.19974202,
@@ -3699,17 +3756,17 @@
       "...ord_14_1.20143_2026-03-19_TrainingOptSeq4096.md | 1242 ----------------",
       "...ord_15_1.20576_2026-03-18_LongContextSeq2048.md | 1231 ---------------",
       "docs/sota_records/sota_records_index.md            |   30 +-",
-      ".../reference_materials/latest_sota_snapshot.md    |   14 +-",
-      ".../parameter_golf_science/dashboard/index.html    |   24 +-",
-      ".../parameter_golf_science/dashboard/status.json   |  959 +++---------",
+      ".../reference_materials/latest_sota_snapshot.md    |   67 +-",
+      ".../parameter_golf_science/dashboard/index.html    |   35 +-",
+      ".../parameter_golf_science/dashboard/status.json   |  371 ++---",
       ".../planning/experiment_ledger.md                  |    1 +",
-      ".../planning/next_experiment.md                    |  260 ++--",
-      ".../planning/research_memory.md                    |   62 +-",
-      ".../reports/comparison_summary.md                  |   12 +",
-      ".../reports/latest_status.md                       |  126 +-",
+      ".../planning/next_experiment.md                    |  264 ++--",
+      ".../planning/research_memory.md                    |   37 +-",
+      ".../reports/comparison_summary.md                  |    5 +",
+      ".../reports/latest_status.md                       |  121 +-",
       "research_lab_pg/scripts/codex_research_loop.sh     |    3 +-",
       ".../scripts/start_parameter_golf_iteration.sh      |    5 +-",
-      "22 files changed, 471 insertions(+), 13776 deletions(-)"
+      "22 files changed, 369 insertions(+), 13321 deletions(-)"
     ]
   }
 }

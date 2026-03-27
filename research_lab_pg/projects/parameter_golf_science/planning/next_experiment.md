@@ -3,234 +3,174 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase scorer-side post-lookup vectorization follow-up on the locked `eval_026` PR `#809` legality line.
+Completed on `2026-03-27` as the reviewed refinement-phase orchestration-only follow-up on top of the locked `eval_027` PR `#809` legality line.
 
 - Executed the reviewed brief materially as written:
-  - created `runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`
-  - copied the exact `eval_026` helper into the new run directory
-  - changed only one scorer-side runtime lever: the remaining post-lookup accounting path in `score_segments()` is now optionally vectorized across the scorer batch after the already-validated batch lookup and batch torch-stats steps
+  - created `runs/eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`
+  - copied the exact `eval_027` helper into the new run directory
+  - added one default-off top-level env switch `NGRAM_EVAL_OFFICIAL_ONLY=1`
+  - changed only top-level orchestration/reporting inside `main()`
   - kept the saved seed-`1337` checkpoint/export lineage unchanged
-  - ran one disabled full-val parity check
-  - ran one enabled same-helper held-out control with `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=0`
-  - ran one enabled held-out candidate screen with `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`
-  - ran one enabled full official eval in `physicslm` on `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`
+  - ran one full official candidate in `physicslm` on `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`
+  - recorded coarse helper phase timings around the single official `legal_ttt_exact` eval
 
 ## Experiment ID
-`eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`
+`eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`
 
 ## Category
 - evaluation
 
-Operational subtype: `runtime-only scorer-side post-lookup accounting vectorization on locked PR #809 legality line`
+Operational subtype: `runtime-only helper-orchestration trim on locked PR #809 legality line`
 
 ## Baseline / Comparison
 Primary runtime baseline:
-- `eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337`
-  - `val_bpb=0.29117999`
-  - script eval wallclock `606325ms`
-  - managed wallclock `647s`
-
-Required semantic control anchors:
-- disabled parity from `eval_026`: `1.11934940`
-- continuity held-out reference from `eval_026`: `1.20584731`
-- same-helper held-out control for this round: `1.20586072`
+- `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`
+  - `val_bpb=0.29117839`
+  - script eval wallclock `574202ms`
+  - managed wallclock `615s`
+  - managed minus script overhead `40.798s`
 
 External comparison:
 - official snapshot target `PR #803`: `0.4416`
+- legality-pending reference `PR #809`: `0.2952`
 
 ## Hypothesis
-If the remaining `6325ms` legality miss after `eval_026` is dominated by Python-side post-lookup scorer bookkeeping, then vectorizing matched-order selection, alpha selection, probability mixing, byte accounting, and histogram updates across the scorer batch will recover the missing script time without materially changing BPB.
+If the remaining `15s` managed overrun after `eval_027` is mostly outside the locked scorer path, then an official-eval-only fast path will reduce managed wallclock to `<=600s` while keeping `val_bpb` within `±0.0001` of `eval_027` and leaving script eval roughly unchanged.
 
 ## Why It Might Work
-- `eval_025` already removed most outer lookup-call overhead.
-- `eval_026` already removed repeated per-row exact neural-stat extraction.
-- The remaining clean residual cost was the Python row loop after lookup results and exact batch neural stats already existed.
+- `eval_026 -> eval_027` recovered `32123ms` of script time while managed minus script overhead stayed large.
+- That pointed away from the locked scorer hot path and toward helper startup, teardown, or inherited run-local work around the single scored official call.
 
 ## Minimal Intervention
-Copy the exact `eval_026` helper into a fresh run directory, add one default-off env switch, and change only the enabled scorer path in `score_segments()` so the remaining post-lookup accounting is vectorized across the scorer batch. Keep checkpoint/export lineage, lookup behavior, TTT behavior, alpha math, chunking, tokenizer, dataset, and export path fixed.
+Copy the exact `eval_027` helper into a fresh run directory, add one default-off env switch, and change only top-level orchestration/reporting so the enabled path runs only the final official `legal_ttt_exact` evaluation on the saved artifact and emits coarse pre/eval/post timings.
 
 ## Variables To Change
-- new env control: `NGRAM_EVAL_VECTORIZE_POSTLOOKUP`
+- new env control: `NGRAM_EVAL_OFFICIAL_ONLY`
 - reviewed candidate setting: `1`
-- scorer behavior when enabled:
-  - build one scorer-batch score mask
-  - flatten scorer positions and targets once
-  - keep lookup batched through the existing `cache.batch_lookup()` by-batch path
-  - compute matched-order / alpha / probability mixing in vectorized form
-  - reduce byte/token counters in batch form
-  - update the matched-order histogram from batched counts
-- minimal telemetry:
-  - `ngram_postlookup_vectorized_batches`
-  - `ngram_postlookup_vectorized_positions_total`
-  - `ngram_postlookup_vectorized_elapsed_ms`
+- top-level behavior when enabled:
+  - skip full code dump to log
+  - skip `nvidia-smi` logging
+  - skip training-shard counting/logging
+  - keep only the saved-artifact load plus final official eval path
+  - emit:
+    - `process_to_official_eval_start_ms`
+    - `official_eval_duration_ms`
+    - `official_eval_end_to_process_exit_ms`
+    - `process_total_ms`
 
 ## Variables To Hold Fixed
+- exact `eval_027` scorer code and n-gram mechanism
 - exact saved seed-`1337` `final_model.pt` and `final_model.int6.ptz`
-- exact `eval_026` helper outside the new scorer switch
 - exact `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`
 - exact `NGRAM_EVAL_BATCH_TORCH_STATS=1`
-- exact `NgramEvalCache` lookup/update semantics
-- `NGRAM_EVAL_MIN_ORDER=2`
-- `NGRAM_EVAL_MAX_ORDER=9`
-- `NGRAM_EVAL_BUCKETS=4194304`
-- `NGRAM_EVAL_MIN_COUNT=2`
-- `NGRAM_EVAL_CHUNK_TOKENS=1000000`
+- exact `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`
+- exact `NGRAM_EVAL_MIN_ORDER=2`
+- exact `NGRAM_EVAL_MAX_ORDER=9`
+- exact `NGRAM_EVAL_BUCKETS=4194304`
+- exact `NGRAM_EVAL_MIN_COUNT=2`
+- exact `NGRAM_EVAL_CHUNK_TOKENS=1000000`
 - locked alpha / entropy / order-mult settings
-- legal score-first TTT settings
-- tokenizer, dataset, eval protocol, export bytes
+- locked legal TTT settings
+- tokenizer, dataset, stride `64`, export bytes
 - no retraining
 - no export rewrite
-- no order / bucket / chunk / backend / lookup-policy / scorer-batch-size sweep
+- no scorer-side algorithm change
 
-## Exact Implementation Diff Versus `eval_026`
+## Exact Implementation Diff Versus `eval_027`
 - added one env var in `Hyperparameters`:
-  - `ngram_eval_vectorize_postlookup = bool(int(os.environ.get("NGRAM_EVAL_VECTORIZE_POSTLOOKUP", "0")))`
-- changed the legal scorer log line to expose `vectorize_postlookup`
-- added scorer-side vectorized-postlookup telemetry accumulators:
-  - `postlookup_vectorized_batches`
-  - `postlookup_vectorized_positions_total`
-  - `postlookup_vectorized_elapsed_ms`
-- changed only `score_segments()` to:
-  - preserve exact `eval_026` behavior when the switch is `0`
-  - when the switch is `1`, and only on top of the already-enabled batch-lookup plus batch-torch-stats path, compute post-lookup accounting on one flattened scorer batch instead of in the per-row Python loop
-  - keep `NgramEvalCache`, TTT, lookup policy, and all held-fixed settings unchanged
+  - `ngram_eval_official_only = bool(int(os.environ.get("NGRAM_EVAL_OFFICIAL_ONLY", "0")))`
+- changed only `main()` / top-level eval-only orchestration so the official-only path:
+  - suppresses inherited code-dump / `nvidia-smi` / train-shard logs
+  - keeps only val-token setup, artifact load, and the locked final official eval
+  - records coarse helper phase timing around the single official eval
+- left `score_segments()`, `NgramEvalCache`, TTT math, lookup/update semantics, tokenizer, dataset, and artifact handling unchanged
 
 ## Identity Checks
-- Source helper from `eval_026` before copy:
-  - `train_gpt.py`: `119346` bytes
-  - SHA-256 `62c19517ea4278a89f4b89f93277f176452a72e55edd315db352df36b4ea25ba`
-- New helper before launch and after all runs:
+- Source helper before copy:
   - `runs/eval_027.../train_gpt.py`: `125178` bytes
   - SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`
-- Saved artifact lineage stayed unchanged before and after all runs:
+- New helper after edit:
+  - `runs/eval_028.../train_gpt.py`: `126904` bytes
+  - SHA-256 `e1e55335df5a188738545811fe6a03516a4629bb343ebd3e57f847598eb0d5b3`
+- Saved artifact lineage stayed unchanged:
   - `final_model.pt`: `106178569` bytes, `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`
   - `final_model.int6.ptz`: `15555121` bytes, `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 
-## Disabled Parity
-- Full-val exact result:
-  - `val_loss=1.88996891`
-  - `val_bpb=1.11934901`
-- Delta vs `eval_026` disabled parity `1.11934940`: `-0.00000039`
-- Script eval wallclock: `468349ms`
-- Managed wallclock: `511s`
-- Parity decision: `pass`
-
-## Enabled Same-Helper Held-Out Control
-- Frozen held-out exact result:
-  - `val_loss=2.03664882`
-  - `val_bpb=1.20586072`
-- Telemetry:
-  - `ngram_batch_lookup_call_count=1040`
-  - `ngram_batch_lookup_elapsed_ms=1769`
-  - `ngram_torch_stats_batches=1040`
-  - `ngram_torch_stats_elapsed_ms=469`
-  - `ngram_postlookup_vectorized_batches=0`
-  - `ngram_postlookup_vectorized_elapsed_ms=0`
-  - `ngram_update_batch_timing calls=3 elapsed_ms=1139`
-- Script eval wallclock: `24971ms`
-- Managed wallclock: `66s`
-- Control decision: `pass`
-
-## Enabled Held-Out Screen
-- Frozen held-out exact result:
-  - `val_loss=2.03665257`
-  - `val_bpb=1.20586294`
-- Delta vs same-helper control `1.20586072`: `+0.00000222`
-- Telemetry:
-  - `ngram_batch_lookup_call_count=1040`
-  - `ngram_batch_lookup_elapsed_ms=1866`
-  - `ngram_torch_stats_batches=1040`
-  - `ngram_torch_stats_elapsed_ms=480`
-  - `ngram_postlookup_vectorized_batches=1040`
-  - `ngram_postlookup_vectorized_positions_total=2097152`
-  - `ngram_postlookup_vectorized_elapsed_ms=40753`
-  - `ngram_update_batch_timing calls=3 elapsed_ms=1157`
-- Script eval wallclock: `24453ms`
-- Managed wallclock: `67s`
-- Screen decision: `controlled, proceed to full eval`
-
 ## Enabled Full Official Eval
 - Exact result:
-  - `val_loss=0.49164251`
-  - `val_bpb=0.29117839`
-- Script eval wallclock: `574202ms`
-- Managed wallclock: `615s`
-- Telemetry:
-  - context-key precompute `resident_bytes=1984692256 elapsed_ms=20904`
+  - `val_loss=0.49164748`
+  - `val_bpb=0.29118133`
+- Script eval wallclock: `579356ms`
+- Managed wallclock: `616s`
+- Managed minus script overhead: `36.644s`
+- Helper-local phase timings:
+  - process start to official-eval start: `14940ms`
+  - official-eval duration: `579356ms`
+  - official-eval end to process exit: `547ms`
+  - helper total process time: `594842ms`
+- Inferred runner-managed overhead outside helper:
+  - `616000ms - 594842ms = 21158ms`
+- Reused scorer telemetry:
+  - `ngram_ctx_key_precompute resident_bytes=1984692256 elapsed_ms=20645`
   - `ngram_batch_lookup_call_count=30770`
-  - `ngram_batch_lookup_elapsed_ms=20336`
-  - `ngram_batch_lookup_positions_total=62021632`
-  - `ngram_batch_lookup_max_positions_per_call=4032`
+  - `ngram_batch_lookup_elapsed_ms=20226`
   - `ngram_torch_stats_batches=30770`
-  - `ngram_torch_stats_elapsed_ms=3223`
-  - `ngram_torch_stats_scored_positions_total=62021632`
+  - `ngram_torch_stats_elapsed_ms=3297`
   - `ngram_postlookup_vectorized_batches=30770`
-  - `ngram_postlookup_vectorized_positions_total=62021632`
-  - `ngram_postlookup_vectorized_elapsed_ms=1177650`
-  - `ngram_update_batch_timing calls=63 elapsed_ms=32130`
+  - `ngram_postlookup_vectorized_elapsed_ms=1171231`
+  - `ngram_update_batch_timing calls=63 elapsed_ms=32505`
   - any-match fraction `0.98387524`
-  - average alpha on matched positions `0.64247077`
-  - matched-order histogram:
-    - `order_2=120864`
-    - `order_3=808024`
-    - `order_4=915947`
-    - `order_5=767349`
-    - `order_6=844813`
-    - `order_7=1317753`
-    - `order_8=3289964`
-    - `order_9=52956834`
+  - average alpha on matched positions `0.64246944`
 
 ## Delta Summary
-- Vs `eval_026`:
-  - `val_bpb`: `-0.00000160`
-  - script eval wallclock: `-32123ms`
-  - managed wallclock: `-32s`
-  - `ngram_ctx_key_precompute elapsed_ms`: `-407ms`
-  - `ngram_batch_lookup_elapsed_ms`: `+462ms`
-  - `ngram_torch_stats_elapsed_ms`: `-34ms`
-  - `ngram_update_batch_timing elapsed_ms`: `-237ms`
-  - `ngram_postlookup_vectorized_elapsed_ms`: `0 -> 1177650`
-- Vs script budget:
-  - `600000ms -> 574202ms` (`-25798ms`, legal)
+- Vs `eval_027`:
+  - `val_bpb`: `+0.00000294`
+  - script eval wallclock: `+5154ms`
+  - managed wallclock: `+1s`
+  - managed minus script overhead: `-4.154s`
+- Vs managed budget:
+  - `600s -> 616s` (`+16s`, still illegal)
+- Vs helper-local `600000ms` process budget:
+  - `594842ms` (`-5158ms`, helper itself is now under budget)
 - Vs official target `0.4416`:
-  - `val_bpb`: `-0.15042161`
+  - `val_bpb`: `-0.15041867`
 
 ## Bytes
 - Artifact bytes: `15555121`
-- Code bytes: `125178`
-- Total bytes: `15680299`
-- Headroom under `16,000,000`: `319701`
+- Code bytes: `126904`
+- Total bytes: `15682025`
+- Headroom under `16,000,000`: `317975`
 
 ## Success Metric
 Primary success criterion:
-- script eval wallclock `<= 600000ms`
+- managed wallclock `<=600s`
 
-Secondary success criterion:
-- improve by at least `6325ms` vs `eval_026`
+Quality guardrail:
+- full official `val_bpb` within `±0.0001` of `eval_027`
 
-Quality guardrails:
-- disabled parity within `+-0.0002`
-- enabled held-out candidate within `+-0.0001` of same-helper control
-- full official `val_bpb` within `+-0.0005` of `eval_026`
+Secondary runtime guardrails:
+- script eval wallclock no worse than `eval_027` by more than `5000ms`
+- managed minus script overhead reduced to `<=26s`
 
 Outcome:
-- all required controls passed
-- full official BPB stayed effectively locked
-- script eval improved by `32123ms` and is now legal
-- managed wallclock improved by `32s` but remains `15s` above `600s`
+- quality guardrail passed
+- managed wallclock target failed
+- script eval stayed close but missed the `+5000ms` tolerance by `154ms`
+- helper-local total process time fell below `600s`
+- remaining miss localizes mostly to managed-path overhead outside the helper rather than more scorer or helper-harness trimming
 
 ## Expected Effect
-- Recover the remaining legality gap on the locked `eval_026` line without materially changing BPB.
+- Keep BPB locked while reducing managed wallclock below `600s`.
 
 ## Actual Result
-- The intervention preserved semantics and improved BPB slightly.
-- The official script eval crossed from `606325ms` to `574202ms`, so legality was recovered on the script metric.
-- Other measured cost centers stayed near-locked, which supports the reviewed interpretation that the removed row-by-row Python post-lookup path was the residual bottleneck.
+- BPB stayed effectively locked.
+- The helper-local fast path reduced helper pre/post work to about `15.5s` total and kept helper total process time under `600s`.
+- Managed wallclock still finished at `616s`, so the round did not achieve full managed legality.
 
 ## Interpretation
-This reviewed refinement-phase runtime-only follow-up succeeded. `eval_027` should replace `eval_026` as the active legality baseline on the locked PR `#809` evaluator line.
+This is a controlled negative refinement result. `eval_028` should not replace `eval_027` as the active legality baseline.
 
-The new `ngram_postlookup_vectorized_elapsed_ms` counter is an absolute cumulative timing for the replacement block, not a before/after delta against the old loop. The decisive evidence is the end-to-end wallclock recovery with near-flat lookup / torch-stats / update timings.
+The new phase split is still useful: the remaining `36.644s` managed minus script gap now decomposes into about `15.487s` of helper-local pre/post work and about `21.158s` outside the helper in the managed runner path.
 
 ## Next Step
-Keep `eval_027` fixed as the new active legality baseline. If more runtime headroom is still useful, target a different non-overlapping cost center such as `update_batch()` or the managed-path overhead rather than scorer-side post-lookup accounting again.
+If another runtime round is warranted, target runner-managed overhead outside the helper rather than another scorer-side or helper-orchestration trim on the locked `eval_027` line.
