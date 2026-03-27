@@ -3,79 +3,83 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase direct-launcher ablation attempt on top of the locked `eval_027` PR `#809` legality line, but the round stopped after the required fresh control missed the acceptance gate.
+Completed on `2026-03-27` as the reviewed refinement-phase global scoring temperature calibration ablation on top of the locked `eval_027` PR809-style vectorized n-gram plus legal TTT line.
 
 - Executed the reviewed brief materially as written:
-  - read the reviewed brief, the required planning/report files, `context/reference_materials/latest_sota_snapshot.md`, and the prior `eval_027` / `eval_028` / `eval_029` metadata needed to recover the exact child command and lineage
-  - changed no repo code and edited no helper, scorer, export, or runner files
-  - verified the exact `eval_027` helper bytes plus the saved checkpoint and artifact bytes and SHA-256 values before launch
-  - recovered the exact locked child command from the prior fresh-control metadata and reused it with a fresh shared `RUN_ID`
-  - ran one fresh official control through the default `tools/gpu_experiment_runner.py` path in `physicslm`
-  - measured outer wallclock externally on the top-level launcher
-  - checked the reviewed control gate immediately after the run
-  - stopped before the direct-launch candidate because the control missed the managed-wallclock gate by `1554ms`
+  - read the reviewed brief, the required planning/report files, `context/reference_materials/latest_sota_snapshot.md`, `context/reference_materials/user_proposed_ideas_eval_mixing.md`, and the locked `eval_027` helper before editing
+  - verified the exact locked helper, checkpoint, and artifact identities before any change
+  - copied the exact `eval_027` helper into a fresh `eval_031` run directory and edited only that copied helper
+  - added one default-off env knob `EVAL_LOGIT_TEMP`, applied only to neural scoring logits immediately before probability computation and before neural-to-n-gram mixing
+  - reused one fixed non-official calibration slice from the frozen `eval_009` held-out train shard and recorded its exact source/offset/token-count identity
+  - ran the required calibration grid `T in {0.95, 0.975, 1.00, 1.025, 1.05}` through `tools/gpu_experiment_runner.py` in `physicslm` on the pinned `8x NVIDIA L20Z` set
+  - confirmed `T=1.0` parity on the calibration slice
+  - launched exactly one full official candidate only after the best non-`1.0` temperature beat `T=1.0` on the slice by more than the reviewed `0.0002` gate
+  - measured runner-managed and external wallclock on the official run
 
 ## Experiment ID
-`eval_030_eval027_direct_launcher_ablation`
+`eval_031_eval027_global_temperature_calibration`
 
 ## Category
 - evaluation
 
-Operational subtype: `runtime-only direct-launcher ablation on locked eval_027 legality line`
+Operational subtype: `scoring-only neural-logit temperature calibration on locked eval_027 legality line`
 
 ## Baseline / Comparison
-Primary historical anchor:
-- `eval_027`: `val_bpb=0.29117839`, script eval wallclock `574202ms`, managed wallclock `615s`
+Primary locked official baseline:
+- `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`
+  - `val_bpb=0.29117839`
+  - script eval wallclock `574202ms`
+  - managed wallclock `615s`
 
-Nearest fresh-control context:
-- `eval_029` fresh control: `val_bpb=0.29117992`, script eval wallclock `582051ms`, managed wallclock `624825ms`
+Fresh stability anchor on the same locked line:
+- `eval_030` fresh control
+  - `val_bpb=0.29117961`
+  - script eval wallclock `583199ms`
+  - managed wallclock `626554ms`
 
-Reviewed acceptance gate before any candidate launch:
-- `val_bpb` within `±0.0001` of historical `eval_027`
-- managed wallclock no worse than `+10s` versus historical `eval_027`
+Calibration-slice parity anchor:
+- locked same-helper held-out control from `eval_027`
+  - `val_bpb=1.20586072`
 
 ## Hypothesis
-If a material share of the remaining managed overrun comes from the outer launcher path rather than the child eval itself, then bypassing `tools/gpu_experiment_runner.py` with a direct shell launch of the exact locked child command should reduce end-to-end wallclock by at least `10s` while preserving `val_bpb` within noise.
+The locked `eval_027` stack may still be slightly miscalibrated on the neural side after legal TTT and PR809-style n-gram backoff, so applying one global temperature only to neural scoring logits will improve post-export `val_bpb` without changing training, export bytes, or n-gram cache behavior.
 
 ## Why It Might Work
-- `eval_027` already made the script path legal.
-- `eval_028` showed helper-local total process time can fit under `600s`.
-- `eval_029` showed nearby repo-runner trimming did not solve the miss.
-- Research memory still left a genuinely different direct-launcher path as the last unresolved repo-adjacent runtime lever.
+- This is a minimal evaluation-side test on top of a line that already contains the current top local legality mechanism stack.
+- The user-priority temperature idea was already negative on the plain legal-TTT `arch_010` line (`eval_009`), but that does not make this redundant because `eval_027` adds the PR809 neural-plus-n-gram mixing path, which can change calibration.
 
 ## Minimal Intervention
-Change only the outer launcher path:
+Edit only the copied `eval_031` helper:
 
-- control via `tools/gpu_experiment_runner.py`
-- candidate planned as a direct `physicslm` launch with `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7`
-
-No repo files were edited for this round.
+- add default-off `EVAL_LOGIT_TEMP`
+- apply it only in the PR809 scorer where neural probabilities are formed
+- leave TTT adaptation loss, cache updates, n-gram alpha logic, export, training, checkpoint, and artifact untouched
 
 ## Variables To Change
-- outer launcher path only
+- `EVAL_LOGIT_TEMP` only
+- fixed calibration sweep: `0.95, 0.975, 1.00, 1.025, 1.05`
 
 ## Variables To Hold Fixed
-- exact `eval_027` helper bytes and SHA-256
-- exact saved `final_model.pt` bytes and SHA-256
-- exact saved `final_model.int6.ptz` bytes and SHA-256
-- exact official `legal_ttt_exact` child command semantics
+- exact locked `eval_027` helper lineage except for the new default-off temperature knob
+- exact saved checkpoint and artifact used by `eval_027`
 - exact PR809-style vectorized chunked n-gram settings
-- exact TTT settings
+- exact legal TTT settings
 - tokenizer, dataset, stride `64`
 - `physicslm` environment
-- exact pinned GPU indices
+- GPU count and pinned device set
 - no retraining
 - no export rewrite
-- no scorer-side edits
-- no helper-side edits
-- same outer wallclock measurement method for both arms
-- same outer stdout/stderr capture policy for both arms
+- no n-gram alpha/backoff changes
+- no runner-path changes
 
 ## Identity Checks
 - Helper:
-  - `runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/train_gpt.py`
-  - bytes: `125178`
-  - SHA-256: `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`
+  - source path: `runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/train_gpt.py`
+  - source bytes: `125178`
+  - source SHA-256: `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`
+  - copied edited path: `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`
+  - copied edited bytes: `125663`
+  - copied edited SHA-256: `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`
 - Saved checkpoint:
   - `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`
   - bytes: `106178569`
@@ -85,12 +89,27 @@ No repo files were edited for this round.
   - bytes: `15555121`
   - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 
-## Exact Child Command Recovered
+## Calibration Slice
+This round reused the exact frozen non-official held-out train slice first created in `eval_009`:
+
+- source shard: `/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_train_000000.bin`
+- source shard header: magic `20240520`, version `1`
+- source start token offset: `8388608`
+- copied token count: `2097153`
+- scored token count after load: `2097152`
+- source end token offset, exclusive: `10485761`
+- chunk coverage at `TTT_CHUNK_TOKENS=32768`: exactly `64` chunks
+- created shard path reused here: `runs/eval_009_arch010_legal_ttt_temperature_seed1337/heldout_data/fineweb_val_000000.bin`
+- created shard bytes: `4195330`
+- created shard SHA-256: `8b5e92cca71fcfb03dff3a5b2cbf37b25e15a476e8218d253006f1bbcb4db556`
+
+## Exact Child Command Shape
 
 ```bash
 env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-  RUN_ID=eval_030_eval027_direct_launcher_ablation_shared \
+  RUN_ID=... \
   EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
+  EVAL_LOGIT_TEMP=... \
   TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
   TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \
   NGRAM_EVAL_ENABLED=1 \
@@ -99,49 +118,43 @@ env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
   NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \
   EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \
   EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \
-  DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \
+  DATA_PATH=... \
   TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \
   torchrun --standalone --nproc_per_node=8 \
-  /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/train_gpt.py
+  /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py
 ```
 
-## Exact Top-Level Commands
-
-Control command actually run:
+## Exact Top-Level Commands Actually Run
+Calibration sweep command shape:
 
 ```bash
 python tools/gpu_experiment_runner.py \
   --gpus 8 \
   --conda-env physicslm \
   --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \
-  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_030_eval027_direct_launcher_ablation/control_via_runner_8gpu \
-  --run-name eval_030_control_via_runner \
+  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/calibration_t<TAG>_8gpu \
+  --run-name eval_031_calibration_t<TAG> \
   --timeout-seconds 7200 -- \
-  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-    RUN_ID=eval_030_eval027_direct_launcher_ablation_shared \
-    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
-    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
-    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \
-    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \
-    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \
-    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \
-    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \
-    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \
-    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \
-    torchrun --standalone --nproc_per_node=8 \
-    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/train_gpt.py
+  env ... EVAL_LOGIT_TEMP=<T> ... \
+    DATA_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_009_arch010_legal_ttt_temperature_seed1337/heldout_data \
+    ... \
+    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py
 ```
 
-Candidate command planned but not run after the gate failure:
+Official selected-temperature command:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
-PROPOSAL_LAB_SELECTED_GPUS=0,1,2,3,4,5,6,7 \
-PROPOSAL_LAB_DEVICE=gpu \
-conda run --no-capture-output -n physicslm \
+python tools/gpu_experiment_runner.py \
+  --gpus 8 \
+  --conda-env physicslm \
+  --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \
+  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/official_t0p95_8gpu \
+  --run-name eval_031_official_t0p95 \
+  --timeout-seconds 7200 -- \
   env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-    RUN_ID=eval_030_eval027_direct_launcher_ablation_shared \
+    RUN_ID=eval_031_eval027_global_temperature_calibration_official_t0p95 \
     EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
+    EVAL_LOGIT_TEMP=0.95 \
     TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
     TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \
     NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \
@@ -151,66 +164,88 @@ conda run --no-capture-output -n physicslm \
     DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \
     TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \
     torchrun --standalone --nproc_per_node=8 \
-    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/train_gpt.py
+    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py
 ```
 
-## Fresh Control Result
+## Calibration Results
+- GPUs for every calibration run: `0,1,2,3,4,5,6,7`
+- Held-out results:
+  - `T=0.95`: `val_loss=2.02724473`, `val_bpb=1.20029274`, managed wallclock `67580ms`
+  - `T=0.975`: `val_loss=2.03140228`, `val_bpb=1.20275434`, managed wallclock `66905ms`
+  - `T=1.00`: `val_loss=2.03667307`, `val_bpb=1.20587508`, managed wallclock `66375ms`
+  - `T=1.025`: `val_loss=2.04287257`, `val_bpb=1.20954568`, managed wallclock `66422ms`
+  - `T=1.05`: `val_loss=2.05002117`, `val_bpb=1.21377823`, managed wallclock `66620ms`
+
+## Calibration Gate Check
+- `T=1.0` parity vs locked same-helper held-out control `1.20586072`:
+  - this round `T=1.0`: `1.20587508`
+  - delta: `+0.00001436`
+  - parity decision: `pass`
+- Best non-`1.0` temperature:
+  - selected `T=0.95`
+  - held-out gain vs `T=1.0`: `-0.00558234`
+  - reviewed minimum gain: `-0.0002`
+  - gate decision: `pass`
+
+## Official Candidate Result
 - GPU indices: `0,1,2,3,4,5,6,7`
 - Exact result:
-  - `val_loss=0.49164458`
-  - `val_bpb=0.29117961`
-- Script eval wallclock: `583199ms`
-- Managed wallclock from runner: `626554ms`
-- External top-level wallclock: `626721ms`
+  - `val_loss=0.49102869`
+  - `val_bpb=0.29081485`
+- Script eval wallclock: `584865ms`
+- Managed wallclock from runner: `628844ms`
+- External top-level wallclock: `629.130s`
 - Historical `eval_027` comparison:
-  - `val_bpb`: `0.29117839 -> 0.29117961` (`+0.00000122`)
-  - managed wallclock: `615000ms -> 626554ms` (`+11554ms`)
-- Fresh `eval_029` control comparison:
-  - `val_bpb`: `0.29117992 -> 0.29117961` (`-0.00000031`)
-  - script eval wallclock: `582051ms -> 583199ms` (`+1148ms`)
-  - managed wallclock: `624825ms -> 626554ms` (`+1729ms`)
-
-## Control Acceptance Gate
-- BPB gate: `pass`
-- Managed-wallclock gate: `fail`
-- Gate decision: `stop`
-
-Reason:
-- the reviewed gate allowed at most `625000ms`
-- the fresh control landed at `626554ms`
-- overrun vs gate: `+1554ms`
-
-## Candidate
-- Not run.
-- Per the reviewed brief, the direct-launch candidate had to be skipped because the fresh control missed the acceptance gate, so this round must be recorded as environment drift rather than launcher evidence.
+  - `val_bpb`: `0.29117839 -> 0.29081485` (`-0.00036354`)
+  - script eval wallclock: `574202ms -> 584865ms` (`+10663ms`)
+  - managed wallclock: `615000ms -> 628844ms` (`+13844ms`)
+- Fresh `eval_030` control comparison:
+  - `val_bpb`: `0.29117961 -> 0.29081485` (`-0.00036476`)
+  - script eval wallclock: `583199ms -> 584865ms` (`+1666ms`)
+  - managed wallclock: `626554ms -> 628844ms` (`+2290ms`)
+  - external wallclock: `626721ms -> 629130ms` (`+2409ms`)
 
 ## Success Metric
 Primary success criterion:
-- candidate outer wallclock `<=600s`
+- full official post-export `val_bpb < 0.29117839`
 
-Secondary:
-- at least `10s` reduction versus fresh control if full legality is not reached
+Target improvement:
+- `>= 0.0005` BPB better than the locked baseline
+
+Guardrails:
+- best non-`1.0` temperature must beat `T=1.0` on the calibration slice by at least `0.0002`
+- script eval should stay in the same band as `eval_027`
+- script eval should not exceed `600000ms`
 
 Outcome:
-- fresh control quality stayed inside the reviewed BPB tolerance
-- fresh control managed wallclock failed the reviewed admission gate
-- direct-launch candidate was not executed
+- calibration gate passed strongly
+- primary success criterion passed
+- target improvement missed
+- script eval guardrail passed
 
 ## Expected Effect
-- Keep BPB locked while reducing end-to-end wallclock enough to test whether bypassing the repo runner closes the remaining managed-legality gap.
+- Slight full-val BPB improvement if the PR809 legality line remained globally miscalibrated on the neural side after neural-plus-n-gram mixing.
 
 ## Actual Result
-- The exact helper and artifact lineage stayed unchanged before and after the control run.
-- The fresh control remained quality-stable at `legal_ttt_exact val_bpb=0.29117961`.
-- The fresh control missed the reviewed managed-wallclock gate at `626554ms`, which is `+11554ms` versus historical `eval_027` and `+1554ms` beyond the allowed `+10s` drift.
-- The direct-launch candidate was therefore not run.
+- The copied helper edit stayed clean and default-off.
+- Artifact bytes and hashes stayed unchanged before and after all runs.
+- The fixed calibration slice selected `T=0.95`, not `T=1.0`.
+- The selected `T=0.95` transferred to a real full official improvement at `0.29081485`.
+- Runtime remained script-legal but managed-illegal:
+  - script headroom vs `600000ms`: `15135ms`
+  - managed overrun vs `600000ms`: `28844ms`
 
 ## Interpretation
-This round is a controlled drift stop, not a direct-launch positive or negative result.
+This is a controlled positive calibration result on the locked PR809 legality line.
 
-- The last unresolved direct-launcher hypothesis remains unanswered.
-- The evidence from this round is only that the environment was slightly slower than the admissible band for a fair comparison.
-- `eval_027` remains the active legality baseline.
+- It is not a parity failure: `T=1.0` held-out parity stayed within noise.
+- It is not selector overfit: the selected `T=0.95` improved the full official run versus both `eval_027` and fresh `eval_030`.
+- It is not large enough to satisfy the more ambitious `>=0.0005` improvement target.
+
+Decision:
+- `EVAL_LOGIT_TEMP=0.95` is conditionally promotable on the locked `eval_027` line.
+- Global temperature scaling on the PR809 legality line should not be retired.
+- Nearby scalar sweeps should stop until this selected point is either confirmed or rejected by a fresh full official rerun.
 
 ## Next Step
-If runtime-legality work is still worth pursuing, first obtain a fresh in-gate control on the locked `eval_027` line, then rerun the direct-launch candidate on the same pinned GPUs and shared child command. If that cannot be achieved reliably, deprioritize further launcher-path work rather than treating this drift-stopped round as evidence against direct launch.
+If more confidence is needed before promotion, run one fresh full official confirmation of `T=0.95` against `T=1.0` on the exact locked artifact and pinned GPUs. If that repeats, promote `eval_031` as the new active legality baseline and stop nearby scalar-temperature sweeps.

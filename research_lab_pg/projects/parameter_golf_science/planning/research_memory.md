@@ -9,16 +9,51 @@ PR `#809` at `0.2952` remains legality-pending and is not the official target.
 
 This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
-- strongest runtime-improved legality baseline: `eval_027=0.29117839`
-- previous legality baseline: `eval_026=0.29117999`
+- strongest runtime-improved legality baseline: `eval_031=0.29081485`
+- previous legality baseline: `eval_027=0.29117839`
+- newest scored refinement round: `eval_031 selected T=0.95 -> 0.29081485`
 - newest runtime-only round: `eval_030 control=0.29117961, candidate not run because gate failed`
-- official-anchor gap on the active legality line: `0.29117839 - 0.4416 = -0.15042161`
-- open problem: the script legality issue is answered, helper-only orchestration trimming is answered, and the minimal repo-controlled runner trim is also answered negatively; the still-unresolved direct-launcher path could not be tested in `eval_030` because the fresh control drifted just outside the admissibility gate, so any further runtime round must either re-establish an in-gate control or accept that platform variance is too large for a meaningful launcher-path comparison
+- official-anchor gap on the active legality line: `0.29081485 - 0.4416 = -0.15078515`
+- open problem: the PR809 legality line now has one controlled positive single-seed temperature calibration result, but it still needs a fresh full official confirmation if the lab wants to promote `T=0.95` as a stable default rather than a one-round selector win; the direct-launcher runtime question remains unanswered separately because `eval_030` never reached its candidate
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_030_eval027_direct_launcher_ablation`
+## Newest Critical Result - `eval_031_eval027_global_temperature_calibration`
+
+- The reviewed refinement-phase temperature calibration ablation executed cleanly on the locked `eval_027` PR809 legality line. The exact source helper was verified first at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`. The copied edited `eval_031` helper changed only to `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged before and after all runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled code diff stayed inside the reviewed single-variable evaluation lane:
+  - copied `eval_027` into fresh `eval_031`
+  - added one default-off env var `EVAL_LOGIT_TEMP`
+  - applied it only to neural scoring logits immediately before `log_softmax` / `softmax` inside the PR809 scorer
+  - left TTT adaptation loss, cache updates, n-gram alpha logic, training, export, checkpoint, and artifact untouched
+- This round reused the exact frozen non-official held-out slice from `eval_009`:
+  - source shard `/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024/fineweb_train_000000.bin`
+  - source start token offset `8388608`
+  - copied token count `2097153`
+  - scored token count `2097152`
+  - shard SHA-256 `8b5e92cca71fcfb03dff3a5b2cbf37b25e15a476e8218d253006f1bbcb4db556`
+- Calibration sweep on that fixed slice in `physicslm` on GPUs `0,1,2,3,4,5,6,7` produced:
+  - `T=0.95 -> 1.20029274`
+  - `T=0.975 -> 1.20275434`
+  - `T=1.00 -> 1.20587508`
+  - `T=1.025 -> 1.20954568`
+  - `T=1.05 -> 1.21377823`
+- `T=1.0` parity stayed clean: the locked same-helper held-out control from `eval_027` was `1.20586072`, so the new `T=1.0` result drifted by only `+0.00001436`. The best non-`1.0` temperature was `T=0.95`, beating `T=1.0` on the fixed slice by `0.00558234`, which passed the reviewed `0.0002` gate by a wide margin.
+- Exactly one full official candidate was then run at `T=0.95`. It scored:
+  - `legal_ttt_exact val_loss=0.49102869`
+  - `legal_ttt_exact val_bpb=0.29081485`
+  - script eval wallclock `584865ms`
+  - runner managed wallclock `628844ms`
+  - external wallclock `629.130s`
+- Official comparisons:
+  - vs locked `eval_027`: `0.29117839 -> 0.29081485` (`-0.00036354`)
+  - vs fresh `eval_030` control: `0.29117961 -> 0.29081485` (`-0.00036476`)
+  - script runtime vs `eval_027`: `+10663ms`
+  - managed runtime vs `eval_027`: `+13844ms`
+- Decision: this is a controlled positive calibration result, not selector overfit. The selected `T=0.95` transferred from the fixed non-official slice to a real full official BPB improvement. The primary success criterion passed, but the more ambitious `>=0.0005` improvement target was not met. Treat `eval_031` as the new active single-seed legality baseline and do not retire the temperature motif on the PR809 line.
+
+## Previous Controlled Negative Result - `eval_030_eval027_direct_launcher_ablation`
 
 - The reviewed refinement-phase direct-launcher ablation was executable as written, but it stopped at the required fresh-control gate rather than reaching the candidate. The helper stayed unchanged at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`. The saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` also stayed unchanged before and after the control run at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled experiment scope stayed exactly inside the reviewed evaluation-only lane:
@@ -122,12 +157,13 @@ This line is in **REFINEMENT phase**:
 - `eval_024`: saturating `uint16` tables preserved the held-out controls and full-val BPB, but full runtime worsened slightly and full-val saturation telemetry was nontrivial, so count-table precision should be considered answered negatively as a legality lever.
 - `eval_025`: scorer-side lookup batching preserved the held-out controls and full-val BPB, slashed lookup call count and lookup elapsed time, and improved end-to-end runtime materially, but still missed the script budget by `14228ms`; this line should be kept as the new active runtime baseline rather than closed as a negative.
 - `eval_026`: scorer-side batched exact torch stats preserved the held-out controls and full-val BPB, recovered another `7903ms` script time on top of `eval_025`, and measured `ngram_torch_stats_elapsed_ms=3257`, but still missed the script budget by `6325ms`; it is now superseded by `eval_027`.
-- `eval_027`: scorer-side post-lookup vectorization preserved the held-out controls and full-val BPB, recovered `32123ms` script time on top of `eval_026`, and brought the official script eval to `574202ms`; this is now the active legality baseline.
+- `eval_027`: scorer-side post-lookup vectorization preserved the held-out controls and full-val BPB, recovered `32123ms` script time on top of `eval_026`, and brought the official script eval to `574202ms`; this was the prior active legality baseline before `eval_031`.
 - `eval_028`: helper-only official-eval orchestration trimming preserved full-val BPB and reduced helper-local pre/post overhead to about `15.5s`, but managed wallclock stayed `616s` because about `21.2s` now localizes outside the helper in the managed runner path; do not promote it over `eval_027`.
 - `eval_029`: a default-off minimal runner mode preserved the exact child command and full official BPB but reduced pre-spawn time by only `247ms` and still worsened managed wallclock by `1173ms`; do not spend another immediate round on nearby repo-controlled runner micro-trims.
 - `eval_030`: the direct-launcher ablation did not reach its candidate because the fresh control missed the reviewed managed-wallclock gate by `1554ms`; treat this as drift, not as evidence for or against direct launch.
+- `eval_031`: scoring-only neural-logit temperature scaling on the locked PR809 legality line is locally positive. `T=1.0` preserved held-out parity, `T=0.95` won the fixed calibration slice by `0.00558234`, and the single official run improved full-val BPB to `0.29081485`; do not spend the next round on nearby scalar sweeps until this exact selected point is either confirmed or rejected by a fresh full official rerun.
 
 ## Best Next Step
 
-Keep `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337` as the active legality baseline.  
-Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend another immediate round on already-answered helper-only orchestration trimming, global entropy gating, table-width sweeps, or nearby repo-controlled runner micro-trims. If more runtime headroom is still desired, first re-establish a fresh in-gate control and only then retry the still-unanswered direct-launcher path; otherwise treat platform variance as the more likely blocker.
+Keep `eval_031_eval027_global_temperature_calibration` with selected `EVAL_LOGIT_TEMP=0.95` as the active single-seed legality baseline.  
+Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend the next round on nearby scalar-temperature sweeps. If the lab wants promotion confidence, first run one fresh full official confirmation of `T=0.95` against `T=1.0` on the exact locked artifact and pinned GPUs; otherwise, treat the temperature setting as the new default and move the next refinement round to a genuinely different single-variable question.
