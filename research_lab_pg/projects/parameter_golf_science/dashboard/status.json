@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-03-27T14:30:14Z",
+  "generated_at_utc": "2026-03-27T15:14:36Z",
   "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
   "repo_root": "/newcpfs/lxh/parameter-golf",
   "external_sota_bpb": 1.1194,
@@ -28,33 +28,32 @@
   },
   "gap_to_sota": -0.919658,
   "latest_status_sections": {
-    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, and the active promoted 8-GPU anchor remains `eval_038_eval035_temperature_pair` at `0.19974237`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest refinement round is `eval_047_eval045_patched_helper_7gpu_control`, which patched only the copied helper’s eval-only non-divisor startup path, then ran one fresh 7-GPU promoted-line control on GPUs `1..7`.\n- The fresh 7-GPU control finished with `legal_ttt_exact val_bpb=0.19974198`, which is:\n  - `+0.00000012` versus fresh admissible 8-GPU control `eval_045=0.19974186`\n  - `-0.00000039` versus promoted 8-GPU anchor `eval_038=0.19974237`\n- The helper/checkpoint/artifact guardrail for this round:\n  - patched helper `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`: `126026` bytes, SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n  - locked source helper `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`: `125663` bytes, SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`\n  - checkpoint `final_model.pt`: `106178569` bytes, SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - artifact `final_model.int6.ptz`: `15555121` bytes, SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- The exact experiment scope stayed controlled:\n  - copied the locked helper into a fresh run directory\n  - changed only the eval-only non-divisor `WORLD_SIZE` startup path\n  - preserved training behavior and non-eval behavior\n  - held checkpoint, artifact, scorer math, TTT hyperparameters, n-gram settings, tokenizer, dataset, export path, and runner fixed\n  - changed operational subset to GPUs `1..7`, runner request count to `7`, and `torchrun --nproc_per_node=7`\n- 7-GPU gate and launch result:\n  - gate sample time `2026-03-27T14:12:53Z`\n  - GPUs `1..7` all showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n  - GPU `0` stayed occupied by a foreign process at about `74486 MiB`, but it was outside the reviewed gate set\n  - the runner then selected GPUs `1,2,3,4,5,6,7` successfully and launched the fresh control at `2026-03-27T14:13:16Z`\n  - the helper emitted `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`\n- Final control timing and telemetry:\n  - `legal_ttt_exact val_loss=0.33725596`\n  - `legal_ttt_exact val_bpb=0.19974198`\n  - script wallclock `616325ms`\n  - runner-managed wallclock `662808ms`\n  - external wallclock `663.092s`\n  - `runner_start_to_child_spawn_ms=428`\n  - `child_runtime_ms=662380`\n  - any-match fraction `0.98387585`\n  - avg alpha `0.65461744`\n  - matched-order histogram identical to `eval_045` and `eval_038`\n  - `ngram_postlookup_vectorized_elapsed_ms=1110166`\n- Interpretation:\n  - this round is `7-GPU surrogate admissible`\n  - the patched eval-only `1..7` path is now a valid surrogate regime for the promoted 8-GPU control\n  - the `TTT_EPOCHS=4 -> 3` scientific question is reopened on this patched path",
-    "Most Important Open Question": "On the now-validated patched `1..7` surrogate path, does changing only `TTT_EPOCHS` from `4` to `3` preserve BPB closely enough to justify promotion as the runtime-optimized setting on the promoted legal-TTT line?",
-    "Active Experiment ID": "`eval_047_eval045_patched_helper_7gpu_control`",
-    "Latest Result Summary": "- Completed the reviewed eval-only launch-path compatibility and surrogate-validity check on the promoted legal-TTT line.\n- Controlled intervention actually executed:\n  - required file re-read\n  - copied-helper creation\n  - minimal eval-only startup patch\n  - helper/checkpoint/artifact byte and SHA-256 verification\n  - one clean-idle gate sample on GPUs `1..7`\n  - one fresh patched 7-GPU control launch through `tools/gpu_experiment_runner.py`\n  - on-disk recording of command, gate evidence, and runner logs in `runs/eval_047_eval045_patched_helper_7gpu_control/`\n- Managed launch result:\n  - environment `physicslm`\n  - GPU allocation at launch: `7x NVIDIA L20Z`, specifically `1,2,3,4,5,6,7`\n  - `legal_ttt_exact val_bpb=0.19974198`\n  - script wallclock `616325ms`\n  - runner-managed wallclock `662808ms`\n  - external wallclock `663.092s`\n  - `runner_start_to_child_spawn_ms=428`\n  - `child_runtime_ms=662380`\n  - any-match `0.98387585`\n  - avg alpha `0.65461744`\n  - `ngram_postlookup_vectorized_elapsed_ms=1110166`\n  - artifact bytes stayed unchanged at `15555121`\n  - patched helper code bytes were `126026`\n  - total bytes on the patched evaluation-helper line are `15681147`\n  - byte status remains under cap by `318853`\n- Decision:\n  - this round is `7-GPU surrogate admissible`\n  - it answers the surrogate-validity question positively\n  - it does not answer `TTT_EPOCHS=3`, because that candidate was intentionally not run in this round",
-    "Recommended Next Step": "Run the exact same-session promoted-line `TTT_EPOCHS=4 -> 3` pair on the patched `1..7` path, keeping the patched helper, checkpoint, artifact, scorer settings, and all non-epoch variables fixed."
+    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, and the active promoted 8-GPU anchor remains `eval_038_eval035_temperature_pair` at `0.19974237`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest refinement round is `eval_048_eval047_ttt_epochs_pair_patched_7gpu`, which ran the reviewed same-session patched-helper `TTT_EPOCHS=4 -> 3` pair on GPUs `1..7`.\n- The helper/checkpoint/artifact guardrail stayed exact for both arms:\n  - patched helper `runs/eval_048_eval047_ttt_epochs_pair_patched_7gpu/train_gpt.py`: `126026` bytes, SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n  - source helper from `eval_047`: `126026` bytes, SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n  - checkpoint `final_model.pt`: `106178569` bytes, SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - artifact `final_model.int6.ptz`: `15555121` bytes, SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- Fresh gate and launch result:\n  - gate sample time `2026-03-27T14:36:53Z`\n  - GPUs `1..7` all showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n  - GPU `0` stayed occupied by a foreign process at about `74486 MiB`, but it was outside the reviewed gate set\n  - the fresh control then launched at `2026-03-27T14:37:26Z`, finished at `2026-03-27T14:48:36Z`, and passed admissibility versus `eval_047`\n  - the immediate candidate launched at `2026-03-27T14:49:01Z` and finished at `2026-03-27T15:06:22Z`\n- Fresh control metrics:\n  - `legal_ttt_exact val_loss=0.33725832`\n  - `legal_ttt_exact val_bpb=0.19974338`\n  - script wallclock `623802ms`\n  - runner-managed wallclock `669909ms`\n  - external wallclock `670.141s`\n  - `runner_start_to_child_spawn_ms=411`\n  - `child_runtime_ms=669498`\n  - any-match fraction `0.98387585`\n  - avg alpha `0.65461534`\n  - matched-order histogram identical to `eval_047`, `eval_045`, and `eval_038`\n  - `ngram_postlookup_vectorized_elapsed_ms=1105413`\n- Control admissibility versus `eval_047=0.19974198`:\n  - `val_bpb` delta `+0.00000140`\n  - `val_loss` delta `+0.00000236`\n  - script delta `+7477ms`\n  - runner delta `+7101ms`\n  - external delta `+7.049s`\n  - avg alpha delta `-0.00000210`\n  - histogram `unchanged`\n  - postlookup delta `-4753ms`\n  - decision `admissible`\n- Immediate candidate metrics:\n  - `legal_ttt_exact val_loss=0.33730055`\n  - `legal_ttt_exact val_bpb=0.19976839`\n  - script wallclock `998177ms`\n  - runner-managed wallclock `1041138ms`\n  - external wallclock `1041.407s`\n  - `runner_start_to_child_spawn_ms=306`\n  - `child_runtime_ms=1040831`\n  - any-match fraction `0.98387585`\n  - avg alpha `0.65467460`\n  - matched-order histogram unchanged\n  - `ngram_postlookup_vectorized_elapsed_ms=1353120`\n- Candidate minus fresh control:\n  - `val_bpb` `+0.00002501`\n  - `val_loss` `+0.00004223`\n  - script wallclock `+374375ms`\n  - runner-managed wallclock `+371229ms`\n  - external wallclock `+371.266s`\n  - any-match `+0.00000000`\n  - avg alpha `+0.00005926`\n  - matched-order histogram `unchanged`\n  - `ngram_postlookup_vectorized_elapsed_ms` `+247707ms`\n- Interpretation:\n  - this round is `hold TTT_EPOCHS=4`\n  - the candidate stayed inside the reviewed BPB tolerance band, so quality did not collapse\n  - but the candidate was dramatically slower than the fresh control, so the runtime-optimization hypothesis failed cleanly\n  - because both arms completed and only `TTT_EPOCHS` changed, this is a valid negative answer rather than a blocked round",
+    "Most Important Open Question": "Which different single-variable refinement question should replace epoch count on the patched promoted-line surrogate path, now that `TTT_EPOCHS=3` has been answered negatively and `TTT_EPOCHS=4` remains the default?",
+    "Active Experiment ID": "`eval_048_eval047_ttt_epochs_pair_patched_7gpu`",
+    "Latest Result Summary": "- Completed the reviewed same-session patched-helper epoch-count pair on the validated `1..7` surrogate path.\n- Controlled intervention actually executed:\n  - required file re-read\n  - exact patched-helper reuse from `eval_047`\n  - helper/checkpoint/artifact byte and SHA-256 verification\n  - one fresh clean-idle gate sample on GPUs `1..7`\n  - one fresh patched `TTT_EPOCHS=4` control launch through `tools/gpu_experiment_runner.py`\n  - one admissibility check against `eval_047`\n  - one immediate patched `TTT_EPOCHS=3` candidate launch through `tools/gpu_experiment_runner.py`\n  - on-disk recording of command, gate evidence, and runner logs in `runs/eval_048_eval047_ttt_epochs_pair_patched_7gpu/`\n- Managed launch results:\n  - environment `physicslm`\n  - GPU allocation at launch: `7x NVIDIA L20Z`, specifically `1,2,3,4,5,6,7`\n  - control `legal_ttt_exact val_bpb=0.19974338`\n  - candidate `legal_ttt_exact val_bpb=0.19976839`\n  - both artifacts stayed unchanged at `15555121` bytes\n  - patched helper code bytes stayed `126026`\n  - total bytes on this evaluation-helper line stayed `15681147`\n  - byte status remains under cap by `318853`\n- Decision:\n  - `hold TTT_EPOCHS=4`\n  - the fresh control was admissible\n  - the immediate `TTT_EPOCHS=3` candidate was slightly worse on BPB and much slower on all wallclocks\n  - `TTT_EPOCHS=3` should not be promoted as a runtime-optimized setting on this patched path",
+    "Recommended Next Step": "Keep `TTT_EPOCHS=4` fixed on the patched promoted-line surrogate path and move the next reviewed refinement round to a different single-variable evaluation question; only reopen `TTT_EPOCHS=3` if a separate operational-diagnosis brief is explicitly desired."
   },
   "next_experiment_sections": {
-    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase eval-only launch-path compatibility and surrogate-validity check on the promoted legal-TTT line.\n\n- Executed the reviewed brief through the required file re-read, locked command recovery, copied-helper patch, helper/checkpoint/artifact identity verification, 7-GPU clean-idle acquisition on `1..7`, and one fresh patched-helper `TTT_EPOCHS=4` control launch.\n- The intervention was narrowed exactly as reviewed:\n  - copied the locked helper into a fresh run directory\n  - patched only the eval-only non-divisor `WORLD_SIZE` startup invariant\n  - did not change training behavior\n  - did not change non-eval launch behavior\n  - did not change scorer math, TTT math, cache logic, export logic, checkpoint bytes, or artifact bytes\n- The fresh patched 7-GPU control launched, finished, and produced a full telemetry set.\n- The immediate `TTT_EPOCHS=3` candidate was intentionally not run in this round, per the reviewed brief.\n- The round is a controlled `surrogate admissible` result on the patched `1..7` path.",
-    "Experiment ID": "`eval_047_eval045_patched_helper_7gpu_control`",
-    "Category": "- evaluation\n\nOperational subtype: `eval-only launch-path compatibility and surrogate-validity check`",
-    "Baseline / Comparison": "Primary baseline:\n- fresh admissible 8-GPU promoted-line control `eval_045=0.19974186`\n\nSecondary anchor:\n- promoted line `eval_038=0.19974237`\n\nPrior blocker evidence:\n- `eval_046` no-code-change launch failure on `WORLD_SIZE=7`\n\nActual comparison obtained this round:\n- fresh patched-helper 7-GPU control on GPUs `1..7` with `TTT_EPOCHS=4`\n- compared directly against `eval_045` and `eval_038` on:\n  - `val_bpb`\n  - `val_loss`\n  - script wallclock\n  - runner wallclock\n  - external wallclock\n  - any-match fraction\n  - avg alpha\n  - matched-order histogram\n  - `ngram_postlookup_vectorized_elapsed_ms`",
-    "Hypothesis": "If the only blocker exposed by `eval_046` was the helper’s startup invariant rather than a real change in evaluation semantics, then a minimal eval-only patch permitting `WORLD_SIZE=7` would produce a fresh promoted-line 7-GPU control that stays in-family with `eval_045`.\n\nOperational falsifier:\n- patched launch still fails, or\n- patched launch finishes but drifts materially from `eval_045`",
-    "Why It Might Work": "- `eval_046` already localized the failure to helper startup rather than GPU cleanliness on the `1..7` subset.\n- The eval-only path does not use the training loop or gradient accumulation schedule as a scientific variable.\n- A guarded eval-only non-divisor fallback is therefore the smallest operational repair that can answer surrogate validity without mixing scorer, TTT, export, dataset, or checkpoint changes.",
-    "Minimal Intervention": "One copied-helper startup patch only:\n- introduce `eval_only_nondivisor_world_size = args.eval_only and (8 % world_size != 0)`\n- preserve the original `WORLD_SIZE` divisor invariant everywhere else\n- set `grad_accum_steps = 1` only on that eval-only non-divisor path\n- log when that compatibility path is taken\n\nNo other code or artifact changes:\n- original locked helper left untouched\n- checkpoint unchanged\n- artifact unchanged\n- runner unchanged\n- no candidate arm launched",
-    "Variables To Change": "Helper startup logic only:\n- copied helper path\n- eval-only non-divisor `WORLD_SIZE` compatibility path\n\nOperational-only:\n- launch subset `CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7`\n- runner request count `7`\n- `torchrun --nproc_per_node=7`\n- fresh `RUN_ID`\n- fresh runner `--log-dir`\n- fresh runner `--run-name`",
-    "Variables To Hold Fixed": "- `EVAL_ONLY=1`\n- `TTT_ENABLED=1`\n- `TTT_EPOCHS=4`\n- `TTT_LR=0.0025`\n- `TTT_CHUNK_TOKENS=32768`\n- `TTT_FREEZE_BLOCKS=0`\n- `TTT_MOMENTUM=0.9`\n- `TTT_BATCH_SEQS=32`\n- `TTT_GRAD_CLIP=1.0`\n- `EVAL_STRIDE=64`\n- `EVAL_LOGIT_TEMP=1.0`\n- `NGRAM_EVAL_ENABLED=1`\n- `NGRAM_EVAL_BUCKETS=2097152`\n- `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`\n- `NGRAM_EVAL_BATCH_TORCH_STATS=1`\n- `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`\n- same checkpoint bytes/hash\n- same artifact bytes/hash\n- same tokenizer, validation data, environment, and runner path",
-    "Identity Checks": "- Patched helper:\n  - path: `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`\n  - bytes: `126026`\n  - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n- Locked source helper:\n  - path: `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`\n  - bytes: `125663`\n  - SHA-256: `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`\n- Saved checkpoint:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`\n  - bytes: `106178569`\n  - SHA-256: `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n- Saved artifact:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz`\n  - bytes: `15555121`\n  - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n\nIdentity status:\n- patched helper differs only by the reviewed eval-only startup patch\n- checkpoint unchanged before launch\n- artifact unchanged before launch",
-    "Commands Actually Run": "Exact patched control command was recorded in:\n- `runs/eval_047_eval045_patched_helper_7gpu_control/command.txt`\n\nThe 7-GPU clean-idle gate evidence was recorded in:\n- `runs/eval_047_eval045_patched_helper_7gpu_control/clean_idle_gate.log`\n\nThe fresh patched 7-GPU control was launched via:\n- `tools/gpu_experiment_runner.py` in `physicslm`\n- pinned subset `1,2,3,4,5,6,7`\n- runner log dir `runs/eval_047_eval045_patched_helper_7gpu_control/runner_control_7gpu/`\n\nNo candidate command was run in this round.",
-    "Clean-Idle Gate Result": "- gate status: `pass`\n- gate sample time: `2026-03-27T14:12:53Z`\n- GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n- GPU `0` remained occupied by a foreign process at about `74486 MiB`, but that was outside the reviewed `1..7` gate set\n- because the gate passed:\n  - the fresh patched 7-GPU control launch was attempted immediately",
-    "Helper Diff Summary": "- The copied helper now defines `eval_only_nondivisor_world_size = args.eval_only and (8 % world_size != 0)`.\n- The original divisor error is still raised for:\n  - all training launches\n  - all non-eval launches\n  - any other non-divisor path outside `EVAL_ONLY=1`\n- `grad_accum_steps` now falls back to `1` only on that eval-only non-divisor path; otherwise it remains `8 // world_size` exactly as before.\n- A single log line records when the compatibility path is used:\n  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`",
-    "Control Launch Result": "- control launch status: `completed`\n- exact runner launch start: `2026-03-27T14:13:16Z`\n- exact runner end: `2026-03-27T14:24:19Z`\n- runner selected GPUs `1,2,3,4,5,6,7` successfully\n- compatibility log emitted:\n  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`\n- final metrics:\n  - `legal_ttt_exact val_loss=0.33725596`\n  - `legal_ttt_exact val_bpb=0.19974198`\n  - script wallclock `616325ms`\n  - runner-managed wallclock `662808ms`\n  - external wallclock `663.092s`\n  - `runner_start_to_child_spawn_ms=428`\n  - `child_runtime_ms=662380`\n  - any-match fraction `0.98387585`\n  - avg alpha `0.65461744`\n  - matched-order histogram unchanged:\n    - `order_2=60166`\n    - `order_3=346841`\n    - `order_4=373090`\n    - `order_5=332096`\n    - `order_6=395043`\n    - `order_7=644544`\n    - `order_8=1634957`\n    - `order_9=57234849`\n  - `ngram_postlookup_vectorized_elapsed_ms=1110166`\n- runner metadata:\n  - exit code `0`\n  - timeout `false`",
-    "Candidate Launch Result": "- candidate launch status: `not attempted`\n- reason:\n  - the reviewed brief explicitly prohibited running `TTT_EPOCHS=3` in this round\n  - this round’s purpose was to answer surrogate admissibility first",
-    "Success Metric": "Primary operational success required:\n- patched 7-GPU control launches and finishes\n\nPrimary admissibility success required:\n- `val_bpb` within `±0.00002` of `eval_045`\n\nSecondary admissibility checks:\n- any-match fraction unchanged or negligible noise\n- avg alpha in-family\n- matched-order histogram unchanged or numerically negligible drift\n- key timing telemetry emitted normally\n\nActual status:\n- launch: `pass`\n- finish: `pass`\n- `val_bpb` delta vs `eval_045`: `+0.00000012`\n- any-match delta vs `eval_045`: `+0.00000000`\n- avg alpha delta vs `eval_045`: `+0.00001589`\n- histogram delta vs `eval_045`: `exactly unchanged`\n- telemetry emission: `pass`\n- surrogate-regime decision: `admissible`",
-    "Expected Effect": "If the startup invariant were the only blocker, the patched-helper 7-GPU control should launch and finish while remaining semantically in-family with the fresh 8-GPU control.",
-    "Actual Result": "- The patched helper launched and completed the full promoted-line 7-GPU control on GPUs `1..7`.\n- The control stayed extremely close to the fresh 8-GPU baseline:\n  - vs `eval_045`, `val_bpb` was only `+0.00000012`\n  - any-match fraction was identical\n  - matched-order histogram was identical\n  - avg alpha remained in-family\n- The control also stayed in-family versus promoted `eval_038`:\n  - `val_bpb` delta `-0.00000039`\n  - any-match identical\n  - matched-order histogram identical\n- Timing moved favorably versus the fresh 8-GPU control:\n  - script `-689683ms`\n  - runner `-687719ms`\n  - external `-687713ms`\n  - `ngram_postlookup_vectorized_elapsed_ms -373926`",
-    "Interpretation": "- Decision label: `7-GPU surrogate admissible`\n- The reviewed hypothesis is supported.\n- `eval_046` was blocked by a helper startup invariant, not by a necessary change in evaluation semantics on the `1..7` subset.\n- The patched 7-GPU control is admissible as a surrogate regime for the promoted 8-GPU control under the reviewed threshold.\n- This round does not answer anything about `TTT_EPOCHS=3`; it only reopens that question on a now-validated path.",
-    "Next Step": "Run the exact same-session promoted-line `TTT_EPOCHS=4 -> 3` pair on the patched `1..7` path:\n- keep the patched eval-only helper fixed\n- keep checkpoint, artifact, scorer path, and all non-epoch variables fixed\n- run a fresh patched 7-GPU control with `TTT_EPOCHS=4`\n- then immediately run the patched 7-GPU candidate with only `TTT_EPOCHS=3`\n- compare against the validated surrogate-control regime established here rather than against the blocked no-code-change path"
+    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase same-session patched-helper `TTT_EPOCHS=4 -> 3` pair on the validated `1..7` surrogate path.\n\n- Executed the reviewed brief through the required file re-read, exact `eval_047` helper/command recovery, copied-helper reuse, helper/checkpoint/artifact identity verification, fresh clean-idle gating on GPUs `1..7`, one fresh patched-helper `TTT_EPOCHS=4` control, an admissibility check against `eval_047`, and one immediate patched-helper `TTT_EPOCHS=3` candidate.\n- The intervention stayed controlled exactly as reviewed:\n  - reused the validated patched eval-only helper from `eval_047` unchanged\n  - kept checkpoint, artifact, scorer path, tokenizer, data, runner path, and all non-epoch eval settings fixed\n  - changed only the candidate arm’s `TTT_EPOCHS: 4 -> 3`\n- Both arms launched and finished cleanly.\n- The fresh control was admissible versus `eval_047`.\n- The candidate stayed within the reviewed BPB tolerance but was substantially slower, so the round closes as `hold TTT_EPOCHS=4`.",
+    "Experiment ID": "`eval_048_eval047_ttt_epochs_pair_patched_7gpu`",
+    "Category": "- evaluation\n\nOperational subtype: `same-session patched-helper epoch-count comparison`",
+    "Baseline / Comparison": "Primary baseline:\n- fresh same-session patched-helper 7-GPU control on GPUs `1..7` with `TTT_EPOCHS=4`\n\nAdmissibility anchors:\n- `eval_047=0.19974198` patched-helper 7-GPU admissible control\n- `eval_045=0.19974186` fresh admissible promoted-line 8-GPU control\n- `eval_038=0.19974237` promoted 8-GPU anchor\n\nPrimary comparison obtained this round:\n- immediate patched-helper 7-GPU candidate with only `TTT_EPOCHS: 4 -> 3`\n- compared first and only for decision against the fresh same-session control",
+    "Hypothesis": "On the validated patched `1..7` surrogate regime, reducing only `TTT_EPOCHS` from `4` to `3` will keep post-export `val_bpb` within `+0.00005` of the fresh same-session control while saving meaningful eval wallclock.\n\nOperational falsifier:\n- fresh control is not admissible versus `eval_047`, or\n- candidate loses by more than `+0.00005 BPB`, or\n- candidate does not deliver a meaningful runtime saving",
+    "Why It Might Work": "- The current leaderboard #1 uses legal score-first TTT with `3` epochs, so this remained the cleanest unresolved evaluation-side mismatch to test on the promoted local line.\n- `eval_034` on the older `T=0.95` line had already shown that `3` epochs can buy real runtime while keeping the quality loss small enough to stay interesting.\n- `eval_047` had already restored interpretability by proving the patched `1..7` helper path is an admissible surrogate regime.",
+    "Minimal Intervention": "No code change beyond copying the already-validated patched helper into a fresh run directory:\n- copied `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`\n- kept helper bytes/hash identical to `eval_047`\n- kept control arm at `TTT_EPOCHS=4`\n- changed only the candidate arm’s `TTT_EPOCHS` from `4` to `3`\n\nNo changes to:\n- model weights\n- checkpoint/artifact bytes\n- scorer math\n- n-gram cache/update logic\n- export logic\n- tokenizer\n- validation data\n- runner path\n- GPU subset",
+    "Variables To Change": "Control arm operational-only changes:\n- fresh `RUN_ID`\n- fresh runner log dir\n- fresh runner run name\n\nCandidate arm scientific change:\n- `TTT_EPOCHS: 4 -> 3`",
+    "Variables To Hold Fixed": "- exact patched eval-only helper logic from `eval_047`\n- helper bytes/hash\n- checkpoint bytes/hash\n- artifact bytes/hash\n- `EVAL_ONLY=1`\n- `TTT_ENABLED=1`\n- `TTT_LR=0.0025`\n- `TTT_CHUNK_TOKENS=32768`\n- `TTT_FREEZE_BLOCKS=0`\n- `TTT_MOMENTUM=0.9`\n- `TTT_BATCH_SEQS=32`\n- `TTT_GRAD_CLIP=1.0`\n- `EVAL_STRIDE=64`\n- `EVAL_LOGIT_TEMP=1.0`\n- `NGRAM_EVAL_ENABLED=1`\n- `NGRAM_EVAL_BUCKETS=2097152`\n- `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`\n- `NGRAM_EVAL_BATCH_TORCH_STATS=1`\n- `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`\n- tokenizer, validation data, environment, runner path, and GPU subset `1..7`",
+    "Identity Checks": "- Patched helper:\n  - path: `runs/eval_048_eval047_ttt_epochs_pair_patched_7gpu/train_gpt.py`\n  - bytes: `126026`\n  - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n- Reference helper from `eval_047`:\n  - path: `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`\n  - bytes: `126026`\n  - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`\n- Saved checkpoint:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`\n  - bytes: `106178569`\n  - SHA-256: `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n- Saved artifact:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz`\n  - bytes: `15555121`\n  - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n\nIdentity status:\n- copied helper matches `eval_047` exactly\n- checkpoint unchanged before both arms\n- artifact unchanged before both arms",
+    "Commands Actually Run": "Exact paired commands were recorded in:\n- `runs/eval_048_eval047_ttt_epochs_pair_patched_7gpu/command.txt`\n\nFresh gate evidence was recorded in:\n- `runs/eval_048_eval047_ttt_epochs_pair_patched_7gpu/clean_idle_gate.log`\n\nControl runner directory:\n- `runs/eval_048_eval047_ttt_epochs_pair_patched_7gpu/runner_control_7gpu/20260327T143726Z_eval_048_runner_control_7gpu_t1p00_e4_b2097152_lr0025/`\n\nCandidate runner directory:\n- `runs/eval_048_eval047_ttt_epochs_pair_patched_7gpu/runner_candidate_7gpu/20260327T144901Z_eval_048_runner_candidate_7gpu_t1p00_e3_b2097152_lr0025/`",
+    "Clean-Idle Gate Result": "- gate status: `pass`\n- gate sample time: `2026-03-27T14:36:53Z`\n- GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n- GPU `0` remained occupied by a foreign process at about `74486 MiB`, but that was outside the reviewed `1..7` gate set\n- because the gate passed:\n  - the fresh control launched immediately\n  - the candidate was launched immediately after the control passed admissibility",
+    "Control Launch Result": "- control launch status: `completed`\n- exact runner launch start: `2026-03-27T14:37:26Z`\n- exact runner end: `2026-03-27T14:48:36Z`\n- runner selected GPUs `1,2,3,4,5,6,7` successfully\n- compatibility log emitted:\n  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`\n- final metrics:\n  - `legal_ttt_exact val_loss=0.33725832`\n  - `legal_ttt_exact val_bpb=0.19974338`\n  - script wallclock `623802ms`\n  - runner-managed wallclock `669909ms`\n  - external wallclock `670.141s`\n  - `runner_start_to_child_spawn_ms=411`\n  - `child_runtime_ms=669498`\n  - any-match fraction `0.98387585`\n  - avg alpha `0.65461534`\n  - matched-order histogram unchanged:\n    - `order_2=60166`\n    - `order_3=346841`\n    - `order_4=373090`\n    - `order_5=332096`\n    - `order_6=395043`\n    - `order_7=644544`\n    - `order_8=1634957`\n    - `order_9=57234849`\n  - `ngram_postlookup_vectorized_elapsed_ms=1105413`\n- runner metadata:\n  - exit code `0`\n  - timeout `false`\n\nControl admissibility vs `eval_047`:\n- `val_bpb` delta `+0.00000140`\n- `val_loss` delta `+0.00000236`\n- script delta `+7477ms`\n- runner delta `+7101ms`\n- external delta `+7.049s`\n- avg alpha delta `-0.00000210`\n- matched-order histogram `unchanged`\n- `ngram_postlookup_vectorized_elapsed_ms` delta `-4753ms`\n- admissibility decision: `pass`",
+    "Candidate Launch Result": "- candidate launch status: `completed`\n- exact runner launch start: `2026-03-27T14:49:01Z`\n- exact runner end: `2026-03-27T15:06:22Z`\n- runner selected GPUs `1,2,3,4,5,6,7` successfully\n- compatibility log emitted:\n  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`\n- final metrics:\n  - `legal_ttt_exact val_loss=0.33730055`\n  - `legal_ttt_exact val_bpb=0.19976839`\n  - script wallclock `998177ms`\n  - runner-managed wallclock `1041138ms`\n  - external wallclock `1041.407s`\n  - `runner_start_to_child_spawn_ms=306`\n  - `child_runtime_ms=1040831`\n  - any-match fraction `0.98387585`\n  - avg alpha `0.65467460`\n  - matched-order histogram unchanged:\n    - `order_2=60166`\n    - `order_3=346841`\n    - `order_4=373090`\n    - `order_5=332096`\n    - `order_6=395043`\n    - `order_7=644544`\n    - `order_8=1634957`\n    - `order_9=57234849`\n  - `ngram_postlookup_vectorized_elapsed_ms=1353120`\n- runner metadata:\n  - exit code `0`\n  - timeout `false`\n\nPrimary comparison, candidate minus fresh control:\n- `val_loss` `+0.00004223`\n- `val_bpb` `+0.00002501`\n- script wallclock `+374375ms`\n- runner-managed wallclock `+371229ms`\n- external wallclock `+371.266s`\n- any-match fraction `+0.00000000`\n- avg alpha `+0.00005926`\n- matched-order histogram `unchanged`\n- `ngram_postlookup_vectorized_elapsed_ms` `+247707ms`",
+    "Success Metric": "Required outcomes:\n- fresh control admissible versus `eval_047`\n- candidate no worse than `+0.00005 BPB` versus fresh control\n- candidate saves at least `50s` wallclock\n\nActual status:\n- fresh control admissibility: `pass`\n- candidate BPB tolerance: `pass`\n- candidate runtime saving: `fail`\n- candidate telemetry family check: `pass for any-match and histogram; slightly higher avg alpha but still in-family`",
+    "Expected Effect": "If the promoted-line epoch mismatch to leaderboard `#1` were still a valid runtime lever on the patched `1..7` path, then `TTT_EPOCHS=3` would preserve post-export BPB while finishing materially faster than the fresh same-session `TTT_EPOCHS=4` control.",
+    "Actual Result": "- The fresh control reproduced the patched surrogate regime and passed admissibility versus `eval_047`.\n- The immediate `TTT_EPOCHS=3` candidate finished cleanly and stayed within the reviewed `+0.00005 BPB` tolerance band.\n- But the candidate was much slower rather than faster:\n  - `+374375ms` script wallclock\n  - `+371229ms` runner wallclock\n  - `+371.266s` external wallclock\n  - `+247707ms` on `ngram_postlookup_vectorized_elapsed_ms`\n- Quality also moved in the wrong direction:\n  - `+0.00002501 BPB`\n  - `+0.00004223 val_loss`",
+    "Interpretation": "- Decision label: `hold TTT_EPOCHS=4`\n- The reviewed promotion hypothesis is falsified on runtime and not rescued by quality.\n- This is not a blocked result:\n  - both arms launched and completed\n  - the control was admissible\n  - the candidate changed only the reviewed epoch count\n  - the comparison therefore answers the intended question directly\n- On the validated patched `1..7` surrogate path, `TTT_EPOCHS=3` is neither a runtime optimization nor a quality improvement.",
+    "Next Step": "Close nearby epoch-count work on this patched surrogate line:\n- keep `TTT_EPOCHS=4` as the quality default\n- do not promote `TTT_EPOCHS=3` as a runtime-optimized setting\n- if runtime work remains important, require a new reviewed brief for a dedicated operational diagnosis of why the `3`-epoch path inflated wallclock despite fewer TTT epochs\n- otherwise move the next refinement round to a different single-variable evaluation question"
   },
   "experiment_rows": [
     {
@@ -325,6 +324,158 @@
     }
   ],
   "comparison_rows_all": [
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: required clean-idle gate on GPUs `1..7` vs `eval_048` launch",
+      "Metric": "prelaunch clean-idle gate on `1,2,3,4,5,6,7`",
+      "Baseline": "`required: GPUs 1..7 idle, no gate failure on selected subset, >=10 GiB free each`",
+      "Candidate": "`pass at 2026-03-27T14:36:53Z`",
+      "Delta": "`valid subset gate`",
+      "Notes": "GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization. GPU `0` remained occupied, but it was intentionally excluded from the reviewed gate set."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.19974198`",
+      "Candidate": "`0.19974338`",
+      "Delta": "`+0.00000140`",
+      "Notes": "Fresh control stayed comfortably inside the reviewed `±0.00002` admissibility band."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "post-export `val_loss`",
+      "Baseline": "`0.33725596`",
+      "Candidate": "`0.33725832`",
+      "Delta": "`+0.00000236`",
+      "Notes": "Loss stayed in-family."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "script eval wallclock",
+      "Baseline": "`616325ms`",
+      "Candidate": "`623802ms`",
+      "Delta": "`+7477ms`",
+      "Notes": "Fresh control remained close enough to the validated patched regime to keep the candidate comparison admissible."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "runner-managed wallclock",
+      "Baseline": "`662808ms`",
+      "Candidate": "`669909ms`",
+      "Delta": "`+7101ms`",
+      "Notes": "Runner-managed timing also stayed in-family."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`663.092s`",
+      "Candidate": "`670.141s`",
+      "Delta": "`+7.049s`",
+      "Notes": "External timing remained close enough that the fresh control was admissible."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "any-match fraction",
+      "Baseline": "`0.98387585`",
+      "Candidate": "`0.98387585`",
+      "Delta": "`+0.00000000`",
+      "Notes": "Match coverage remained identical."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "avg alpha on matched",
+      "Baseline": "`0.65461744`",
+      "Candidate": "`0.65461534`",
+      "Delta": "`-0.00000210`",
+      "Notes": "Avg alpha stayed in-family."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "matched-order histogram",
+      "Baseline": "`exact promoted-line histogram`",
+      "Candidate": "`exact promoted-line histogram`",
+      "Delta": "`unchanged`",
+      "Notes": "Orders `2..9` matched exactly."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: `eval_047` admissible control vs fresh `eval_048` control",
+      "Metric": "vectorized postlookup elapsed",
+      "Baseline": "`1110166ms`",
+      "Candidate": "`1105413ms`",
+      "Delta": "`-4753ms`",
+      "Notes": "Key timing telemetry remained stable."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.19974338`",
+      "Candidate": "`0.19976839`",
+      "Delta": "`+0.00002501`",
+      "Notes": "Candidate stayed within the reviewed `+0.00005` BPB tolerance band, but it was directionally worse."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "post-export `val_loss`",
+      "Baseline": "`0.33725832`",
+      "Candidate": "`0.33730055`",
+      "Delta": "`+0.00004223`",
+      "Notes": "Loss moved in the same worse direction as BPB."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "script eval wallclock",
+      "Baseline": "`623802ms`",
+      "Candidate": "`998177ms`",
+      "Delta": "`+374375ms`",
+      "Notes": "The runtime-optimization hypothesis failed decisively: the `3`-epoch candidate was much slower."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "runner-managed wallclock",
+      "Baseline": "`669909ms`",
+      "Candidate": "`1041138ms`",
+      "Delta": "`+371229ms`",
+      "Notes": "Runner-managed timing agrees with the script-side slowdown."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`670.141s`",
+      "Candidate": "`1041.407s`",
+      "Delta": "`+371.266s`",
+      "Notes": "External timing confirms there was no runtime win to harvest."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "any-match fraction",
+      "Baseline": "`0.98387585`",
+      "Candidate": "`0.98387585`",
+      "Delta": "`+0.00000000`",
+      "Notes": "Match coverage stayed identical."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "avg alpha on matched",
+      "Baseline": "`0.65461534`",
+      "Candidate": "`0.65467460`",
+      "Delta": "`+0.00005926`",
+      "Notes": "Avg alpha moved slightly upward while quality worsened."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "matched-order histogram",
+      "Baseline": "`exact promoted-line histogram`",
+      "Candidate": "`exact promoted-line histogram`",
+      "Delta": "`unchanged`",
+      "Notes": "Orders `2..9` matched exactly, so the comparison remains interpretable."
+    },
+    {
+      "Comparison": "Local PR `#809` patched 7-GPU epoch pair: fresh same-session control `TTT_EPOCHS=4` vs immediate candidate `TTT_EPOCHS=3`",
+      "Metric": "vectorized postlookup elapsed",
+      "Baseline": "`1105413ms`",
+      "Candidate": "`1353120ms`",
+      "Delta": "`+247707ms`",
+      "Notes": "The candidate’s dominant slowdown showed up heavily in the postlookup timing field."
+    },
     {
       "Comparison": "Local PR `#809` patched 7-GPU surrogate regime: required clean-idle gate on GPUs `1..7` vs `eval_047` launch",
       "Metric": "prelaunch clean-idle gate on `1,2,3,4,5,6,7`",
@@ -4729,41 +4880,54 @@
         "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_021.worker.prompt.txt",
         "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_021.worker.final.txt",
         "worker_exit_code": "0"
+      },
+      "round_022.meta": {
+        "round": "22",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.worker.final.txt",
+        "worker_exit_code": "0"
       }
     },
     "phase_meta": {
       "planner": {
         "phase": "planner",
-        "round": "22",
-        "start_time": "2026-03-27T14:03:25Z",
-        "end_time": "2026-03-27T14:07:43Z",
+        "round": "23",
+        "start_time": "2026-03-27T14:30:55Z",
+        "end_time": "2026-03-27T14:32:49Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.planner.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.planner.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.planner.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.planner.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.planner.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.planner.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.planner.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.planner.final.txt"
       },
       "review": {
         "phase": "review",
-        "round": "22",
-        "start_time": "2026-03-27T14:07:44Z",
-        "end_time": "2026-03-27T14:09:19Z",
+        "round": "23",
+        "start_time": "2026-03-27T14:32:49Z",
+        "end_time": "2026-03-27T14:34:21Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.review.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.review.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.review.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.review.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.review.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.review.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.review.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.review.final.txt"
       },
       "worker": {
         "phase": "worker",
-        "round": "22",
-        "start_time": "2026-03-27T14:09:19Z",
-        "end_time": "2026-03-27T14:30:10Z",
+        "round": "23",
+        "start_time": "2026-03-27T14:34:21Z",
+        "end_time": "2026-03-27T15:14:33Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.worker.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.worker.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.worker.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_022.worker.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.worker.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.worker.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.worker.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_023.worker.final.txt"
       }
     }
   },
@@ -4771,11 +4935,11 @@
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z",
       "configured_rounds": 50,
-      "completed_rounds": 22,
-      "latest_round": "22",
+      "completed_rounds": 23,
+      "latest_round": "23",
       "latest_phase": "worker",
       "state": "in progress",
-      "latest_timestamp": "2026-03-27T14:30:10Z"
+      "latest_timestamp": "2026-03-27T15:14:33Z"
     },
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z",
@@ -4825,6 +4989,30 @@
   ],
   "training_runs": [
     {
+      "name": "eval_048_eval047_ttt_epochs_pair_patched_7gpu_runner_candidate",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_048_eval047_ttt_epochs_pair_patched_7gpu_runner_candidate.txt",
+      "updated_at_utc": "2026-03-27T15:06:19Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
+      "name": "eval_048_eval047_ttt_epochs_pair_patched_7gpu_runner_control",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_048_eval047_ttt_epochs_pair_patched_7gpu_runner_control.txt",
+      "updated_at_utc": "2026-03-27T14:48:32Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
       "name": "eval_047_eval045_patched_helper_7gpu_control_runner_control",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_047_eval045_patched_helper_7gpu_control_runner_control.txt",
       "updated_at_utc": "2026-03-27T14:24:16Z",
@@ -4864,30 +5052,6 @@
       "name": "eval_040_eval038_duplicate_control_runner_control_b",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_040_eval038_duplicate_control_runner_control_b.txt",
       "updated_at_utc": "2026-03-27T11:07:17Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_040_eval038_duplicate_control_runner_control_a",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_040_eval038_duplicate_control_runner_control_a.txt",
-      "updated_at_utc": "2026-03-27T10:37:26Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_039_eval038_ttt_epochs_pair_runner_control",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_039_eval038_ttt_epochs_pair_runner_control.txt",
-      "updated_at_utc": "2026-03-27T09:47:12Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -5236,14 +5400,14 @@
       "docs/sota_records/sota_records_index.md            |   30 +-",
       ".../reference_materials/latest_sota_snapshot.md    |    2 +-",
       ".../planning/experiment_ledger.md                  |    1 +",
-      ".../planning/next_experiment.md                    |  266 ++--",
-      ".../planning/research_memory.md                    |   47 +-",
+      ".../planning/next_experiment.md                    |  323 ++--",
+      ".../planning/research_memory.md                    |   67 +-",
       ".../reports/comparison_summary.md                  |   19 +",
-      ".../reports/latest_status.md                       |  103 +-",
+      ".../reports/latest_status.md                       |  131 +-",
       ".../tools/gpu_experiment_runner.py                 |   31 +-",
       "research_lab_pg/scripts/codex_research_loop.sh     |    3 +-",
       ".../scripts/start_parameter_golf_iteration.sh      |    5 +-",
-      "21 files changed, 313 insertions(+), 12945 deletions(-)"
+      "21 files changed, 358 insertions(+), 13005 deletions(-)"
     ]
   }
 }

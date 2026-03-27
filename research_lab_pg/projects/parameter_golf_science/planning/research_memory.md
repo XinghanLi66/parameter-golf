@@ -11,19 +11,78 @@ This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - promoted quality baseline on the locked legality line is now `eval_038 candidate=0.19974237` with `EVAL_LOGIT_TEMP=1.0`
 - freshest admissible same-session control on the promoted line: `eval_045 control=0.19974186`
-- newest refinement round: `eval_047 patched-helper 7-GPU control -> surrogate admissible`
+- newest completed paired refinement round: `eval_048 patched-helper 7-GPU same-session epoch pair -> hold TTT_EPOCHS=4`
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest completed exact promoted-line control on the validated surrogate path: `eval_047=0.19974198` with script `616325ms`, runner `662808ms`, external `663.092s`
+- newest completed exact promoted-line control on the validated surrogate path: `eval_048 control=0.19974338` with script `623802ms`, runner `669909ms`, external `670.141s`
+- newest completed promoted-line candidate on the validated surrogate path: `eval_048 candidate=0.19976839` with script `998177ms`, runner `1041138ms`, external `1041.407s`
 - official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
-- open problem: promoted-line scorer temperature is closed positively on this helper lineage, and the only unanswered nearby refinement question is now again the exact promoted-line `TTT_EPOCHS=4 -> 3` pair. `eval_047` shows that the patched `1..7` eval-only path is a valid surrogate regime, so the next round should keep `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed and run the same-session `4 -> 3` pair on that patched helper path.
+- open problem: the exact promoted-line `TTT_EPOCHS=4 -> 3` question is now answered negatively on the patched `1..7` surrogate path. Keep `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, `NGRAM_EVAL_BUCKETS=2097152`, and `TTT_EPOCHS=4` fixed, and move the next reviewed refinement round to a different single-variable evaluation question unless the project explicitly wants a dedicated operational diagnosis of why the `3`-epoch path ran much slower.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_047_eval045_patched_helper_7gpu_control`
+## Newest Critical Result - `eval_048_eval047_ttt_epochs_pair_patched_7gpu`
 
+- The reviewed refinement-phase same-session patched-helper `TTT_EPOCHS=4 -> 3` pair on GPUs `1..7` completed and answered the epoch-count question directly.
+- No new code was introduced beyond copying the already-validated patched helper from `eval_047` into a fresh run directory:
+  - copied helper stayed at `126026` bytes with SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`
+  - saved checkpoint stayed fixed at `106178569` bytes / `b8291ad1...`
+  - saved artifact stayed fixed at `15555121` bytes / `eb062c96...`
+- The round stayed exactly inside the reviewed single-variable lane:
+  - re-read `context/reference_materials/latest_sota_snapshot.md`, the planning files, the reporting files, and the required `eval_047` / `eval_045` artifacts before any action
+  - re-verified helper, checkpoint, and artifact identities
+  - recorded a fresh clean-idle gate on GPUs `1..7`
+  - ran one fresh patched-helper control with `TTT_EPOCHS=4`
+  - checked admissibility versus `eval_047`
+  - ran one immediate patched-helper candidate with only `TTT_EPOCHS=3`
+- Fresh `1..7` gate evidence:
+  - gate sample at `2026-03-27T14:36:53Z`
+  - GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization
+  - GPU `0` remained occupied by a foreign process at about `74486 MiB`, but it was outside the reviewed gate set
+- Fresh control result:
+  - runner start `2026-03-27T14:37:26Z`
+  - runner end `2026-03-27T14:48:36Z`
+  - `legal_ttt_exact val_loss=0.33725832`
+  - `legal_ttt_exact val_bpb=0.19974338`
+  - script `623802ms`
+  - runner `669909ms`
+  - external `670.141s`
+  - `runner_start_to_child_spawn_ms=411`
+  - `child_runtime_ms=669498`
+  - any-match `0.98387585`
+  - avg alpha `0.65461534`
+  - matched-order histogram identical to `eval_047`, `eval_045`, and `eval_038`
+  - `ngram_postlookup_vectorized_elapsed_ms=1105413`
+  - required admissibility versus `eval_047` passed with `+0.00000140 BPB`, `+0.00000236 val_loss`, `+7477ms` script, `+7101ms` runner, `+7.049s` external, `-0.00000210` avg alpha, unchanged histogram, and `-4753ms` postlookup
+- Immediate candidate result:
+  - runner start `2026-03-27T14:49:01Z`
+  - runner end `2026-03-27T15:06:22Z`
+  - `legal_ttt_exact val_loss=0.33730055`
+  - `legal_ttt_exact val_bpb=0.19976839`
+  - script `998177ms`
+  - runner `1041138ms`
+  - external `1041.407s`
+  - `runner_start_to_child_spawn_ms=306`
+  - `child_runtime_ms=1040831`
+  - any-match `0.98387585`
+  - avg alpha `0.65467460`
+  - matched-order histogram identical to control
+  - `ngram_postlookup_vectorized_elapsed_ms=1353120`
+- Candidate minus fresh control:
+  - `+0.00002501 BPB`
+  - `+0.00004223 val_loss`
+  - `+374375ms` script
+  - `+371229ms` runner
+  - `+371.266s` external
+  - `+0.00005926` avg alpha
+  - unchanged matched-order histogram
+  - `+247707ms` postlookup
+- Decision label: `hold TTT_EPOCHS=4`.
+- Interpretation: the patched `1..7` surrogate path is still valid, but the epoch-count hypothesis is now answered negatively on that path. `TTT_EPOCHS=3` stayed within the reviewed BPB tolerance band, yet it was substantially slower and slightly worse on quality, so it is neither the quality default nor a runtime-optimized setting here.
+
+## Previous Critical Result - `eval_047_eval045_patched_helper_7gpu_control`
 - The reviewed refinement-phase eval-only launch-path compatibility and surrogate-validity check completed successfully: the copied helper was patched only on the eval-only non-divisor startup path, the fresh 7-GPU control on GPUs `1..7` launched and finished, and the result stayed semantically in-family with the fresh 8-GPU control `eval_045`.
 - The code change was structurally minimal and stayed inside the reviewed lane:
   - copied `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py` into `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`
