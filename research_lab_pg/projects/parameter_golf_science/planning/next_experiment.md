@@ -3,62 +3,70 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase same-session duplicate-control reproducibility check on the promoted `eval_038` legality line.
+Completed on `2026-03-27` as the reviewed refinement-phase clean-idle runtime-diagnosis attempt on the exact promoted `eval_038` legality line.
 
-- Executed the reviewed brief materially as written:
-  - re-read `context/reference_materials/latest_sota_snapshot.md`, `planning/next_experiment.md`, `planning/research_memory.md`, `planning/experiment_ledger.md`, `reports/latest_status.md`, `reports/comparison_summary.md`, and the active helper before launch
-  - re-verified helper, checkpoint, and artifact identities before launch and again after the round
-  - recovered the exact promoted `eval_038` runner command family from on-disk metadata
-  - launched `control A` and `control B` on the exact promoted stack in the same session
-  - changed only operational identifiers between the two successful controls
+- Executed the reviewed brief through the required file re-read, identity verification, promoted-command recovery, and repeated prelaunch gate sampling.
 - No code edits were made in this round.
+- No evaluation run was launched because the required clean-idle gate on GPUs `0..7` never passed.
+- This round did not test a new leaderboard motif; it remained a refinement-phase operational control needed to make later `TTT_EPOCHS=4 -> 3` comparisons interpretable again.
 
 ## Experiment ID
-`eval_040_eval038_duplicate_control`
+`eval_041_eval038_clean_idle_telemetry_control`
 
 ## Category
 - evaluation
 
-Operational subtype: `same-session duplicate-control runtime reproducibility`
+Operational subtype: `clean-idle gated runtime diagnosis on the exact promoted stack`
 
 ## Baseline / Comparison
-Primary baseline:
+Primary runtime-restoration target:
 - promoted `eval_038=0.19974237`
-
-Historical anchors:
-- promoted external wallclock `634926ms`
-- promoted runner-managed wallclock `634685ms`
 - promoted script eval wallclock `588813ms`
-- fresh drifted `eval_039=0.19974161`
-- fresh drifted external wallclock `1237494ms`
+- promoted runner-managed wallclock `634685ms`
+- promoted external wallclock `634926ms`
+
+Recent slowdown anchors:
+- `eval_039=0.19974161` at `1237494ms` external
+- `eval_040 control B=0.19974367` at `1298755ms` external
 
 ## Hypothesis
-The `eval_039` slowdown was a transient session/runtime event rather than a persistent shift in the promoted evaluation regime. If true, two fresh exact controls should reproduce promoted BPB and telemetry and return to the promoted runtime band.
+The promoted helper/checkpoint/artifact stack is still semantically stable, and the current slowdown is operational rather than semantic.
+
+Falsifiable version:
+- if one exact clean-idle rerun still shows inflated child runtime with no foreign-process overlap and no large launch-side stall, the slowdown is intrinsic to the current infrastructure/process regime
+- if telemetry instead shows overlap, idle gaps, or launch-side stalls, the slowdown is operationally localized and not an in-process semantic shift
 
 ## Why It Might Work
-- `eval_039` already showed that the promoted helper/checkpoint/artifact stack still reproduces the same quality regime
-- the unresolved variable is runtime reproducibility, not semantics
-- a duplicate-control probe is the smallest refinement-phase experiment that can distinguish restored promoted runtime from runtime jitter or a persistent runtime shift
+- `eval_039` and `eval_040` already showed that BPB and n-gram telemetry stayed in-family
+- the unresolved variable is localization, not semantics
+- one exact rerun with enforced clean-idle launch is the smallest refinement-phase experiment that can distinguish external contention from host-side launch overhead and from true in-process runtime drift
 
 ## Minimal Intervention
-No code edits in this round.
+No helper, checkpoint, artifact, runner, eval-hyperparameter, or export changes were made.
 
-Actual executed changes were operational only:
-- `RUN_ID`
-- runner `--log-dir`
-- runner `--run-name`
+Intended operational-only changes:
+- prelaunch clean-idle verification on GPUs `0..7`
+- synchronized runtime telemetry capture
+- fresh `RUN_ID`
+- fresh runner `--log-dir`
+- fresh runner `--run-name`
+
+Actual executed changes:
+- only prelaunch clean-idle and process-state measurements
 
 ## Variables To Change
 Semantic variables:
 - none
 
 Operational-only variables:
+- clean-idle gate enforcement on GPUs `0..7`
+- telemetry capture
 - `RUN_ID`
 - runner `--log-dir`
 - runner `--run-name`
 
 ## Variables To Hold Fixed
-- exact helper path, bytes, and SHA-256 from `eval_038`
+- exact helper path, bytes, and SHA-256 from promoted `eval_038`
 - exact checkpoint path, bytes, and SHA-256
 - exact artifact path, bytes, and SHA-256
 - `EVAL_ONLY=1`
@@ -102,37 +110,29 @@ Identity status:
 - checkpoint unchanged before vs after the round
 - artifact unchanged before vs after the round
 
-## Exact Top-Level Commands Actually Run
-
-Control A:
+## Commands Actually Run
+Prelaunch gate and process-state probes:
 
 ```bash
-TIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.py \
-  --gpus 8 \
-  --gpu-indices 0,1,2,3,4,5,6,7 \
-  --conda-env physicslm \
-  --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \
-  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_040_eval038_duplicate_control/runner_control_a_8gpu \
-  --run-name eval_040_runner_controlA_t1p00_e4_b2097152_lr0025 \
-  --timeout-seconds 7200 -- \
-  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-    RUN_ID=eval_040_eval038_duplicate_control_runner_control_a \
-    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
-    EVAL_LOGIT_TEMP=1.0 \
-    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
-    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \
-    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BUCKETS=2097152 \
-    NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \
-    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \
-    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \
-    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \
-    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \
-    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \
-    torchrun --standalone --nproc_per_node=8 \
-    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py
+date -u --iso-8601=seconds
+nvidia-smi --query-gpu=index,name,memory.total,memory.free,memory.used,utilization.gpu,utilization.memory --format=csv,noheader,nounits -i 0,1,2,3,4,5,6,7
+nvidia-smi --query-compute-apps=gpu_uuid,gpu_name,pid,process_name,used_memory --format=csv,noheader,nounits
+nvidia-smi pmon -i 0,1,2,3,4,5,6,7 -c 1
 ```
 
-Control B:
+Bounded clean-idle watch:
+
+```bash
+for i in 1 2 3 4 5 6; do
+  date -u --iso-8601=seconds
+  nvidia-smi --query-gpu=index,memory.free,memory.used,utilization.gpu --format=csv,noheader,nounits -i 0,1,2,3,4,5,6,7
+  nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader,nounits
+  echo '---'
+  sleep 20
+done
+```
+
+## Exact Top-Level Eval Command Prepared But Not Launched
 
 ```bash
 TIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.py \
@@ -140,11 +140,11 @@ TIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.
   --gpu-indices 0,1,2,3,4,5,6,7 \
   --conda-env physicslm \
   --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \
-  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_040_eval038_duplicate_control/runner_control_b_8gpu \
-  --run-name eval_040_runner_controlB_t1p00_e4_b2097152_lr0025 \
+  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_041_eval038_clean_idle_telemetry_control/runner_control_8gpu \
+  --run-name eval_041_runner_control_t1p00_e4_b2097152_lr0025 \
   --timeout-seconds 7200 -- \
   env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-    RUN_ID=eval_040_eval038_duplicate_control_runner_control_b \
+    RUN_ID=eval_041_eval038_clean_idle_telemetry_control_runner_control \
     EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
     EVAL_LOGIT_TEMP=1.0 \
     TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
@@ -161,133 +161,46 @@ TIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.
 ```
 
 Operational note:
-- one pre-launch `control A` attempt and one immediate post-`control A` `control B` attempt failed before child spawn because only 7 GPUs met the runner free-memory gate
-- the two successful completed controls above are the official results for this round
+- this command was intentionally not launched because the reviewed clean-idle gate never passed
 
-## Fresh Official Results
-- Control A:
-  - `val_loss=0.33725588`
-  - `val_bpb=0.19974193`
-  - script eval wallclock `1316129ms`
-  - runner-managed wallclock `1364893ms`
-  - runner start-to-spawn `382ms`
-  - child runtime `1364510ms`
-  - external top-level wallclock `1365195ms`
-  - any-match fraction `0.98387585`
-  - avg alpha on matched `0.65459876`
-  - matched-order histogram:
-    - `order_2=60166`
-    - `order_3=346841`
-    - `order_4=373090`
-    - `order_5=332096`
-    - `order_6=395043`
-    - `order_7=644544`
-    - `order_8=1634957`
-    - `order_9=57234849`
-- Control B:
-  - `val_loss=0.33725882`
-  - `val_bpb=0.19974367`
-  - script eval wallclock `1249634ms`
-  - runner-managed wallclock `1298509ms`
-  - runner start-to-spawn `479ms`
-  - child runtime `1298030ms`
-  - external top-level wallclock `1298755ms`
-  - any-match fraction `0.98387585`
-  - avg alpha on matched `0.65459430`
-  - matched-order histogram:
-    - `order_2=60166`
-    - `order_3=346841`
-    - `order_4=373090`
-    - `order_5=332096`
-    - `order_6=395043`
-    - `order_7=644544`
-    - `order_8=1634957`
-    - `order_9=57234849`
-
-## Command / Environment Parity Check
-- same helper path: `pass`
-- same checkpoint path: `pass`
-- same artifact path: `pass`
-- same cwd: `pass`
-- same `physicslm` environment: `pass`
-- same runner path: `pass`
-- same pinned GPUs via runner request `0,1,2,3,4,5,6,7`: `pass`
-- same wrapped child command family as promoted `eval_038`: `pass`
-- only wrapped-command differences:
-  - allowed `RUN_ID`
-  - allowed runner log dir
-  - allowed runner run name
-
-## Required Comparisons
-- Control A vs promoted `eval_038`:
-  - `val_loss`: `0.33725663 -> 0.33725588` (`-0.00000075`)
-  - `val_bpb`: `0.19974237 -> 0.19974193` (`-0.00000044`)
-  - script eval wallclock: `588813ms -> 1316129ms` (`+727316ms`)
-  - runner-managed wallclock: `634685ms -> 1364893ms` (`+730208ms`)
-  - external top-level wallclock: `634926ms -> 1365195ms` (`+730269ms`)
-  - runner start-to-spawn: `366ms -> 382ms` (`+16ms`)
-  - child runtime: `634319ms -> 1364510ms` (`+730191ms`)
-  - avg alpha on matched: `0.65459911 -> 0.65459876` (`-0.00000035`)
-- Control B vs promoted `eval_038`:
-  - `val_loss`: `0.33725663 -> 0.33725882` (`+0.00000219`)
-  - `val_bpb`: `0.19974237 -> 0.19974367` (`+0.00000130`)
-  - script eval wallclock: `588813ms -> 1249634ms` (`+660821ms`)
-  - runner-managed wallclock: `634685ms -> 1298509ms` (`+663824ms`)
-  - external top-level wallclock: `634926ms -> 1298755ms` (`+663829ms`)
-  - runner start-to-spawn: `366ms -> 479ms` (`+113ms`)
-  - child runtime: `634319ms -> 1298030ms` (`+663711ms`)
-  - avg alpha on matched: `0.65459911 -> 0.65459430` (`-0.00000481`)
-- Control B vs Control A:
-  - `val_loss`: `0.33725588 -> 0.33725882` (`+0.00000294`)
-  - `val_bpb`: `0.19974193 -> 0.19974367` (`+0.00000174`)
-  - script eval wallclock: `1316129ms -> 1249634ms` (`-66495ms`)
-  - runner-managed wallclock: `1364893ms -> 1298509ms` (`-66384ms`)
-  - external top-level wallclock: `1365195ms -> 1298755ms` (`-66440ms`)
-  - runner start-to-spawn: `382ms -> 479ms` (`+97ms`)
-  - child runtime: `1364510ms -> 1298030ms` (`-66480ms`)
-  - avg alpha on matched: `0.65459876 -> 0.65459430` (`-0.00000446`)
-- Control A vs fresh `eval_039` drifted control:
-  - `val_loss`: `0.33725535 -> 0.33725588` (`+0.00000053`)
-  - `val_bpb`: `0.19974161 -> 0.19974193` (`+0.00000032`)
-  - script eval wallclock: `1190477ms -> 1316129ms` (`+125652ms`)
-  - runner-managed wallclock: `1237270ms -> 1364893ms` (`+127623ms`)
-  - external top-level wallclock: `1237494ms -> 1365195ms` (`+127701ms`)
-  - runner start-to-spawn: `474ms -> 382ms` (`-92ms`)
-  - child runtime: `1236796ms -> 1364510ms` (`+127714ms`)
-- Control B vs fresh `eval_039` drifted control:
-  - `val_loss`: `0.33725535 -> 0.33725882` (`+0.00000347`)
-  - `val_bpb`: `0.19974161 -> 0.19974367` (`+0.00000206`)
-  - script eval wallclock: `1190477ms -> 1249634ms` (`+59157ms`)
-  - runner-managed wallclock: `1237270ms -> 1298509ms` (`+61239ms`)
-  - external top-level wallclock: `1237494ms -> 1298755ms` (`+61261ms`)
-  - runner start-to-spawn: `474ms -> 479ms` (`+5ms`)
-  - child runtime: `1236796ms -> 1298030ms` (`+61234ms`)
+## Clean-Idle Gate Result
+- gate status: `fail`
+- repeated UTC samples from `2026-03-27T11:23:11Z` through `2026-03-27T11:25:26Z` showed the pinned GPU set was not clean-idle
+- GPU `0` remained occupied the entire watch window:
+  - free memory `6512 MiB`
+  - used memory `74495 MiB`
+  - utilization `100%`
+  - compute-app snapshot `GPU-d45bfedb-df91-05be-293c-7375698e87dd, PID 3106138, process_name=[Not Found], used_memory=74486 MiB`
+- GPUs `1..7` stayed idle with about `81007 MiB` free and `0%` utilization
+- because the gate never passed, no synchronized prelaunch/child/teardown telemetry loop and no runner-managed eval launch were started
 
 ## Success Metric
-Primary success condition:
-- both fresh controls within `±0.00005 BPB` of promoted `eval_038`: `pass`
-- both fresh controls within `±15000ms` external wallclock of promoted `634926ms`: `fail`
+Primary diagnostic success required:
+- clean-idle gate passes on GPUs `0..7`
+- one exact promoted-line run finishes
+- BPB stays within `±0.00005` of promoted `eval_038`
+- telemetry is sufficient to classify the slowdown locus
 
-Secondary stability condition:
-- `control A` and `control B` within `±15000ms` external wallclock of each other: `fail`
-- script eval wallclock and runner child/runtime fields show no restored promoted-band behavior: `fail`
-- telemetry remains in-band: `pass`
+Secondary success required:
+- runtime returns to within `+15s` of promoted `eval_038`
+
+Actual status:
+- clean-idle gate pass: `fail`
+- exact promoted-line run: `not launched`
+- diagnostic localization from aligned launch telemetry: `not obtained`
 
 ## Expected Effect
-If the `eval_039` slowdown was transient, both fresh exact controls should return to the promoted runtime band while staying semantically identical to the promoted `eval_038` line.
+If the slowdown was operational rather than semantic, one exact clean-idle rerun with aligned telemetry should have localized whether the drift sits in external contention, launch-side overhead, or the child runtime itself.
 
 ## Actual Result
-- both controls stayed semantically in-family on BPB and telemetry
-- neither control returned to the promoted runtime band
-- control A ran with observed external overlap from a root-owned Humaneval/VLLM workload on GPU `0`
-- control B ran after that overlap cleared and still stayed deep in the slowdown regime
+- no valid diagnostic control was launched
+- no new `val_loss`, `val_bpb`, script wallclock, runner wallclock, external wallclock, `runner_start_to_child_spawn_ms`, or `child_runtime_ms` fields were produced
+- the round produced only a clean-idle gate failure record on the pinned `0..7` GPU set
 
 ## Interpretation
-- Classification: `persistent-runtime-shift`
-- This round answered the reviewed duplicate-control question directly:
-  - not `runtime-restored`, because neither fresh control returned anywhere near promoted runtime
-  - not round-level `runtime-jitter`, because both controls remained much closer to the already-drifted `eval_039` regime than to the promoted `eval_038` runtime regime
-- The promoted helper/checkpoint/artifact stack still reproduces semantics, but the promoted runtime regime is not presently reproducible.
+- Decision label: `no-launch / clean-idle-gate-fail`
+- The round does not update the existing `persistent-runtime-shift` classification from `eval_040`; it only shows that the reviewed clean-idle diagnostic control could not be executed because the required pinned GPU set was externally occupied.
+- Because the exact clean-idle control did not run, the slowdown locus is still not newly localized in this round.
 
 ## Next Step
-Do not return to the dedicated `TTT_EPOCHS=4 -> 3` comparison next round. First diagnose the runtime shift on the exact promoted `eval_038` legality line, because the epoch-count comparison is still inadmissible under the reviewed same-session standard.
+Retry the exact same clean-idle telemetry control once exclusive access to GPUs `0,1,2,3,4,5,6,7` can be guaranteed. Do not reopen the dedicated `TTT_EPOCHS=4 -> 3` refinement pair until that clean-idle diagnostic control succeeds.

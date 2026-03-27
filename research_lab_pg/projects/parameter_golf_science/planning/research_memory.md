@@ -14,16 +14,37 @@ This line is in **REFINEMENT phase**:
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest refinement round: `eval_040 promoted-line duplicate-control check -> persistent-runtime-shift`
+- newest refinement round: `eval_041 clean-idle runtime-diagnosis attempt -> no-launch / clean-idle-gate-fail`
 - newest completed comparison-clean result remains `eval_038 candidate=0.19974237 vs fresh eval_038 control=0.20079897` with external delta `+3477ms`
 - official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
-- open problem: promoted-line scorer temperature is closed positively on this helper lineage, but the reopened epoch-count question is still unanswered on the new `EVAL_LOGIT_TEMP=1.0` line because the promoted runtime regime itself no longer reproduces cleanly. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed operationally, and diagnose the runtime shift before returning to `TTT_EPOCHS=4 -> 3`.
+- open problem: promoted-line scorer temperature is closed positively on this helper lineage, but the reopened epoch-count question is still unanswered on the new `EVAL_LOGIT_TEMP=1.0` line because the promoted runtime regime itself no longer reproduces cleanly and the latest clean-idle diagnostic attempt could not even launch on pinned GPUs `0..7`. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_EPOCHS=4`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed operationally, and first obtain a valid clean-idle runtime-diagnosis control before returning to `TTT_EPOCHS=4 -> 3`.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_040_eval038_duplicate_control`
+## Newest Critical Result - `eval_041_eval038_clean_idle_telemetry_control`
 
+- The reviewed refinement-phase clean-idle runtime-diagnosis attempt on the promoted `eval_038` legality line did not launch because the required prelaunch gate on pinned GPUs `0,1,2,3,4,5,6,7` never passed.
+- No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The round stayed exactly inside the reviewed control-only lane up to the stop:
+  - re-read `context/reference_materials/latest_sota_snapshot.md`, `planning/next_experiment.md`, `planning/research_memory.md`, `planning/experiment_ledger.md`, `reports/latest_status.md`, `reports/comparison_summary.md`, and the active helper before any action
+  - re-verified helper, checkpoint, and artifact identities
+  - recovered the exact promoted `eval_038` runner command family from on-disk metadata
+  - changed no helper code, no checkpoint, no artifact, no runner code, no export path, and no evaluation hyperparameters
+  - prepared the exact promoted-line control command with only allowed operational identifier changes, but intentionally did not launch it after the gate failed
+- Clean-idle gate evidence:
+  - repeated UTC samples from `2026-03-27T11:23:11Z` through `2026-03-27T11:25:26Z`
+  - GPU `0` remained occupied throughout with `6512 MiB` free, `74495 MiB` used, and `100%` utilization
+  - compute-app snapshots showed `GPU-d45bfedb-df91-05be-293c-7375698e87dd, PID 3106138, process_name=[Not Found], used_memory=74486 MiB`
+  - GPUs `1..7` stayed idle with about `81007 MiB` free and `0%` utilization
+- Because the gate never passed:
+  - no synchronized launch/execution/teardown telemetry loop was started
+  - no runner-managed eval process was started
+  - no new `val_loss`, `val_bpb`, script wallclock, runner wallclock, external wallclock, `runner_start_to_child_spawn_ms`, or `child_runtime_ms` fields exist for this round
+- Decision label: `no-launch / clean-idle-gate-fail`.
+- Interpretation: this round does not supersede the existing `persistent-runtime-shift` evidence from `eval_040`; it only records that the exact clean-idle diagnostic control is still pending because the required pinned GPU set was externally occupied. The dedicated `TTT_EPOCHS=4 -> 3` pair therefore remains inadmissible.
+
+## Previous Critical Result - `eval_040_eval038_duplicate_control`
 - The reviewed refinement-phase duplicate-control reproducibility check completed as written with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled experiment scope stayed exactly inside the reviewed control-only lane:
   - reused the exact locked `eval_031` helper with no edits
