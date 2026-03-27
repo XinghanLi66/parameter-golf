@@ -11,16 +11,40 @@ This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - strongest runtime-improved legality baseline: `eval_027=0.29117839`
 - previous legality baseline: `eval_026=0.29117999`
-- newest controlled runtime-only result: `eval_029 control=0.29117992, candidate=0.29118007`
+- newest runtime-only round: `eval_030 control=0.29117961, candidate not run because gate failed`
 - official-anchor gap on the active legality line: `0.29117839 - 0.4416 = -0.15042161`
-- open problem: the script legality issue is answered, helper-only orchestration trimming is answered, and the minimal repo-controlled runner trim is also answered negatively; any further runtime round would need a genuinely different launcher or platform-side lever rather than another scorer, helper-harness, or nearby runner micro-trim
+- open problem: the script legality issue is answered, helper-only orchestration trimming is answered, and the minimal repo-controlled runner trim is also answered negatively; the still-unresolved direct-launcher path could not be tested in `eval_030` because the fresh control drifted just outside the admissibility gate, so any further runtime round must either re-establish an in-gate control or accept that platform variance is too large for a meaningful launcher-path comparison
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_029_eval027_runner_minpath_seed1337`
+## Newest Critical Result - `eval_030_eval027_direct_launcher_ablation`
 
-- The reviewed refinement-phase runner-path ablation is now answered directly on the exact `eval_027` helper/artifact lineage. The helper stayed unchanged at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`. The saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` also stayed unchanged at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The reviewed refinement-phase direct-launcher ablation was executable as written, but it stopped at the required fresh-control gate rather than reaching the candidate. The helper stayed unchanged at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`. The saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` also stayed unchanged before and after the control run at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled experiment scope stayed exactly inside the reviewed evaluation-only lane:
+  - no repo code edits
+  - no helper edits
+  - no scorer edits
+  - no export edits
+  - recovered the exact locked child command from prior `eval_029` metadata
+  - reused one fresh shared `RUN_ID` and the exact `eval_027` helper path
+  - measured top-level wallclock externally while also preserving runner metadata
+- The fresh official control rerun in `physicslm` on GPUs `0,1,2,3,4,5,6,7` scored:
+  - `legal_ttt_exact val_loss=0.49164458`
+  - `legal_ttt_exact val_bpb=0.29117961`
+  - script eval wallclock `583199ms`
+  - runner managed wallclock `626554ms`
+  - external top-level wallclock `626721ms`
+- Gate check vs historical `eval_027`:
+  - `val_bpb` drift `+0.00000122` -> pass
+  - managed wallclock drift `+11554ms` -> fail
+  - reviewed allowance was only `+10000ms`, so the control missed the gate by `1554ms`
+- Per the reviewed brief, the direct-launch candidate was not run after that gate failure. This round must therefore be interpreted as environment drift rather than launcher evidence.
+- Decision: keep `eval_027` as the active legality baseline, and do not treat `eval_030` as either a positive or a negative direct-launch result. The direct-launcher hypothesis remains unanswered.
+
+## Previous Controlled Negative Result - `eval_029_eval027_runner_minpath_seed1337`
+
+- The reviewed refinement-phase runner-path ablation is still answered directly on the exact `eval_027` helper/artifact lineage. The helper stayed unchanged at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`. The saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` also stayed unchanged at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled code diff stayed inside the reviewed runner-only scope:
   - edited only `tools/gpu_experiment_runner.py`
   - added one default-off switch `--minimal-runner`
@@ -51,7 +75,7 @@ This line is in **REFINEMENT phase**:
   - `child_runtime_ms`: `624397 -> 625818` (`+1421ms`)
   - `child_exit_to_runner_exit_ms`: `0 -> 0`
 - The exact `eval_027` helper intentionally remained untouched, so the fresh arms do not emit helper-local `process_total_ms`. The closest helper-timed historical anchor remains `eval_028`, which measured `process_total_ms=594842` and inferred outside-helper residual `21158ms`.
-- Decision: do not promote the new minimal runner mode. This is a controlled negative result for the repo-controlled runner-path hypothesis. `eval_027` remains the active legality baseline, and any remaining managed miss now looks more likely to require a genuinely different launcher or platform-side change.
+- Decision: do not promote the new minimal runner mode. This is a controlled negative result for the repo-controlled runner-path hypothesis inside the runner itself.
 
 ## Previous Positive Baseline Result - `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`
 
@@ -101,8 +125,9 @@ This line is in **REFINEMENT phase**:
 - `eval_027`: scorer-side post-lookup vectorization preserved the held-out controls and full-val BPB, recovered `32123ms` script time on top of `eval_026`, and brought the official script eval to `574202ms`; this is now the active legality baseline.
 - `eval_028`: helper-only official-eval orchestration trimming preserved full-val BPB and reduced helper-local pre/post overhead to about `15.5s`, but managed wallclock stayed `616s` because about `21.2s` now localizes outside the helper in the managed runner path; do not promote it over `eval_027`.
 - `eval_029`: a default-off minimal runner mode preserved the exact child command and full official BPB but reduced pre-spawn time by only `247ms` and still worsened managed wallclock by `1173ms`; do not spend another immediate round on nearby repo-controlled runner micro-trims.
+- `eval_030`: the direct-launcher ablation did not reach its candidate because the fresh control missed the reviewed managed-wallclock gate by `1554ms`; treat this as drift, not as evidence for or against direct launch.
 
 ## Best Next Step
 
 Keep `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337` as the active legality baseline.  
-Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend another immediate round on already-answered helper-only orchestration trimming, global entropy gating, table-width sweeps, or nearby repo-controlled runner micro-trims. If more runtime headroom is still desired, it now likely requires a genuinely different launcher path or platform-side change rather than another scorer, helper, or minimal runner tweak.
+Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend another immediate round on already-answered helper-only orchestration trimming, global entropy gating, table-width sweeps, or nearby repo-controlled runner micro-trims. If more runtime headroom is still desired, first re-establish a fresh in-gate control and only then retry the still-unanswered direct-launcher path; otherwise treat platform variance as the more likely blocker.
