@@ -337,7 +337,7 @@ def scan_eval_runs(project_root: Path) -> list[dict[str, Any]]:
         r"## (?:Primary Results|Actual Result)(.*?)(?=\n## |\Z)", re.DOTALL
     )
     _bpb_re = re.compile(r"val_bpb[^0-9]*([0-9]+\.[0-9]+)")
-    _wc_re = re.compile(r"script eval wallclock[^0-9]*([0-9]+)ms")
+    _wc_re = re.compile(r"script eval wallclock[^-0-9]*([0-9]{4,})ms", re.IGNORECASE)
     results = []
     for summary_path in sorted(runs_dir.glob("eval_*/summary.md")):
         run_name = summary_path.parent.name
