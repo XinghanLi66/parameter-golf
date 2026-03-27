@@ -9,17 +9,49 @@ PR `#809` at `0.2952` remains legality-pending and is not the official target.
 
 This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
-- strongest runtime-improved legality baseline: `eval_031=0.29081485`
+- strongest runtime-improved legality baseline: `eval_032=0.29081271`
 - previous legality baseline: `eval_027=0.29117839`
-- newest scored refinement round: `eval_031 selected T=0.95 -> 0.29081485`
+- newest scored refinement round: `eval_032 fresh confirmation pair -> promote T=0.95 -> 0.29081271`
 - newest runtime-only round: `eval_030 control=0.29117961, candidate not run because gate failed`
-- official-anchor gap on the active legality line: `0.29081485 - 0.4416 = -0.15078515`
-- open problem: the PR809 legality line now has one controlled positive single-seed temperature calibration result, but it still needs a fresh full official confirmation if the lab wants to promote `T=0.95` as a stable default rather than a one-round selector win; the direct-launcher runtime question remains unanswered separately because `eval_030` never reached its candidate
+- official-anchor gap on the active legality line: `0.29081271 - 0.4416 = -0.15078729`
+- open problem: the scalar-temperature question is now closed on the locked PR809 legality line because fresh official control/candidate confirmation passed cleanly and promoted `T=0.95` as the default. The direct-launcher runtime question remains unanswered separately because `eval_030` never reached its candidate, but it should only be revisited behind a fresh admissible control.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_031_eval027_global_temperature_calibration`
+## Newest Critical Result - `eval_032_eval031_temperature_confirmation_pair`
+
+- The reviewed refinement-phase fresh official confirmation pair executed cleanly on the locked `eval_031` legality lineage with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after both runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
+  - reused the exact locked `eval_031` helper with no edits
+  - reused the exact same checkpoint, artifact, runner path, environment, tokenizer, dataset, stride, legal TTT settings, and PR809 vectorized n-gram settings
+  - changed only `EVAL_LOGIT_TEMP` between fresh official control `1.0` and fresh official candidate `0.95`
+  - changed only `RUN_ID`, log dir, and run name as operational bookkeeping
+- Fresh same-helper full official control in `physicslm` on GPUs `0,1,2,3,4,5,6,7` scored:
+  - `legal_ttt_exact val_loss=0.49164677`
+  - `legal_ttt_exact val_bpb=0.29118091`
+  - script eval wallclock `591399ms`
+  - runner-managed wallclock `633253ms`
+  - external top-level wallclock `633409ms`
+- Fresh same-helper full official candidate at `EVAL_LOGIT_TEMP=0.95` on the same GPUs scored:
+  - `legal_ttt_exact val_loss=0.49102508`
+  - `legal_ttt_exact val_bpb=0.29081271`
+  - script eval wallclock `584876ms`
+  - runner-managed wallclock `627182ms`
+  - external top-level wallclock `627421ms`
+- Required comparisons:
+  - fresh `T=0.95` vs fresh `T=1.0`: `0.29118091 -> 0.29081271` (`-0.00036820`)
+  - fresh `T=0.95` vs prior `eval_031`: `0.29081485 -> 0.29081271` (`-0.00000214`)
+  - fresh `T=1.0` vs `eval_027`: `0.29117839 -> 0.29118091` (`+0.00000252`)
+  - fresh `T=1.0` vs `eval_030`: `0.29117961 -> 0.29118091` (`+0.00000130`)
+  - runtime vs `eval_027`:
+    - fresh `T=1.0`: `+17197ms` script, `+18253ms` runner-managed
+    - fresh `T=0.95`: `+10674ms` script, `+12182ms` runner-managed
+- Fresh-control admissibility passed cleanly because the fresh `T=1.0` control stayed far within the reviewed `0.0002` drift band against both `eval_027` and `eval_030`.
+- Decision label: `promote`.
+- Interpretation: this is a clean confirmatory result, not drift-limited and not another one-off selected run. `EVAL_LOGIT_TEMP=0.95` is now the promoted default on the locked `eval_031` PR809 legality line, and nearby scalar-temperature tuning should be considered closed on this line.
+
+## Previous Critical Result - `eval_031_eval027_global_temperature_calibration`
 
 - The reviewed refinement-phase temperature calibration ablation executed cleanly on the locked `eval_027` PR809 legality line. The exact source helper was verified first at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`. The copied edited `eval_031` helper changed only to `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged before and after all runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled code diff stayed inside the reviewed single-variable evaluation lane:
@@ -161,9 +193,10 @@ This line is in **REFINEMENT phase**:
 - `eval_028`: helper-only official-eval orchestration trimming preserved full-val BPB and reduced helper-local pre/post overhead to about `15.5s`, but managed wallclock stayed `616s` because about `21.2s` now localizes outside the helper in the managed runner path; do not promote it over `eval_027`.
 - `eval_029`: a default-off minimal runner mode preserved the exact child command and full official BPB but reduced pre-spawn time by only `247ms` and still worsened managed wallclock by `1173ms`; do not spend another immediate round on nearby repo-controlled runner micro-trims.
 - `eval_030`: the direct-launcher ablation did not reach its candidate because the fresh control missed the reviewed managed-wallclock gate by `1554ms`; treat this as drift, not as evidence for or against direct launch.
-- `eval_031`: scoring-only neural-logit temperature scaling on the locked PR809 legality line is locally positive. `T=1.0` preserved held-out parity, `T=0.95` won the fixed calibration slice by `0.00558234`, and the single official run improved full-val BPB to `0.29081485`; do not spend the next round on nearby scalar sweeps until this exact selected point is either confirmed or rejected by a fresh full official rerun.
+- `eval_031`: scoring-only neural-logit temperature scaling on the locked PR809 legality line was locally positive and selected `T=0.95`; it is now superseded by `eval_032`, which cleanly confirmed the same setting on a fresh full official control/candidate pair.
+- `eval_032`: fresh same-helper full official control/candidate confirmation on the locked `eval_031` line promoted `EVAL_LOGIT_TEMP=0.95` as the default. The fresh control stayed admissible, the fresh candidate won by `0.00036820 BPB`, and nearby scalar-temperature tuning on this line should now be treated as closed.
 
 ## Best Next Step
 
-Keep `eval_031_eval027_global_temperature_calibration` with selected `EVAL_LOGIT_TEMP=0.95` as the active single-seed legality baseline.  
-Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend the next round on nearby scalar-temperature sweeps. If the lab wants promotion confidence, first run one fresh full official confirmation of `T=0.95` against `T=1.0` on the exact locked artifact and pinned GPUs; otherwise, treat the temperature setting as the new default and move the next refinement round to a genuinely different single-variable question.
+Keep the locked `eval_031` legality line with promoted `EVAL_LOGIT_TEMP=0.95` as the active baseline.  
+Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend the next round on nearby scalar-temperature sweeps. Move the next refinement round to a genuinely different single-variable question; if launcher-path runtime work is revisited, require a fresh admissible control first.
