@@ -3,161 +3,136 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase orchestration-only follow-up on top of the locked `eval_027` PR `#809` legality line.
+Completed on `2026-03-27` as the reviewed refinement-phase runner-path ablation on top of the locked `eval_027` PR `#809` legality line.
 
 - Executed the reviewed brief materially as written:
-  - created `runs/eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`
-  - copied the exact `eval_027` helper into the new run directory
-  - added one default-off top-level env switch `NGRAM_EVAL_OFFICIAL_ONLY=1`
-  - changed only top-level orchestration/reporting inside `main()`
-  - kept the saved seed-`1337` checkpoint/export lineage unchanged
-  - ran one full official candidate in `physicslm` on `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`
-  - recorded coarse helper phase timings around the single official `legal_ttt_exact` eval
+  - edited only `tools/gpu_experiment_runner.py`
+  - added a default-off runner switch `--minimal-runner`
+  - added coarse runner timing logs in both arms
+  - kept the exact `eval_027` helper bytes, saved checkpoint bytes, and saved artifact bytes unchanged
+  - ran one fresh official control through the default runner path
+  - verified the control stayed within the reviewed `val_bpb` and managed-wallclock gate
+  - ran one corrected official candidate with the exact same child command and log destination, changing only the outer runner switch
+  - recorded a controlled negative result
 
 ## Experiment ID
-`eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`
+`eval_029_eval027_runner_minpath_seed1337`
 
 ## Category
 - evaluation
 
-Operational subtype: `runtime-only helper-orchestration trim on locked PR #809 legality line`
+Operational subtype: `runtime-only runner-path ablation on locked eval_027 legality line`
 
 ## Baseline / Comparison
-Primary runtime baseline:
-- `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`
-  - `val_bpb=0.29117839`
-  - script eval wallclock `574202ms`
-  - managed wallclock `615s`
-  - managed minus script overhead `40.798s`
+Fresh control baseline:
+- `eval_029` control on the unchanged `eval_027` helper/artifact line
+  - `val_bpb=0.29117992`
+  - script eval wallclock `582051ms`
+  - managed wallclock `624825ms`
 
-External comparison:
-- official snapshot target `PR #803`: `0.4416`
-- legality-pending reference `PR #809`: `0.2952`
+Historical anchors:
+- `eval_027`: `val_bpb=0.29117839`, script eval wallclock `574202ms`, managed wallclock `615s`
+- `eval_028`: `val_bpb=0.29118133`, helper `process_total_ms=594842`, inferred runner-managed outside-helper overhead `21158ms`, managed wallclock `616s`
 
 ## Hypothesis
-If the remaining `15s` managed overrun after `eval_027` is mostly outside the locked scorer path, then an official-eval-only fast path will reduce managed wallclock to `<=600s` while keeping `val_bpb` within `±0.0001` of `eval_027` and leaving script eval roughly unchanged.
+If the remaining managed overrun is mainly runner-side setup, teardown, and wrapper bookkeeping outside the helper, then a minimal runner mode that preserves identical child execution should reduce managed wallclock enough to reach `<=600s` while preserving `val_bpb` within `±0.0001` of fresh control and historical `eval_027`.
 
 ## Why It Might Work
-- `eval_026 -> eval_027` recovered `32123ms` of script time while managed minus script overhead stayed large.
-- That pointed away from the locked scorer hot path and toward helper startup, teardown, or inherited run-local work around the single scored official call.
+- `eval_027` already proved the exact script path is legal.
+- `eval_028` showed helper-local total process time can already fit under budget.
+- The untested repo-controlled variable was still the runner path outside the helper.
 
 ## Minimal Intervention
-Copy the exact `eval_027` helper into a fresh run directory, add one default-off env switch, and change only top-level orchestration/reporting so the enabled path runs only the final official `legal_ttt_exact` evaluation on the saved artifact and emits coarse pre/eval/post timings.
+Change only `tools/gpu_experiment_runner.py`:
+
+- add one default-off runner switch `--minimal-runner`
+- keep the child command, env, cwd, stdout/stderr file capture, exit propagation, and artifact paths unchanged
+- add the same timing instrumentation to both arms
+- allow minimal mode to skip only nonessential runner-side console mirroring and extra pre-query bookkeeping
 
 ## Variables To Change
-- new env control: `NGRAM_EVAL_OFFICIAL_ONLY`
-- reviewed candidate setting: `1`
-- top-level behavior when enabled:
-  - skip full code dump to log
-  - skip `nvidia-smi` logging
-  - skip training-shard counting/logging
-  - keep only the saved-artifact load plus final official eval path
-  - emit:
-    - `process_to_official_eval_start_ms`
-    - `official_eval_duration_ms`
-    - `official_eval_end_to_process_exit_ms`
-    - `process_total_ms`
+- new runner switch: `--minimal-runner`
+- runner-side console mirroring outside the child path
+- runner-side extra pre-query work
+- new runner timing fields:
+  - `runner_start_to_child_spawn_ms`
+  - `child_runtime_ms`
+  - `child_exit_to_runner_exit_ms`
+  - `runner_total_ms`
 
 ## Variables To Hold Fixed
-- exact `eval_027` scorer code and n-gram mechanism
-- exact saved seed-`1337` `final_model.pt` and `final_model.int6.ptz`
-- exact `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`
-- exact `NGRAM_EVAL_BATCH_TORCH_STATS=1`
-- exact `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`
-- exact `NGRAM_EVAL_MIN_ORDER=2`
-- exact `NGRAM_EVAL_MAX_ORDER=9`
-- exact `NGRAM_EVAL_BUCKETS=4194304`
-- exact `NGRAM_EVAL_MIN_COUNT=2`
-- exact `NGRAM_EVAL_CHUNK_TOKENS=1000000`
-- locked alpha / entropy / order-mult settings
-- locked legal TTT settings
-- tokenizer, dataset, stride `64`, export bytes
+- exact `eval_027` helper bytes and SHA-256
+- exact saved seed-`1337` checkpoint/export bytes and SHA-256
+- exact official `legal_ttt_exact` eval child command
+- tokenizer, dataset, stride `64`
+- exact n-gram and TTT settings from `eval_027`
+- exact `physicslm` environment and `8x NVIDIA L20Z` launch shape
 - no retraining
 - no export rewrite
-- no scorer-side algorithm change
-
-## Exact Implementation Diff Versus `eval_027`
-- added one env var in `Hyperparameters`:
-  - `ngram_eval_official_only = bool(int(os.environ.get("NGRAM_EVAL_OFFICIAL_ONLY", "0")))`
-- changed only `main()` / top-level eval-only orchestration so the official-only path:
-  - suppresses inherited code-dump / `nvidia-smi` / train-shard logs
-  - keeps only val-token setup, artifact load, and the locked final official eval
-  - records coarse helper phase timing around the single official eval
-- left `score_segments()`, `NgramEvalCache`, TTT math, lookup/update semantics, tokenizer, dataset, and artifact handling unchanged
+- no scorer-side code changes
+- no helper `main()` orchestration edits
 
 ## Identity Checks
-- Source helper before copy:
+- Helper:
   - `runs/eval_027.../train_gpt.py`: `125178` bytes
   - SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`
-- New helper after edit:
-  - `runs/eval_028.../train_gpt.py`: `126904` bytes
-  - SHA-256 `e1e55335df5a188738545811fe6a03516a4629bb343ebd3e57f847598eb0d5b3`
-- Saved artifact lineage stayed unchanged:
-  - `final_model.pt`: `106178569` bytes, `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`
-  - `final_model.int6.ptz`: `15555121` bytes, `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
+- Saved checkpoint:
+  - `final_model.pt`: `106178569` bytes
+  - SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`
+- Saved artifact:
+  - `final_model.int6.ptz`: `15555121` bytes
+  - SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 
-## Enabled Full Official Eval
-- Exact result:
-  - `val_loss=0.49164748`
-  - `val_bpb=0.29118133`
-- Script eval wallclock: `579356ms`
-- Managed wallclock: `616s`
-- Managed minus script overhead: `36.644s`
-- Helper-local phase timings:
-  - process start to official-eval start: `14940ms`
-  - official-eval duration: `579356ms`
-  - official-eval end to process exit: `547ms`
-  - helper total process time: `594842ms`
-- Inferred runner-managed overhead outside helper:
-  - `616000ms - 594842ms = 21158ms`
-- Reused scorer telemetry:
-  - `ngram_ctx_key_precompute resident_bytes=1984692256 elapsed_ms=20645`
-  - `ngram_batch_lookup_call_count=30770`
-  - `ngram_batch_lookup_elapsed_ms=20226`
-  - `ngram_torch_stats_batches=30770`
-  - `ngram_torch_stats_elapsed_ms=3297`
-  - `ngram_postlookup_vectorized_batches=30770`
-  - `ngram_postlookup_vectorized_elapsed_ms=1171231`
-  - `ngram_update_batch_timing calls=63 elapsed_ms=32505`
-  - any-match fraction `0.98387524`
-  - average alpha on matched positions `0.64246944`
+## Control Acceptance Gate
+- Fresh control `val_bpb=0.29117992`, historical drift `+0.00000153`
+- Fresh control managed wallclock `624825ms`, historical drift `+9825ms`
+- Gate decision: `pass`
 
-## Delta Summary
-- Vs `eval_027`:
-  - `val_bpb`: `+0.00000294`
-  - script eval wallclock: `+5154ms`
-  - managed wallclock: `+1s`
-  - managed minus script overhead: `-4.154s`
-- Vs managed budget:
-  - `600s -> 616s` (`+16s`, still illegal)
-- Vs helper-local `600000ms` process budget:
-  - `594842ms` (`-5158ms`, helper itself is now under budget)
-- Vs official target `0.4416`:
-  - `val_bpb`: `-0.15041867`
+## Final Comparison
+- Exact child command identity between final control and final candidate: `pass`
+- Control:
+  - `val_loss=0.49164510`
+  - `val_bpb=0.29117992`
+  - script eval wallclock `582051ms`
+  - managed wallclock `624825ms`
+  - runner split `427 / 624397 / 0 / 624825ms`
+- Candidate (`--minimal-runner`):
+  - `val_loss=0.49164536`
+  - `val_bpb=0.29118007`
+  - script eval wallclock `583407ms`
+  - managed wallclock `625998ms`
+  - runner split `180 / 625818 / 0 / 625998ms`
+- Deltas:
+  - `val_bpb`: `+0.00000015`
+  - script eval wallclock: `+1356ms`
+  - managed wallclock: `+1173ms`
+  - `runner_start_to_child_spawn_ms`: `-247ms`
+  - `child_runtime_ms`: `+1421ms`
+  - `child_exit_to_runner_exit_ms`: unchanged at `0ms`
 
-## Bytes
-- Artifact bytes: `15555121`
-- Code bytes: `126904`
-- Total bytes: `15682025`
-- Headroom under `16,000,000`: `317975`
+## Notes
+- One initial minimal-mode launch used a different `RUN_ID`; it was discarded from comparison because the child command and helper log destination were not strictly identical. The final reported candidate reran with the exact same child command as control.
+- The exact `eval_027` helper does not emit `process_total_ms`, so fresh-arm `runner_total_ms - helper_process_total_ms` is unavailable. The closest helper-timed historical anchor remains `eval_028`, which measured outside-helper residual `21158ms`.
 
 ## Success Metric
 Primary success criterion:
-- managed wallclock `<=600s`
+- candidate managed wallclock `<=600s`
 
 Quality guardrail:
-- full official `val_bpb` within `±0.0001` of `eval_027`
-
-Secondary runtime guardrails:
-- script eval wallclock no worse than `eval_027` by more than `5000ms`
-- managed minus script overhead reduced to `<=26s`
+- candidate `val_bpb` within `±0.0001` of fresh control and historical `eval_027`
 
 Outcome:
 - quality guardrail passed
-- managed wallclock target failed
-- script eval stayed close but missed the `+5000ms` tolerance by `154ms`
-- helper-local total process time fell below `600s`
-- remaining miss localizes mostly to managed-path overhead outside the helper rather than more scorer or helper-harness trimming
+- managed wallclock target failed by `25998ms`
+- minimal runner did not materially reduce managed wallclock
+- the only measurable runner-side improvement was a small `247ms` reduction before child spawn
+- overall result was slightly worse end-to-end
+
+## Interpretation
+This is a controlled negative answer to the runner-path hypothesis inside the repo-controlled launcher. The minimal runner preserved quality and the exact child command but did not buy legality; `eval_027` remains the active legality baseline.
+
+## Next Step
+If another runtime round is still warranted, treat the remaining miss as likely dominated by platform or job-wrapper overhead outside this repo’s minimal runner adjustments. Do not spend the next immediate round on another nearby runner micro-trim unless a genuinely different launcher path is available.
 
 ## Expected Effect
 - Keep BPB locked while reducing managed wallclock below `600s`.

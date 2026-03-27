@@ -11,40 +11,47 @@ This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - strongest runtime-improved legality baseline: `eval_027=0.29117839`
 - previous legality baseline: `eval_026=0.29117999`
-- newest controlled runtime-only result: `eval_028=0.29118133`
+- newest controlled runtime-only result: `eval_029 control=0.29117992, candidate=0.29118007`
 - official-anchor gap on the active legality line: `0.29117839 - 0.4416 = -0.15042161`
-- open problem: the script legality issue is now answered and helper-only orchestration trimming has also been answered; any next runtime round should target runner-managed overhead outside the helper rather than scorer-side post-lookup bookkeeping or another helper-harness trim
+- open problem: the script legality issue is answered, helper-only orchestration trimming is answered, and the minimal repo-controlled runner trim is also answered negatively; any further runtime round would need a genuinely different launcher or platform-side lever rather than another scorer, helper-harness, or nearby runner micro-trim
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_028_arch010_pr809_chunk_ngram_ttt_official_eval_only_seed1337`
+## Newest Critical Result - `eval_029_eval027_runner_minpath_seed1337`
 
-- The reviewed refinement-phase orchestration-only follow-up on top of `eval_027` is now answered directly on the exact `eval_027` scorer/artifact lineage. The copied source helper from `eval_027` was `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`. The new `eval_028` helper was `126904` bytes with SHA-256 `e1e55335df5a188738545811fe6a03516a4629bb343ebd3e57f847598eb0d5b3`. The saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
-- The controlled code diff versus `eval_027` stayed inside the reviewed orchestration-only scope:
-  - added one env var: `NGRAM_EVAL_OFFICIAL_ONLY`
-  - changed only top-level `main()` / eval-only orchestration
-  - suppressed inherited code-dump, `nvidia-smi`, and train-shard logging on the official-only path
-  - added one coarse `official_eval_only_phase_timing` log
-  - left `score_segments()`, `NgramEvalCache`, TTT math, lookup/update semantics, tokenizer, dataset, and artifact handling unchanged
-- The enabled full official run scored `legal_ttt_exact val_loss=0.49164748`, `legal_ttt_exact val_bpb=0.29118133`, with script eval wallclock `579356ms` and managed wallclock `616s`. That keeps BPB well inside the reviewed guardrail versus `eval_027` (`+0.00000294 val_bpb`) but does not improve runtime on the real managed path (`+5154ms` script, `+1s` managed).
-- The new helper-local phase split is the decisive evidence from this round:
-  - `process_to_official_eval_start_ms=14940`
-  - `official_eval_duration_ms=579356`
-  - `official_eval_end_to_process_exit_ms=547`
-  - `process_total_ms=594842`
-  - inferred runner-managed overhead outside the helper: `616000ms - 594842ms = 21158ms`
-- This decomposes the remaining managed minus script gap `36644ms` into about `15487ms` of helper-local pre/post work and about `21158ms` outside the helper in the managed runner path.
-- Reused scorer telemetry stayed in family with the active `eval_027` line:
-  - `ngram_ctx_key_precompute resident_bytes=1984692256 elapsed_ms=20645`
-  - `ngram_batch_lookup_elapsed_ms=20226`
-  - `ngram_torch_stats_elapsed_ms=3297`
-  - `ngram_postlookup_vectorized_elapsed_ms=1171231`
-  - `ngram_update_batch_timing elapsed_ms=32505`
-  - any-match fraction `0.98387524`
-  - average alpha `0.64246944`
-- The run remained under the byte cap at `15555121` artifact bytes, `126904` code bytes, `15682025` total, leaving `317975` bytes of headroom.
-- Decision: do not promote `eval_028`. `eval_027` remains the active legality baseline. Helper-local orchestration trimming was real but insufficient; the next non-redundant runtime target, if any, is runner-managed overhead outside the helper.
+- The reviewed refinement-phase runner-path ablation is now answered directly on the exact `eval_027` helper/artifact lineage. The helper stayed unchanged at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`. The saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` also stayed unchanged at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled code diff stayed inside the reviewed runner-only scope:
+  - edited only `tools/gpu_experiment_runner.py`
+  - added one default-off switch `--minimal-runner`
+  - added the same runner timing fields in both arms:
+    - `runner_start_to_child_spawn_ms`
+    - `child_runtime_ms`
+    - `child_exit_to_runner_exit_ms`
+    - `runner_total_ms`
+  - kept child command, env, cwd, stdout/stderr file capture, exit propagation, and artifact paths unchanged
+  - allowed minimal mode to skip only console mirroring and the extra pre-query bookkeeping
+- The fresh official control rerun answered the stability gate cleanly enough to compare:
+  - `legal_ttt_exact val_loss=0.49164510`
+  - `legal_ttt_exact val_bpb=0.29117992`
+  - script eval wallclock `582051ms`
+  - managed wallclock `624825ms`
+  - drift vs historical `eval_027`: `+0.00000153 val_bpb`, `+9825ms` managed
+- A first minimal-mode attempt with a different `RUN_ID` was discarded because the child command and helper log destination were not strictly identical. The final candidate reran with the exact same child command as control and changed only the outer runner switch.
+- The corrected final candidate scored:
+  - `legal_ttt_exact val_loss=0.49164536`
+  - `legal_ttt_exact val_bpb=0.29118007`
+  - script eval wallclock `583407ms`
+  - managed wallclock `625998ms`
+- Final control-vs-candidate deltas were:
+  - `val_bpb`: `+0.00000015`
+  - script eval wallclock: `+1356ms`
+  - managed wallclock: `+1173ms`
+  - `runner_start_to_child_spawn_ms`: `427 -> 180` (`-247ms`)
+  - `child_runtime_ms`: `624397 -> 625818` (`+1421ms`)
+  - `child_exit_to_runner_exit_ms`: `0 -> 0`
+- The exact `eval_027` helper intentionally remained untouched, so the fresh arms do not emit helper-local `process_total_ms`. The closest helper-timed historical anchor remains `eval_028`, which measured `process_total_ms=594842` and inferred outside-helper residual `21158ms`.
+- Decision: do not promote the new minimal runner mode. This is a controlled negative result for the repo-controlled runner-path hypothesis. `eval_027` remains the active legality baseline, and any remaining managed miss now looks more likely to require a genuinely different launcher or platform-side change.
 
 ## Previous Positive Baseline Result - `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`
 
@@ -93,8 +100,9 @@ This line is in **REFINEMENT phase**:
 - `eval_026`: scorer-side batched exact torch stats preserved the held-out controls and full-val BPB, recovered another `7903ms` script time on top of `eval_025`, and measured `ngram_torch_stats_elapsed_ms=3257`, but still missed the script budget by `6325ms`; it is now superseded by `eval_027`.
 - `eval_027`: scorer-side post-lookup vectorization preserved the held-out controls and full-val BPB, recovered `32123ms` script time on top of `eval_026`, and brought the official script eval to `574202ms`; this is now the active legality baseline.
 - `eval_028`: helper-only official-eval orchestration trimming preserved full-val BPB and reduced helper-local pre/post overhead to about `15.5s`, but managed wallclock stayed `616s` because about `21.2s` now localizes outside the helper in the managed runner path; do not promote it over `eval_027`.
+- `eval_029`: a default-off minimal runner mode preserved the exact child command and full official BPB but reduced pre-spawn time by only `247ms` and still worsened managed wallclock by `1173ms`; do not spend another immediate round on nearby repo-controlled runner micro-trims.
 
 ## Best Next Step
 
 Keep `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337` as the active legality baseline.  
-Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend another immediate round on already-answered helper-only orchestration trimming, global entropy gating, or table-width sweeps. If more runtime headroom is still desired, the next controlled experiment should target runner-managed overhead outside the helper rather than another scorer-side or helper-harness change.
+Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend another immediate round on already-answered helper-only orchestration trimming, global entropy gating, table-width sweeps, or nearby repo-controlled runner micro-trims. If more runtime headroom is still desired, it now likely requires a genuinely different launcher path or platform-side change rather than another scorer, helper, or minimal runner tweak.
