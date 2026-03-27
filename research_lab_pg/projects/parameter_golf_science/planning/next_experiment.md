@@ -3,86 +3,83 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase same-session patched-helper `NGRAM_EVAL_BUCKETS=2097152 -> 1048576` pair on the validated `1..7` surrogate path.
+Completed on `2026-03-27` as the reviewed refinement-phase candidate-only operational diagnosis of the patched-helper `NGRAM_EVAL_BUCKETS=1048576` path on GPUs `1..7`.
 
-- Executed the reviewed brief through the required file re-read, exact `eval_047` / `eval_048` helper-command recovery, copied-helper reuse, helper/checkpoint/artifact identity verification, fresh clean-idle gating on GPUs `1..7`, one fresh patched-helper `2097152` control, admissibility checks against `eval_048` and `eval_047`, and one immediate patched-helper `1048576` candidate launch.
-- The intervention stayed controlled exactly as reviewed:
-  - reused the validated patched eval-only helper from `eval_047` unchanged
-  - kept checkpoint, artifact, scorer path, tokenizer, data, runner path, TTT settings, and all non-bucket eval settings fixed
-  - changed only the candidate arm’s `NGRAM_EVAL_BUCKETS: 2097152 -> 1048576`
-- The fresh control completed and was admissible versus both `eval_048` and `eval_047`.
-- The immediate candidate launched, but it did not finish cleanly:
-  - it reached chunk `1521/1893`
-  - then failed late with `torch.AcceleratorError: CUDA error: unspecified launch failure`
-  - torchrun hung in distributed teardown after the child-side failure
-  - I interrupted the stuck runner only after the failure had already been recorded so GPUs `1..7` were released cleanly
-- Because the candidate never produced a final post-export metric, the round closes as `blocked`, not `promote` or `hold`.
+- Executed the reviewed brief in the narrowed operational lane:
+  - re-read the required SOTA, urgent n-gram, planning, reporting, and `eval_049` lineage files before changing anything
+  - re-verified helper, checkpoint, and artifact bytes/SHA against the validated `eval_049` lineage
+  - reused the exact patched helper unchanged in a fresh `eval_050` run directory
+  - recorded a fresh gate sample, then a bounded launch-ready clean-idle watch on GPUs `1..7`
+  - captured full external GPU telemetry during the rerun
+  - launched exactly one candidate-only `NGRAM_EVAL_BUCKETS=1048576` rerun through `tools/gpu_experiment_runner.py`
+- The operational question is now answered:
+  - the prior late `1048576` failure from `eval_049` did **not** reproduce
+  - the rerun passed the old failure locus at chunk `1521/1893`
+  - it finished cleanly, wrote `metadata.json`, and emitted final post-export metrics
+- Because this round intentionally omitted a fresh same-session control arm, the result is `operationally viable`, **not** `promote`.
 
 ## Experiment ID
-`eval_049_eval048_buckets_pair_patched_7gpu`
+`eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu`
 
 ## Category
 - evaluation
 
-Operational subtype: `same-session patched-helper bucket-count comparison`
+Operational subtype: `evaluation-path operational diagnosis`
 
 ## Baseline / Comparison
-Primary baseline:
-- fresh same-session patched-helper 7-GPU control on GPUs `1..7` with `NGRAM_EVAL_BUCKETS=2097152`
+Primary comparison for this round:
+- prior failed `eval_049` candidate at `NGRAM_EVAL_BUCKETS=1048576`
+- one exact rerun on the same patched-helper / checkpoint / artifact / GPU-subset path with only fresh operational identifiers
 
-Admissibility anchors:
-- `eval_048 control=0.19974338` patched-helper 7-GPU admissible control
-- `eval_047=0.19974198` patched-helper 7-GPU admissible control
-- `eval_045=0.19974186` fresh admissible promoted-line 8-GPU control
-- historical bucket-family signal `eval_015=0.19974202`
-
-Primary comparison attempted this round:
-- immediate patched-helper 7-GPU candidate with only `NGRAM_EVAL_BUCKETS: 2097152 -> 1048576`
-- compared first and only for decision against the fresh same-session control
+Context anchors retained but not rerun this round:
+- `eval_049` patched-helper admissible control at `NGRAM_EVAL_BUCKETS=2097152`
+- `eval_048` patched-helper admissible control at `NGRAM_EVAL_BUCKETS=2097152`
+- `eval_047` patched-helper admissible control at `NGRAM_EVAL_BUCKETS=2097152`
 
 ## Hypothesis
-On the validated patched `1..7` surrogate regime, reducing only `NGRAM_EVAL_BUCKETS` from `2097152` to `1048576` will keep post-export `val_bpb` within `+0.00010` of the fresh same-session control while saving at least `30s` external wallclock.
+On the validated patched `1..7` surrogate regime, the `NGRAM_EVAL_BUCKETS=1048576` path is either:
+- operationally unstable in a reproducible way, in which case one exact rerun should fail again with comparable late-path evidence, or
+- operationally viable, in which case one exact rerun should finish cleanly and produce a final post-export metric.
 
-Operational falsifier:
-- fresh control is not admissible versus `eval_048` / `eval_047`, or
-- candidate loses by more than `+0.00010 BPB`, or
-- candidate does not save at least `30s` external wallclock
+This round tests stability only, not promotability.
 
 ## Why It Might Work
-- This is a refinement-phase runtime/promotability question, not a new architecture change.
-- `eval_015` already established that `2097152` beat `4194304` on an older line, but it did not answer whether one more bucket halving is still safe on the stronger patched-helper regime with `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `TTT_EPOCHS=4`.
-- The active local line already sits far past the accepted leaderboard anchor on BPB, so the unresolved question is whether the same line can be made cheaper to run without damaging decision quality.
+- `eval_049` already provided the fresh admissible patched-helper control, so repeating another control would not answer a new question.
+- The only unresolved variable was whether the `1048576` candidate itself is reproducibly broken on this patched `1..7` path.
+- Even a negative result would have been scientifically useful because it would have closed `1048576` as operationally unstable on this path.
 
 ## Minimal Intervention
-No code change beyond copying the already-validated patched helper into a fresh run directory:
-- copied `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`
-- kept helper bytes/hash identical to `eval_047` and `eval_048`
-- kept the control arm at `NGRAM_EVAL_BUCKETS=2097152`
-- changed only the candidate arm’s `NGRAM_EVAL_BUCKETS` from `2097152` to `1048576`
+No helper-code change beyond copying the already-validated patched helper into a fresh run directory:
+- copied `runs/eval_049_eval048_buckets_pair_patched_7gpu/train_gpt.py`
+- kept helper bytes/hash identical to `eval_049`, `eval_048`, and `eval_047`
+- launched only the candidate-only `NGRAM_EVAL_BUCKETS=1048576` path
 
 No changes to:
 - model weights
-- checkpoint/artifact bytes
+- checkpoint bytes
+- artifact bytes
 - scorer math
 - cache/update logic
 - export logic
 - tokenizer
 - validation data
 - runner path
-- GPU subset
-- TTT hyperparameters
+- TTT settings
+- GPU subset `1..7`
 
 ## Variables To Change
-Control arm operational-only changes:
+Operational-only changes:
 - fresh `RUN_ID`
-- fresh runner log dir
-- fresh runner run name
+- fresh runner log directory
+- fresh run name
+- fresh gate logs
+- fresh external telemetry log
 
-Candidate arm scientific change:
-- `NGRAM_EVAL_BUCKETS: 2097152 -> 1048576`
+Scientific variable under test:
+- `NGRAM_EVAL_BUCKETS=1048576` candidate rerun on the patched helper path
 
 ## Variables To Hold Fixed
-- exact patched eval-only helper logic from `eval_047`
+- exact patched eval-only helper logic from `eval_049`
 - helper bytes/hash
 - checkpoint bytes/hash
 - artifact bytes/hash
@@ -107,11 +104,11 @@ Candidate arm scientific change:
 
 ## Identity Checks
 - Patched helper:
-  - path: `runs/eval_049_eval048_buckets_pair_patched_7gpu/train_gpt.py`
+  - path: `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/train_gpt.py`
   - bytes: `126026`
   - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`
-- Reference helper from `eval_047`:
-  - path: `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`
+- Reference helper from `eval_049` and `eval_047`:
+  - path: `runs/eval_049_eval048_buckets_pair_patched_7gpu/train_gpt.py`
   - bytes: `126026`
   - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`
 - Saved checkpoint:
@@ -124,144 +121,117 @@ Candidate arm scientific change:
   - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 
 Identity status:
-- copied helper matches `eval_047` / `eval_048` exactly
-- checkpoint unchanged before both arms
-- artifact unchanged before both arms
+- copied helper matches `eval_049` and `eval_047` exactly
+- checkpoint unchanged before launch
+- artifact unchanged before launch
 
 ## Commands Actually Run
-Exact paired commands were recorded in:
-- `runs/eval_049_eval048_buckets_pair_patched_7gpu/command.txt`
+Exact candidate rerun command was recorded in:
+- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/command.txt`
 
-Fresh gate evidence was recorded in:
-- `runs/eval_049_eval048_buckets_pair_patched_7gpu/clean_idle_gate.log`
+Gate evidence was recorded in:
+- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/clean_idle_gate.log`
+- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/gate_watch.log`
 
-Control runner directory:
-- `runs/eval_049_eval048_buckets_pair_patched_7gpu/runner_control_7gpu/20260327T152213Z_eval_049_runner_control_7gpu_t1p00_e4_b2097152_lr0025/`
+External telemetry was recorded in:
+- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/external_gpu_telemetry.log`
 
 Candidate runner directory:
-- `runs/eval_049_eval048_buckets_pair_patched_7gpu/runner_candidate_7gpu/20260327T153346Z_eval_049_runner_candidate_7gpu_t1p00_e4_b1048576_lr0025/`
+- `runs/eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu/runner_candidate_7gpu/20260327T161117Z_eval_050_runner_candidate_7gpu_t1p00_e4_b1048576_lr0025/`
 
 ## Clean-Idle Gate Result
-- gate status: `pass`
-- gate sample time: `2026-03-27T15:21:54Z`
-- GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization
-- no compute-app processes were present on the selected `1..7` subset at gate sample time
-- because the gate passed:
-  - the fresh control launched immediately
-  - the candidate was launched immediately after the control passed admissibility
+- initial fresh sample status: `fail`
+- initial sample time: `2026-03-27T16:10:03Z`
+- first sample showed GPUs `1..7` occupied by a foreign 8-GPU workload:
+  - about `37543..39141 MiB` used on the selected subset
+  - about `41866..43464 MiB` free
+  - `100%` utilization on each selected GPU
+- bounded watch then recovered a clean launch window:
+  - launch-ready pass sample time: `2026-03-27T16:10:35Z`
+  - GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization
+  - no compute-app processes were present on the selected subset at the pass sample
 
-## Control Launch Result
-- control launch status: `completed`
-- run directory timestamp: `2026-03-27T15:22:13Z`
+## Candidate Launch Result
+- candidate launch status: `completed cleanly`
+- run directory timestamp: `2026-03-27T16:11:17Z`
 - runner selected GPUs `1,2,3,4,5,6,7` successfully
 - compatibility log emitted:
   - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`
+- exact failure locus from `eval_049` was crossed cleanly:
+  - old failed locus: chunk `1521/1893` at running `bpb=0.161550`, any-match `0.979712`, avg alpha `0.659670`, helper chunk-time `637.6s`
+  - rerun at the same locus: chunk `1521/1893` at running `bpb=0.161550`, any-match `0.979712`, avg alpha `0.659664`, helper chunk-time `487.0s`
+  - rerun then continued through the remaining `372` chunks and finished
 - final metrics:
-  - `legal_ttt_exact val_loss=0.33725796`
-  - `legal_ttt_exact val_bpb=0.19974316`
-  - script wallclock `616057ms`
-  - runner-managed wallclock `661647ms`
-  - external wallclock `661.929s`
-  - `runner_start_to_child_spawn_ms=390`
-  - `child_runtime_ms=661256`
-  - any-match fraction `0.98387585`
-  - avg alpha `0.65461727`
-  - matched-order histogram unchanged:
-    - `order_2=60166`
-    - `order_3=346841`
-    - `order_4=373090`
-    - `order_5=332096`
-    - `order_6=395043`
-    - `order_7=644544`
-    - `order_8=1634957`
-    - `order_9=57234849`
-  - `ngram_postlookup_vectorized_elapsed_ms=1112324`
+  - `legal_ttt_exact val_loss=0.24656535`
+  - `legal_ttt_exact val_bpb=0.14602989`
+  - script wallclock `618438ms`
+  - runner-managed wallclock `666370ms`
+  - external wallclock `666.594s`
+  - `runner_start_to_child_spawn_ms=395`
+  - `child_runtime_ms=665975`
+  - any-match fraction `0.98387635`
+  - avg alpha `0.66088724`
+  - matched-order histogram:
+    - `order_2=17786`
+    - `order_3=95312`
+    - `order_4=113192`
+    - `order_5=124743`
+    - `order_6=175760`
+    - `order_7=309994`
+    - `order_8=810348`
+    - `order_9=59374482`
+  - `ngram_batch_lookup_elapsed_ms=14132`
+  - `ngram_torch_stats_elapsed_ms=4303`
+  - `ngram_postlookup_vectorized_elapsed_ms=1108473`
+  - `ngram_update_batch_timing elapsed_ms=29799`
 - runner metadata:
   - exit code `0`
   - timeout `false`
-
-Control admissibility vs `eval_048`:
-- `val_bpb` delta `-0.00000022`
-- `val_loss` delta `-0.00000036`
-- script delta `-7745ms`
-- runner delta `-8262ms`
-- external delta `-8.212s`
-- avg alpha delta `+0.00000193`
-- matched-order histogram `unchanged`
-- `ngram_postlookup_vectorized_elapsed_ms` delta `+6911ms`
-- admissibility decision: `pass`
-
-Control admissibility vs `eval_047`:
-- `val_bpb` delta `+0.00000118`
-- `val_loss` delta `+0.00000200`
-- script delta `-268ms`
-- runner delta `-1161ms`
-- external delta `-1.163s`
-- avg alpha delta `-0.00000017`
-- matched-order histogram `unchanged`
-- `ngram_postlookup_vectorized_elapsed_ms` delta `+2158ms`
-- admissibility decision: `pass`
-
-## Candidate Launch Result
-- candidate launch status: `failed late / blocked`
-- run directory timestamp: `2026-03-27T15:33:46Z`
-- runner selected GPUs `1,2,3,4,5,6,7` successfully
-- compatibility log emitted:
-  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`
-- the candidate did not reach a final `legal_ttt_exact` line
-- last recorded helper progress before failure:
-  - chunk `1521/1893`
-  - running `bpb=0.161550`
-  - any-match `0.979712`
-  - avg alpha `0.659670`
-  - helper chunk-time field `637.6s`
-- failure evidence:
-  - `rank0` raised `torch.AcceleratorError: CUDA error: unspecified launch failure`
-  - failure occurred inside `score_segments()` while materializing `local_score_starts_t`
-  - `stderr.log` also recorded the NCCL teardown warning that `destroy_process_group()` was not called before process exit
-- post-failure runner state:
-  - torchrun hung in distributed teardown and did not write `metadata.json`
-  - because the child failure had already been captured and GPUs remained occupied, I interrupted the stuck top-level runner at `2026-03-27T15:54:48Z` to release GPUs `1..7`
-  - after interruption, GPUs `1..7` returned to `0 MiB` used, about `81007 MiB` free, and `0%` utilization
+  - `metadata.json` written successfully
+- external GPU telemetry near the finish showed a normal active tail rather than a crash pattern:
+  - at `2026-03-27T16:22:19Z`, GPUs `1..7` were using about `5367..5627 MiB` with `68..82%` utilization
+  - at `2026-03-27T16:22:24Z` and `2026-03-27T16:22:30Z`, GPUs `1..7` had returned to `0 MiB` used, about `81007 MiB` free, and `0%` utilization with `subset_apps=none`
 
 ## Success Metric
 Required outcomes:
-- fresh control admissible versus `eval_048` / `eval_047`
-- candidate no worse than `+0.00010 BPB` versus fresh control
-- candidate saves at least `30s` external wallclock
+- if the path were unstable, the rerun should fail again with comparable late-path evidence
+- if the path were viable, the rerun should finish cleanly and emit final post-export metrics
 
 Actual status:
-- fresh control admissibility: `pass`
-- candidate clean completion: `fail`
-- candidate BPB tolerance: `not measurable`
-- candidate runtime saving: `not measurable`
-- decision basis: `blocked after admissible control because the candidate failed before producing final post-export metrics`
+- repeated late failure: `not reproduced`
+- clean completion: `pass`
+- final post-export metric emitted: `pass`
+- metadata written: `pass`
+- decision basis: `the exact rerun completed cleanly on the same patched-helper lineage, so the prior late failure is not reproducible enough to close the setting as operationally unstable`
 
 ## Expected Effect
-If one more bucket halving were still safe on the patched promoted-line surrogate path, then `NGRAM_EVAL_BUCKETS=1048576` would preserve final post-export BPB within the reviewed tolerance while finishing at least `30s` faster than the fresh same-session `2097152` control.
+If the prior `eval_049` failure was path-level instability, the rerun should fail again near the same late chunk. If it was transient, the rerun should finish and reopen the bucket question for a later fresh same-session comparison.
 
 ## Actual Result
-- The fresh control reproduced the patched surrogate regime and passed admissibility versus both `eval_048` and `eval_047`.
-- The immediate `1048576` candidate launched cleanly on the same helper, checkpoint, artifact, and GPU subset, but it never reached a final post-export result.
-- Before the crash, the candidate showed a different live trajectory from the control:
-  - same general match-coverage growth
-  - higher running alpha
-  - lower running chunk BPB
-  - then a severe late-tail slowdown before the CUDA launch failure
-- Because the candidate did not finish and required manual interruption after the failure to release GPUs, there is no valid same-session final BPB or final wallclock comparison for the candidate arm.
+- The first fresh gate sample was dirty, but the selected `1..7` subset became clean under a bounded watch and the candidate launched on the exact reviewed path.
+- The rerun matched the prior failed candidate’s live trajectory through the old failure zone, then cleanly exceeded it:
+  - same chunk `1521/1893`
+  - same running `bpb=0.161550`
+  - same any-match `0.979712`
+  - effectively identical avg alpha
+  - but about `150.6s` faster at that locus, with no crash
+- The candidate then finished, wrote `metadata.json`, and produced final post-export metrics.
+- Relative to the last completed patched-helper `2097152` control from `eval_049`, the completed `1048576` rerun was contextually:
+  - `-0.09069261` lower on `val_loss`
+  - `-0.05371327` lower on `val_bpb`
+  - `+2381ms` slower on script wallclock
+  - `+4723ms` slower on runner-managed wallclock
+  - `+4.665s` slower on external wallclock
+- Those control deltas are informative context only; they are **not** promotability evidence for this round because no fresh same-session control arm was rerun here.
 
 ## Interpretation
-- Decision label: `blocked`
-- This is not a `hold NGRAM_EVAL_BUCKETS=2097152` result and not a `promote NGRAM_EVAL_BUCKETS=1048576` result.
-- The reviewed bucket-geometry question remains unanswered because the candidate arm failed operationally after an admissible control had already been obtained.
-- The fresh control does strengthen confidence that the patched `1..7` surrogate path itself remains valid and repeatable.
-- The only safe scientific conclusion from round 24 is narrower:
-  - `2097152` remains the last completed validated default on this patched path
-  - `1048576` cannot be judged from this round because the candidate never produced the required final metrics
+- Decision label: `1048576 operationally viable but needs fresh same-session comparison`
+- The exact `eval_049` late crash is not reproducible enough to close `1048576` as operationally unstable on the patched `1..7` path.
+- The candidate-only operational diagnosis therefore succeeds: this setting can finish on the validated patched-helper path.
+- Promotability is still unanswered because this round intentionally omitted a fresh same-session `2097152` control.
+- The unexpectedly large completed BPB shift relative to the last completed `2097152` control makes a later reviewed same-session control/candidate pair more useful, not less, because the operational blocker is now removed but the scientific bucket conclusion still needs a comparison-clean rerun.
 
 ## Next Step
-Do not infer a bucket-geometry conclusion from round 24.
+If the bucket question still matters, schedule a later reviewed same-session patched-helper `2097152 -> 1048576` control/candidate comparison on the validated `1..7` surrogate path, keeping helper/checkpoint/artifact lineage and all non-bucket settings fixed.
 
-If this question remains important, require a new reviewed brief for a dedicated operational diagnosis or controlled retry of the late `1048576` CUDA failure on the patched `1..7` path.
-
-Otherwise, leave `NGRAM_EVAL_BUCKETS=2097152` as the currently validated default by default-of-evidence and move the next refinement round to a different single-variable evaluation question.
+If that question is no longer the highest-priority refinement target, move the next reviewed round to a different single-variable evaluation question; do not treat `eval_050` alone as a promotion.

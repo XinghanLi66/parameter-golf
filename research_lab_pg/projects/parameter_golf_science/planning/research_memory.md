@@ -8,63 +8,46 @@ This file is the compact scientific memory for the project. Keep it updated so t
 PR `#809` at `0.2952` remains legality-pending and is not the official target.
 
 This line is in **REFINEMENT phase**:
-- strongest measured local run: `eval_015=0.19974202`
+- strongest completed measured local run is now `eval_050=0.14602989`, but it came from a candidate-only operational diagnosis and is **not** yet a promoted default
 - promoted quality baseline on the locked legality line is now `eval_038 candidate=0.19974237` with `EVAL_LOGIT_TEMP=1.0`
 - freshest admissible same-session control on the promoted line: `eval_045 control=0.19974186`
-- newest completed refinement round: `eval_049 patched-helper 7-GPU same-session bucket pair -> blocked after admissible control`
+- newest completed refinement round: `eval_050` patched-helper 7-GPU candidate-only operational diagnosis with `NGRAM_EVAL_BUCKETS=1048576` -> completed cleanly
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
 - newest completed exact promoted-line control on the validated surrogate path: `eval_049 control=0.19974316` with script `616057ms`, runner `661647ms`, external `661.929s`
-- newest blocked promoted-line candidate attempt on the validated surrogate path: `eval_049 candidate 1048576` late-failed at chunk `1521/1893` with `CUDA error: unspecified launch failure`
-- official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
-- open problem: the exact promoted-line `NGRAM_EVAL_BUCKETS=2097152 -> 1048576` question is still unanswered on the patched `1..7` surrogate path because the candidate failed late after an admissible control had already been obtained. Keep `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, `TTT_EPOCHS=4`, and the patched helper lineage fixed; do not treat round 24 as evidence for or against `1048576` unless a new reviewed brief explicitly reopens the failure as an operational-diagnosis problem.
+- newest completed promoted-line candidate attempt on the validated surrogate path: `eval_050 candidate 1048576` completed with `val_bpb=0.14602989`, script `618438ms`, runner `666370ms`, external `666.594s`
+- official-anchor gap on the newest completed run: `0.14602989 - 0.4416 = -0.29557011`
+- open problem: the exact promoted-line `NGRAM_EVAL_BUCKETS=2097152 -> 1048576` **promotability** question is still unanswered on the patched `1..7` surrogate path. `eval_050` removed the operational blocker by finishing cleanly, but a later reviewed fresh same-session control/candidate pair is still required before treating `1048576` as a promoted bucket setting.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_049_eval048_buckets_pair_patched_7gpu`
+## Newest Critical Result - `eval_050_eval049_buckets1048576_operational_rerun_patched_7gpu`
 
-- The reviewed refinement-phase same-session patched-helper `NGRAM_EVAL_BUCKETS=2097152 -> 1048576` pair on GPUs `1..7` did not yield a valid final bucket comparison because the candidate failed late after an admissible control had already been obtained.
-- No new code was introduced beyond copying the already-validated patched helper from `eval_047` into a fresh run directory:
+- The reviewed refinement-phase candidate-only operational diagnosis of the patched-helper `NGRAM_EVAL_BUCKETS=1048576` path on GPUs `1..7` completed cleanly, so the prior `eval_049` late crash is not reproducible enough to close this setting as operationally unstable.
+- No new code was introduced beyond copying the already-validated patched helper from `eval_049` into a fresh run directory:
   - copied helper stayed at `126026` bytes with SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`
   - saved checkpoint stayed fixed at `106178569` bytes / `b8291ad1...`
   - saved artifact stayed fixed at `15555121` bytes / `eb062c96...`
-- The round stayed exactly inside the reviewed single-variable lane:
-  - re-read `context/reference_materials/latest_sota_snapshot.md`, the urgent n-gram note, the planning files, the reporting files, and the required `eval_047` / `eval_048` / `eval_015` artifacts before any action
+- The round stayed exactly inside the reviewed operational lane:
+  - re-read `context/reference_materials/latest_sota_snapshot.md`, the urgent n-gram note, the planning files, the reporting files, and the required `eval_049` artifacts before any action
   - re-verified helper, checkpoint, and artifact identities
-  - recorded a fresh clean-idle gate on GPUs `1..7`
-  - ran one fresh patched-helper control with `NGRAM_EVAL_BUCKETS=2097152`
-  - checked admissibility versus `eval_048` and `eval_047`
-  - ran one immediate patched-helper candidate with only `NGRAM_EVAL_BUCKETS=1048576`
-- Fresh `1..7` gate evidence:
-  - gate sample at `2026-03-27T15:21:54Z`
-  - GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization
-  - no compute-app processes were present on the selected `1..7` subset at gate time
-- Fresh control result:
-  - run directory timestamp `2026-03-27T15:22:13Z`
-  - `legal_ttt_exact val_loss=0.33725796`
-  - `legal_ttt_exact val_bpb=0.19974316`
-  - script `616057ms`
-  - runner `661647ms`
-  - external `661.929s`
-  - `runner_start_to_child_spawn_ms=390`
-  - `child_runtime_ms=661256`
-  - any-match `0.98387585`
-  - avg alpha `0.65461727`
-  - matched-order histogram identical to `eval_048`, `eval_047`, `eval_045`, and `eval_038`
-  - `ngram_postlookup_vectorized_elapsed_ms=1112324`
-  - required admissibility passed versus `eval_048` with `-0.00000022 BPB`, `-0.00000036 val_loss`, `-7745ms` script, `-8262ms` runner, `-8.212s` external, `+0.00000193` avg alpha, unchanged histogram, and `+6911ms` postlookup
-  - required admissibility also passed versus `eval_047` with `+0.00000118 BPB`, `+0.00000200 val_loss`, `-268ms` script, `-1161ms` runner, `-1.163s` external, `-0.00000017` avg alpha, unchanged histogram, and `+2158ms` postlookup
-- Immediate candidate result:
-  - run directory timestamp `2026-03-27T15:33:46Z`
-  - the helper launched and progressed to chunk `1521/1893`
-  - last recorded live metrics were running `bpb=0.161550`, any-match `0.979712`, avg alpha `0.659670`, helper chunk-time `637.6s`
-  - `stderr.log` then recorded `torch.AcceleratorError: CUDA error: unspecified launch failure` on `rank0` inside `score_segments()`
-  - torchrun hung in distributed teardown after the child-side failure and never wrote `metadata.json`
-  - I interrupted the stuck top-level runner at `2026-03-27T15:54:48Z` only after the failure had already been captured so GPUs `1..7` were released
-- Decision label: `blocked`.
-- Interpretation: the patched `1..7` surrogate path is still valid, but the bucket-count hypothesis remains unanswered on that path. `1048576` showed different live behavior and then failed late, so the round does not justify either promoting `1048576` or rejecting it on final BPB/runtime grounds.
+  - recorded one fresh gate sample, then a bounded launch-ready gate watch on GPUs `1..7`
+  - recorded full external GPU telemetry for the full attempt
+  - ran one exact patched-helper candidate-only rerun with `NGRAM_EVAL_BUCKETS=1048576`
+- Gate evidence:
+  - the initial fresh sample at `2026-03-27T16:10:03Z` failed because a foreign 8-GPU workload occupied GPUs `1..7` with about `37.5..39.1 GiB` used and `100%` utilization
+  - the bounded watch then passed at `2026-03-27T16:10:35Z`, with GPUs `1..7` each showing about `81007 MiB` free, `0 MiB` used, `0%` utilization, and no subset compute-app processes
+- Candidate result:
+  - run directory timestamp `2026-03-27T16:11:17Z`
+  - compatibility log emitted: `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`
+  - the rerun passed the old failed locus cleanly: at chunk `1521/1893` it had the same running `bpb=0.161550`, the same any-match `0.979712`, and nearly identical avg alpha `0.659664`, but reached that point at `487.0s` instead of `637.6s`
+  - the rerun then completed with `legal_ttt_exact val_loss=0.24656535`, `val_bpb=0.14602989`, script `618438ms`, runner `666370ms`, external `666.594s`, `runner_start_to_child_spawn_ms=395`, `child_runtime_ms=665975`, any-match `0.98387635`, avg alpha `0.66088724`, matched-order histogram `order_2=17786`, `order_3=95312`, `order_4=113192`, `order_5=124743`, `order_6=175760`, `order_7=309994`, `order_8=810348`, `order_9=59374482`, `ngram_batch_lookup_elapsed_ms=14132`, `ngram_torch_stats_elapsed_ms=4303`, `ngram_postlookup_vectorized_elapsed_ms=1108473`, and `ngram_update_batch_timing elapsed_ms=29799`
+  - `metadata.json` was written with exit code `0` and timeout `false`
+  - external telemetry showed a normal active tail near `2026-03-27T16:22:19Z` with about `5.3..5.6 GiB` used and `68..82%` utilization on GPUs `1..7`, followed by clean release back to idle at `16:22:24Z` and `16:22:30Z`
+- Decision label: `1048576 operationally viable but needs fresh same-session comparison`.
+- Interpretation: `eval_050` removes the operational blocker from round 24, but because this was a candidate-only diagnosis and the completed metric moved dramatically, a later reviewed fresh same-session `2097152 -> 1048576` pair is still required before treating `1048576` as a promoted bucket setting.
 
 ## Previous Critical Result - `eval_047_eval045_patched_helper_7gpu_control`
 - The reviewed refinement-phase eval-only launch-path compatibility and surrogate-validity check completed successfully: the copied helper was patched only on the eval-only non-divisor startup path, the fresh 7-GPU control on GPUs `1..7` launched and finished, and the result stayed semantically in-family with the fresh 8-GPU control `eval_045`.
