@@ -14,7 +14,7 @@ This line is in **REFINEMENT phase**:
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest refinement round: `eval_043 same-session epoch-pair attempt -> no-launch / clean-idle-gate-fail`
+- newest refinement round: `eval_044 same-session epoch-pair retry -> no-launch / clean-idle-gate-fail`
 - newest completed exact promoted-line control: `eval_042=0.19974395` with script `1507653ms`, runner `1555810ms`, external `1556076ms`
 - official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
 - open problem: promoted-line scorer temperature is closed positively on this helper lineage, and the only unanswered nearby refinement question remains the exact promoted-line `TTT_EPOCHS=4 -> 3` pair. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed, but do not relaunch until pinned GPUs `0..7` can be confirmed clean-idle again.
@@ -22,7 +22,32 @@ This line is in **REFINEMENT phase**:
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_043_eval038_ttt_epochs_pair_clean_idle_blocked`
+## Newest Critical Result - `eval_044_eval038_ttt_epochs_pair_clean_idle_retry`
+
+- The reviewed refinement-phase exact promoted-line same-session `TTT_EPOCHS=4 -> 3` retry did not launch because the required clean-idle gate on pinned GPUs `0..7` never passed.
+- No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The round stayed exactly inside the reviewed single-variable lane up to the stop:
+  - re-read `context/reference_materials/latest_sota_snapshot.md`, `planning/next_experiment.md`, `planning/research_memory.md`, `planning/experiment_ledger.md`, `reports/latest_status.md`, `reports/comparison_summary.md`, the active helper, and the required `eval_042` logs before any action
+  - re-verified helper, checkpoint, and artifact identities
+  - recovered the exact intended same-session control and candidate command family from `eval_042` and `eval_043`
+  - changed no helper code, no checkpoint, no artifact, no runner code, no export path, and no evaluation hyperparameters
+  - prepared only fresh operational identifiers plus the intended candidate-only semantic change `TTT_EPOCHS=4 -> 3`, but intentionally did not launch after the gate failed
+- Clean-idle gate evidence:
+  - repeated UTC samples from `2026-03-27T12:43:36Z` through `2026-03-27T12:46:41Z`
+  - the watch started with persistent foreign compute-app PIDs `3796173..3796180` already present across all eight pinned GPUs, initially using `2884 MiB` on GPU `0` and `1506 MiB` on GPUs `1..7`
+  - by `2026-03-27T12:44:22Z`, the same PIDs had expanded to about `27766..37388 MiB` used across GPUs `0..7`
+  - by the final sample at `2026-03-27T12:46:25Z`, all eight GPUs were still occupied with about `38596..39096 MiB` used, `41902..42404 MiB` free, and `86..100%` utilization
+  - compute-app snapshots stayed `[Not Found]` for all eight PIDs throughout the watch
+- Because the gate never passed:
+  - no synchronized telemetry loop was started
+  - no runner-managed fresh `TTT_EPOCHS=4` control was started
+  - no immediate `TTT_EPOCHS=3` candidate was started
+  - no new `val_loss`, `val_bpb`, script wallclock, runner wallclock, external wallclock, `runner_start_to_child_spawn_ms`, `child_runtime_ms`, any-match, avg alpha, matched-order histogram, or postlookup timing fields exist for this round
+- Intended commands and blocker evidence were recorded in `runs/eval_044_eval038_ttt_epochs_pair_clean_idle_retry/`.
+- Decision label: `no-launch / clean-idle-gate-fail`.
+- Interpretation: this round does not answer the promoted-line epoch-count question and does not supersede `eval_042`. The new evidence is that the blocker can appear as a persistent foreign 8-GPU workload rather than only the single-GPU occupancy seen in `eval_043`, so the correct next action remains a clean-idle retry rather than a dirty launch.
+
+## Previous Critical Result - `eval_043_eval038_ttt_epochs_pair_clean_idle_blocked`
 
 - The reviewed refinement-phase exact promoted-line same-session `TTT_EPOCHS=4 -> 3` pair did not launch because the required clean-idle gate on pinned GPUs `0..7` never passed.
 - No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.

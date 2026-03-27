@@ -3,7 +3,7 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase same-session promoted-line `TTT_EPOCHS=4 -> 3` evaluation attempt, but the round stopped before launch because the required clean-idle gate on pinned GPUs `0..7` never passed.
+Completed on `2026-03-27` as the reviewed refinement-phase same-session promoted-line `TTT_EPOCHS=4 -> 3` evaluation retry, but the round again stopped before launch because the required clean-idle gate on pinned GPUs `0..7` never passed.
 
 - Executed the reviewed brief through the required file re-read, exact promoted-command recovery, helper/checkpoint/artifact identity verification, and bounded clean-idle gate watch.
 - No code edits were made in this round.
@@ -12,12 +12,12 @@ Completed on `2026-03-27` as the reviewed refinement-phase same-session promoted
 - The round therefore remains a controlled blocker report rather than an epoch-count result.
 
 ## Experiment ID
-`eval_043_eval038_ttt_epochs_pair_clean_idle_blocked`
+`eval_044_eval038_ttt_epochs_pair_clean_idle_retry`
 
 ## Category
 - evaluation
 
-Operational subtype: `same-session promoted-line epoch-pair clean-idle gate attempt`
+Operational subtype: `same-session promoted-line epoch-pair clean-idle retry`
 
 ## Baseline / Comparison
 Intended primary comparison:
@@ -117,20 +117,25 @@ Identity status:
 No runner-managed eval command was launched because the required clean-idle gate never passed.
 
 The round executed a bounded prelaunch clean-idle watch on pinned GPUs `0..7`, recorded in:
-- `runs/eval_043_eval038_ttt_epochs_pair_clean_idle_blocked/clean_idle_gate.log`
+- `runs/eval_044_eval038_ttt_epochs_pair_clean_idle_retry/clean_idle_gate.log`
 
 The exact intended control and candidate commands were recorded, but not executed, in:
-- `runs/eval_043_eval038_ttt_epochs_pair_clean_idle_blocked/command.txt`
+- `runs/eval_044_eval038_ttt_epochs_pair_clean_idle_retry/command.txt`
 
 ## Clean-Idle Gate Result
 - gate status: `fail`
-- bounded watch interval: `2026-03-27T12:27:56Z` through `2026-03-27T12:30:45Z`
-- pinned GPU `0` remained occupied for the full watch:
-  - free memory stayed at `6512 MiB`
-  - used memory stayed at `74495 MiB`
-  - utilization stayed at `100%`
-  - compute-app snapshot stayed `GPU-d45bfedb-df91-05be-293c-7375698e87dd, PID 3676150, process_name=[Not Found], used_memory=74486 MiB`
-- GPUs `1..7` stayed idle with about `81007 MiB` free, `0 MiB` used, and `0%` utilization
+- bounded watch interval: `2026-03-27T12:43:36Z` through `2026-03-27T12:46:41Z`
+- the pinned set was already dirty at the first sample and then ramped into a heavy 8-GPU workload during the watch
+- first sample at `2026-03-27T12:43:36Z`:
+  - GPU `0`: `78114 MiB` free, `2893 MiB` used, `100%` utilization
+  - GPUs `1..7`: about `79492 MiB` free, `1515 MiB` used, `0%` utilization
+  - compute-app snapshot already showed persistent foreign PIDs `3796173..3796180` across all 8 GPUs, each with process name `[Not Found]`
+- by `2026-03-27T12:44:22Z`, the same PIDs had expanded to about `27766..37388 MiB` used across GPUs `0..7`
+- final sample at `2026-03-27T12:46:25Z`:
+  - GPU free memory ranged from `41902 MiB` to `42404 MiB`
+  - GPU used memory ranged from `38596 MiB` to `39096 MiB`
+  - GPU utilization ranged from `86%` to `100%`
+  - the same PIDs `3796173..3796180` remained present on all 8 GPUs
 - because the gate never passed:
   - synchronized telemetry was not started
   - no fresh `TTT_EPOCHS=4` control launched
@@ -162,7 +167,7 @@ If the gate had passed, the exact same-session pair would have cleanly answered 
 ## Interpretation
 - Decision label: `no-launch / clean-idle-gate-fail`
 - This round does not supersede `eval_042` and does not answer the promoted-line `TTT_EPOCHS=4 -> 3` question.
-- The current blocker is external occupancy on pinned GPU `0`, not a semantic change in the promoted helper/checkpoint/artifact stack.
+- Unlike `eval_043`, which was blocked by a single foreign `GPU 0` workload, this retry was blocked by a persistent 8-GPU foreign workload that expanded during the bounded watch.
 - Under the reviewed refinement brief, forcing a dirty launch would have produced a non-interpretable pair, so the correct action was to stop.
 
 ## Next Step
