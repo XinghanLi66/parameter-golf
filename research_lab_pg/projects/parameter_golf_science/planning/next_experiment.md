@@ -3,102 +3,116 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase same-session promoted-line `TTT_EPOCHS=4 -> 3` retry on the fixed `7-GPU` subset `1..7`, but the round terminated before any admissible control metric because the locked helper rejects `WORLD_SIZE=7`.
+Completed on `2026-03-27` as the reviewed refinement-phase eval-only launch-path compatibility and surrogate-validity check on the promoted legal-TTT line.
 
-- Executed the reviewed brief through the required file re-read, promoted-command recovery, helper/checkpoint/artifact identity verification, 7-GPU clean-idle acquisition on `1..7`, and the fresh 7-GPU control launch attempt.
-- No code edits were made in this round.
-- The clean-idle gate on GPUs `1..7` passed immediately.
-- The fresh control did not reach evaluation because `torchrun --nproc_per_node=7` failed at helper startup with `ValueError: WORLD_SIZE=7 must divide 8 so grad_accum_steps stays integral`.
-- The immediate `TTT_EPOCHS=3` candidate was therefore not attempted.
-- The round is a controlled `operationally blocked` result on the reviewed 7-GPU launch path, not an epoch-count comparison.
+- Executed the reviewed brief through the required file re-read, locked command recovery, copied-helper patch, helper/checkpoint/artifact identity verification, 7-GPU clean-idle acquisition on `1..7`, and one fresh patched-helper `TTT_EPOCHS=4` control launch.
+- The intervention was narrowed exactly as reviewed:
+  - copied the locked helper into a fresh run directory
+  - patched only the eval-only non-divisor `WORLD_SIZE` startup invariant
+  - did not change training behavior
+  - did not change non-eval launch behavior
+  - did not change scorer math, TTT math, cache logic, export logic, checkpoint bytes, or artifact bytes
+- The fresh patched 7-GPU control launched, finished, and produced a full telemetry set.
+- The immediate `TTT_EPOCHS=3` candidate was intentionally not run in this round, per the reviewed brief.
+- The round is a controlled `surrogate admissible` result on the patched `1..7` path.
 
 ## Experiment ID
-`eval_046_eval045_ttt_epochs_pair_7gpu_subset`
+`eval_047_eval045_patched_helper_7gpu_control`
 
 ## Category
 - evaluation
 
-Operational subtype: `same-session promoted-line epoch-pair 7-GPU launch-path check`
+Operational subtype: `eval-only launch-path compatibility and surrogate-validity check`
 
 ## Baseline / Comparison
-Intended primary comparison:
-- fresh same-session 7-GPU surrogate control on the exact promoted line with `TTT_EPOCHS=4`
-- immediate same-session 7-GPU surrogate candidate on the same subset with only `TTT_EPOCHS=3`
+Primary baseline:
+- fresh admissible 8-GPU promoted-line control `eval_045=0.19974186`
 
-Interpretation anchors:
-- promoted 8-GPU line `eval_038=0.19974237`
-- fresh admissible 8-GPU control `eval_045 control=0.19974186`
+Secondary anchor:
+- promoted line `eval_038=0.19974237`
+
+Prior blocker evidence:
+- `eval_046` no-code-change launch failure on `WORLD_SIZE=7`
 
 Actual comparison obtained this round:
-- clean-idle admissibility of the fixed `1..7` subset
-- reviewed 7-GPU control launch request versus the locked helper’s startup invariants
+- fresh patched-helper 7-GPU control on GPUs `1..7` with `TTT_EPOCHS=4`
+- compared directly against `eval_045` and `eval_038` on:
+  - `val_bpb`
+  - `val_loss`
+  - script wallclock
+  - runner wallclock
+  - external wallclock
+  - any-match fraction
+  - avg alpha
+  - matched-order histogram
+  - `ngram_postlookup_vectorized_elapsed_ms`
 
 ## Hypothesis
-If the repeated blocker was specifically GPU `0` contamination rather than the epoch-count hypothesis itself, then moving the same-session pair to the persistently cleaner subset `1..7` would produce a valid surrogate control, after which a fresh same-session `TTT_EPOCHS=3` candidate could answer the epoch-count question.
+If the only blocker exposed by `eval_046` was the helper’s startup invariant rather than a real change in evaluation semantics, then a minimal eval-only patch permitting `WORLD_SIZE=7` would produce a fresh promoted-line 7-GPU control that stays in-family with `eval_045`.
 
-Operational falsifier for this round:
-- if the fixed-helper launch path itself cannot execute at `WORLD_SIZE=7`, the 7-GPU surrogate regime cannot be used to answer the epoch-count question without an explicitly reviewed helper or topology change
+Operational falsifier:
+- patched launch still fails, or
+- patched launch finishes but drifts materially from `eval_045`
 
 ## Why It Might Work
-- GPUs `1..7` had repeatedly appeared clean while GPU `0` was the recurring blocker.
-- The reviewed brief kept every semantic evaluation variable fixed except the intended candidate epoch count.
-- This remained the narrowest operationally motivated retry of the strongest current leaderboard-aligned evaluation motif.
+- `eval_046` already localized the failure to helper startup rather than GPU cleanliness on the `1..7` subset.
+- The eval-only path does not use the training loop or gradient accumulation schedule as a scientific variable.
+- A guarded eval-only non-divisor fallback is therefore the smallest operational repair that can answer surrogate validity without mixing scorer, TTT, export, dataset, or checkpoint changes.
 
 ## Minimal Intervention
-No helper, checkpoint, artifact, runner, eval-hyperparameter, or export changes were made.
+One copied-helper startup patch only:
+- introduce `eval_only_nondivisor_world_size = args.eval_only and (8 % world_size != 0)`
+- preserve the original `WORLD_SIZE` divisor invariant everywhere else
+- set `grad_accum_steps = 1` only on that eval-only non-divisor path
+- log when that compatibility path is taken
 
-Intended semantic change:
-- candidate `TTT_EPOCHS: 4 -> 3`
-
-Actual executed changes:
-- fresh operational identifiers for a new run namespace
-- launch subset changed from pinned `0..7` to pinned `1..7`
-- runner request count changed from `8` to `7`
-- attempted control launch used `torchrun --nproc_per_node=7`
+No other code or artifact changes:
+- original locked helper left untouched
+- checkpoint unchanged
+- artifact unchanged
+- runner unchanged
+- no candidate arm launched
 
 ## Variables To Change
-Intended semantic change:
-- candidate `TTT_EPOCHS: 4 -> 3`
+Helper startup logic only:
+- copied helper path
+- eval-only non-divisor `WORLD_SIZE` compatibility path
 
 Operational-only:
-- fresh `RUN_ID`
-- fresh runner `--log-dir`
-- fresh runner `--run-name`
 - launch subset `CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7`
 - runner request count `7`
 - `torchrun --nproc_per_node=7`
-
-Actual executed this round:
-- 7-GPU clean-idle gate on `1..7`
-- fresh 7-GPU control launch attempt with `TTT_EPOCHS=4`
+- fresh `RUN_ID`
+- fresh runner `--log-dir`
+- fresh runner `--run-name`
 
 ## Variables To Hold Fixed
-- helper path `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`
-- helper bytes/hash `125663 / 2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`
-- checkpoint path `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`
-- checkpoint bytes/hash `106178569 / b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`
-- artifact path `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz`
-- artifact bytes/hash `15555121 / eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 - `EVAL_ONLY=1`
 - `TTT_ENABLED=1`
-- `EVAL_STRIDE=64`
-- `EVAL_LOGIT_TEMP=1.0`
+- `TTT_EPOCHS=4`
 - `TTT_LR=0.0025`
 - `TTT_CHUNK_TOKENS=32768`
 - `TTT_FREEZE_BLOCKS=0`
 - `TTT_MOMENTUM=0.9`
 - `TTT_BATCH_SEQS=32`
 - `TTT_GRAD_CLIP=1.0`
+- `EVAL_STRIDE=64`
+- `EVAL_LOGIT_TEMP=1.0`
 - `NGRAM_EVAL_ENABLED=1`
 - `NGRAM_EVAL_BUCKETS=2097152`
 - `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`
 - `NGRAM_EVAL_BATCH_TORCH_STATS=1`
 - `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`
-- tokenizer, dataset, cwd, `physicslm`
-- launcher `tools/gpu_experiment_runner.py`
+- same checkpoint bytes/hash
+- same artifact bytes/hash
+- same tokenizer, validation data, environment, and runner path
 
 ## Identity Checks
-- Helper:
+- Patched helper:
+  - path: `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`
+  - bytes: `126026`
+  - SHA-256: `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`
+- Locked source helper:
   - path: `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`
   - bytes: `125663`
   - SHA-256: `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`
@@ -112,87 +126,133 @@ Actual executed this round:
   - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 
 Identity status:
-- helper unchanged before launch
+- patched helper differs only by the reviewed eval-only startup patch
 - checkpoint unchanged before launch
 - artifact unchanged before launch
 
 ## Commands Actually Run
-The exact intended 7-GPU control and candidate commands were recorded in:
-- `runs/eval_046_eval045_ttt_epochs_pair_7gpu_subset/command.txt`
+Exact patched control command was recorded in:
+- `runs/eval_047_eval045_patched_helper_7gpu_control/command.txt`
 
 The 7-GPU clean-idle gate evidence was recorded in:
-- `runs/eval_046_eval045_ttt_epochs_pair_7gpu_subset/clean_idle_gate.log`
+- `runs/eval_047_eval045_patched_helper_7gpu_control/clean_idle_gate.log`
 
-The fresh 7-GPU control command was actually launched via:
+The fresh patched 7-GPU control was launched via:
 - `tools/gpu_experiment_runner.py` in `physicslm`
 - pinned subset `1,2,3,4,5,6,7`
-- runner log dir `runs/eval_046_eval045_ttt_epochs_pair_7gpu_subset/runner_control_7gpu/`
+- runner log dir `runs/eval_047_eval045_patched_helper_7gpu_control/runner_control_7gpu/`
 
-The immediate candidate command was intentionally not launched after the control failed at startup.
+No candidate command was run in this round.
 
 ## Clean-Idle Gate Result
 - gate status: `pass`
-- gate sample time: `2026-03-27T13:56:56Z`
+- gate sample time: `2026-03-27T14:12:53Z`
 - GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization
 - GPU `0` remained occupied by a foreign process at about `74486 MiB`, but that was outside the reviewed `1..7` gate set
 - because the gate passed:
-  - the fresh 7-GPU control launch was attempted immediately
+  - the fresh patched 7-GPU control launch was attempted immediately
+
+## Helper Diff Summary
+- The copied helper now defines `eval_only_nondivisor_world_size = args.eval_only and (8 % world_size != 0)`.
+- The original divisor error is still raised for:
+  - all training launches
+  - all non-eval launches
+  - any other non-divisor path outside `EVAL_ONLY=1`
+- `grad_accum_steps` now falls back to `1` only on that eval-only non-divisor path; otherwise it remains `8 // world_size` exactly as before.
+- A single log line records when the compatibility path is used:
+  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`
 
 ## Control Launch Result
-- control launch status: `blocked at helper startup`
-- exact runner launch start: `2026-03-27T13:57:15Z`
+- control launch status: `completed`
+- exact runner launch start: `2026-03-27T14:13:16Z`
+- exact runner end: `2026-03-27T14:24:19Z`
 - runner selected GPUs `1,2,3,4,5,6,7` successfully
-- no evaluation metric was produced because the child failed before model evaluation
-- root startup failure on every rank:
-  - `ValueError: WORLD_SIZE=7 must divide 8 so grad_accum_steps stays integral`
-- runner timing:
-  - external wallclock `34.181s`
-  - runner-managed wallclock `33914ms`
-  - `runner_start_to_child_spawn_ms=424`
-  - `child_runtime_ms=33489`
-- child process status:
-  - torchrun exited with `ChildFailedError`
-  - first observed root-cause failure was rank `5`
-  - runner metadata exit code `1`
+- compatibility log emitted:
+  - `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`
+- final metrics:
+  - `legal_ttt_exact val_loss=0.33725596`
+  - `legal_ttt_exact val_bpb=0.19974198`
+  - script wallclock `616325ms`
+  - runner-managed wallclock `662808ms`
+  - external wallclock `663.092s`
+  - `runner_start_to_child_spawn_ms=428`
+  - `child_runtime_ms=662380`
+  - any-match fraction `0.98387585`
+  - avg alpha `0.65461744`
+  - matched-order histogram unchanged:
+    - `order_2=60166`
+    - `order_3=346841`
+    - `order_4=373090`
+    - `order_5=332096`
+    - `order_6=395043`
+    - `order_7=644544`
+    - `order_8=1634957`
+    - `order_9=57234849`
+  - `ngram_postlookup_vectorized_elapsed_ms=1110166`
+- runner metadata:
+  - exit code `0`
+  - timeout `false`
 
 ## Candidate Launch Result
 - candidate launch status: `not attempted`
 - reason:
-  - the control never reached an admissible surrogate-regime result
-  - the reviewed brief explicitly allowed candidate launch only if the control was admissible
-- therefore no candidate `val_loss`, `val_bpb`, script wallclock, runner wallclock, or external wallclock exist for this round
+  - the reviewed brief explicitly prohibited running `TTT_EPOCHS=3` in this round
+  - this round’s purpose was to answer surrogate admissibility first
 
 ## Success Metric
-Primary success required:
-- 7-GPU control launches and finishes
-- 7-GPU control is admissible as a surrogate regime
-- immediate 7-GPU `TTT_EPOCHS=3` candidate also launches and finishes
+Primary operational success required:
+- patched 7-GPU control launches and finishes
+
+Primary admissibility success required:
+- `val_bpb` within `±0.00002` of `eval_045`
+
+Secondary admissibility checks:
+- any-match fraction unchanged or negligible noise
+- avg alpha in-family
+- matched-order histogram unchanged or numerically negligible drift
+- key timing telemetry emitted normally
 
 Actual status:
-- clean-idle gate on `1..7`: `pass`
-- control launch on `1..7`: `failed before evaluation`
-- surrogate-regime admissibility: `not measurable`
-- candidate launch: `not attempted`
-- epoch-count decision: `unanswered`
+- launch: `pass`
+- finish: `pass`
+- `val_bpb` delta vs `eval_045`: `+0.00000012`
+- any-match delta vs `eval_045`: `+0.00000000`
+- avg alpha delta vs `eval_045`: `+0.00001589`
+- histogram delta vs `eval_045`: `exactly unchanged`
+- telemetry emission: `pass`
+- surrogate-regime decision: `admissible`
 
 ## Expected Effect
-If the 7-GPU subset were both clean and executable on the locked helper, the fresh control would establish whether the `1..7` regime is an acceptable surrogate, after which the immediate `TTT_EPOCHS=3` candidate could answer the epoch-count question without GPU `0`.
+If the startup invariant were the only blocker, the patched-helper 7-GPU control should launch and finish while remaining semantically in-family with the fresh 8-GPU control.
 
 ## Actual Result
-- The fixed `1..7` subset was clean and the runner selected it successfully.
-- The control did not reach evaluation because the locked helper enforces `8 % WORLD_SIZE == 0` before any eval-only logic runs.
-- A true 7-process launch therefore fails immediately under the reviewed no-code-change constraints.
-- Because the control never produced BPB or telemetry, the candidate was not attempted.
+- The patched helper launched and completed the full promoted-line 7-GPU control on GPUs `1..7`.
+- The control stayed extremely close to the fresh 8-GPU baseline:
+  - vs `eval_045`, `val_bpb` was only `+0.00000012`
+  - any-match fraction was identical
+  - matched-order histogram was identical
+  - avg alpha remained in-family
+- The control also stayed in-family versus promoted `eval_038`:
+  - `val_bpb` delta `-0.00000039`
+  - any-match identical
+  - matched-order histogram identical
+- Timing moved favorably versus the fresh 8-GPU control:
+  - script `-689683ms`
+  - runner `-687719ms`
+  - external `-687713ms`
+  - `ngram_postlookup_vectorized_elapsed_ms -373926`
 
 ## Interpretation
-- Decision label: `operationally blocked`
-- This round answered the reviewed operational question negatively: excluding GPU `0` is not sufficient on the locked helper because the helper itself is not compatible with `WORLD_SIZE=7`.
-- The scientific `TTT_EPOCHS=4 -> 3` question remains unanswered.
-- Under the reviewed minimal-intervention rules, silently switching to a different process topology or patching the helper would have mixed in an unreviewed extra change, so the correct action was to stop here.
+- Decision label: `7-GPU surrogate admissible`
+- The reviewed hypothesis is supported.
+- `eval_046` was blocked by a helper startup invariant, not by a necessary change in evaluation semantics on the `1..7` subset.
+- The patched 7-GPU control is admissible as a surrogate regime for the promoted 8-GPU control under the reviewed threshold.
+- This round does not answer anything about `TTT_EPOCHS=3`; it only reopens that question on a now-validated path.
 
 ## Next Step
-Do not spend another immediate round on the exact reviewed 7-GPU surrogate path unless a new reviewed brief explicitly authorizes one of these helper-compatible changes:
-- patching the locked helper to support non-divisor world sizes in eval-only mode, or
-- using a different reviewed operational topology that keeps the epoch-count comparison interpretable.
-
-Until then, treat the promoted-line `TTT_EPOCHS=4 -> 3` question as blocked by launch-shape incompatibility rather than by GPU `0` cleanliness alone.
+Run the exact same-session promoted-line `TTT_EPOCHS=4 -> 3` pair on the patched `1..7` path:
+- keep the patched eval-only helper fixed
+- keep checkpoint, artifact, scorer path, and all non-epoch variables fixed
+- run a fresh patched 7-GPU control with `TTT_EPOCHS=4`
+- then immediately run the patched 7-GPU candidate with only `TTT_EPOCHS=3`
+- compare against the validated surrogate-control regime established here rather than against the blocked no-code-change path

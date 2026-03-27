@@ -11,18 +11,57 @@ This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - promoted quality baseline on the locked legality line is now `eval_038 candidate=0.19974237` with `EVAL_LOGIT_TEMP=1.0`
 - freshest admissible same-session control on the promoted line: `eval_045 control=0.19974186`
-- newest refinement round: `eval_046 7-GPU subset retry -> operationally blocked at helper startup`
+- newest refinement round: `eval_047 patched-helper 7-GPU control -> surrogate admissible`
 - previous promoted line before the temperature fix: `eval_035=0.20079980`
 - previous fresh admissible prior control on the old promoted line: `eval_036 control=0.20079853`
 - previous legality baseline: `eval_027=0.29117839`
-- newest completed exact promoted-line control: `eval_045=0.19974186` with script `1306008ms`, runner `1350527ms`, external `1350805ms`
+- newest completed exact promoted-line control on the validated surrogate path: `eval_047=0.19974198` with script `616325ms`, runner `662808ms`, external `663.092s`
 - official-anchor gap on the active legality line: `0.19974237 - 0.4416 = -0.24185763`
-- open problem: promoted-line scorer temperature is closed positively on this helper lineage, and the only unanswered nearby refinement question remains the exact promoted-line `TTT_EPOCHS=4 -> 3` pair. The attempted 7-GPU surrogate path removed GPU `0` from the gate successfully but exposed a harder launch constraint: the locked helper refuses `WORLD_SIZE=7` before eval-only mode. Hold `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed, and do not retry the 7-GPU path without a newly reviewed helper-compatible plan.
+- open problem: promoted-line scorer temperature is closed positively on this helper lineage, and the only unanswered nearby refinement question is now again the exact promoted-line `TTT_EPOCHS=4 -> 3` pair. `eval_047` shows that the patched `1..7` eval-only path is a valid surrogate regime, so the next round should keep `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, and `NGRAM_EVAL_BUCKETS=2097152` fixed and run the same-session `4 -> 3` pair on that patched helper path.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_046_eval045_ttt_epochs_pair_7gpu_subset`
+## Newest Critical Result - `eval_047_eval045_patched_helper_7gpu_control`
+
+- The reviewed refinement-phase eval-only launch-path compatibility and surrogate-validity check completed successfully: the copied helper was patched only on the eval-only non-divisor startup path, the fresh 7-GPU control on GPUs `1..7` launched and finished, and the result stayed semantically in-family with the fresh 8-GPU control `eval_045`.
+- The code change was structurally minimal and stayed inside the reviewed lane:
+  - copied `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py` into `runs/eval_047_eval045_patched_helper_7gpu_control/train_gpt.py`
+  - preserved the original `WORLD_SIZE` divisor invariant for all training and non-eval launches
+  - allowed only `EVAL_ONLY=1` plus non-divisor `WORLD_SIZE` to fall back to `grad_accum_steps=1`
+  - added one explicit compatibility log line
+  - left scorer math, TTT logic, cache logic, export logic, checkpoint bytes, artifact bytes, and runner code unchanged
+- Identity state before launch:
+  - patched helper `126026` bytes, SHA-256 `c4a687b680df9eaff7f23c259f7e07e1da5446fab9319e3c72e3c4b59706b2ed`
+  - locked source helper `125663` bytes, SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`
+  - checkpoint unchanged at `106178569` bytes / `b8291ad1...`
+  - artifact unchanged at `15555121` bytes / `eb062c96...`
+- 7-GPU clean-idle gate evidence:
+  - gate sample at `2026-03-27T14:12:53Z`
+  - GPUs `1..7` each showed about `81007 MiB` free, `0 MiB` used, and `0%` utilization
+  - GPU `0` remained occupied by a foreign process at about `74486 MiB`, but it was outside the reviewed gate set
+- Fresh patched-helper control result:
+  - runner launch start `2026-03-27T14:13:16Z`
+  - runner end `2026-03-27T14:24:19Z`
+  - compatibility log emitted: `eval_only_nondivisor_world_size:enabled world_size:7 forced_grad_accum_steps:1`
+  - `legal_ttt_exact val_loss=0.33725596`
+  - `legal_ttt_exact val_bpb=0.19974198`
+  - script eval wallclock `616325ms`
+  - runner-managed wallclock `662808ms`
+  - external wallclock `663.092s`
+  - `runner_start_to_child_spawn_ms=428`
+  - `child_runtime_ms=662380`
+  - any-match fraction `0.98387585`
+  - avg alpha `0.65461744`
+  - matched-order histogram identical to `eval_045` and `eval_038`
+  - `ngram_postlookup_vectorized_elapsed_ms=1110166`
+- Required admissibility comparisons:
+  - versus `eval_045`, BPB was `+0.00000012`, any-match was identical, histogram was identical, avg alpha was `+0.00001589`, script was `-689683ms`, runner was `-687719ms`, external was `-687713ms`, and postlookup was `-373926ms`
+  - versus promoted `eval_038`, BPB was `-0.00000039`, any-match was identical, histogram was identical, avg alpha was `+0.00001833`, script was `+27512ms`, runner was `+28123ms`, external was `+28166ms`, and postlookup was `-52017ms`
+- Decision label: `7-GPU surrogate admissible`.
+- Interpretation: `eval_046` was blocked by a helper startup invariant, not by a semantic mismatch on the `1..7` subset. The patched eval-only 7-GPU path is now validated as an admissible surrogate regime for the promoted 8-GPU control, so the exact `TTT_EPOCHS=4 -> 3` comparison is scientifically reopened on that path.
+
+## Previous Critical Result - `eval_046_eval045_ttt_epochs_pair_7gpu_subset`
 
 - The reviewed refinement-phase exact promoted-line same-session `TTT_EPOCHS=4 -> 3` retry on the fixed `1..7` subset did not reach a surrogate-regime control because the locked helper rejects `WORLD_SIZE=7` before any evaluation work begins.
 - No code edits were made. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before the round at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
