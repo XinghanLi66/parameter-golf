@@ -11,15 +11,46 @@ This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
 - strongest runtime-improved legality baseline: `eval_032=0.29081271`
 - previous legality baseline: `eval_027=0.29117839`
-- newest scored refinement round: `eval_032 fresh confirmation pair -> promote T=0.95 -> 0.29081271`
-- newest runtime-only round: `eval_030 control=0.29117961, candidate not run because gate failed`
+- newest scored refinement round: `eval_033 direct-launch pair -> negative launcher bypass on promoted eval_031 T=0.95 line`
+- newest runtime-only round: `eval_033 control=0.29081380, direct=0.29081558, external delta=-2602ms -> negative`
 - official-anchor gap on the active legality line: `0.29081271 - 0.4416 = -0.15078729`
-- open problem: the scalar-temperature question is now closed on the locked PR809 legality line because fresh official control/candidate confirmation passed cleanly and promoted `T=0.95` as the default. The direct-launcher runtime question remains unanswered separately because `eval_030` never reached its candidate, but it should only be revisited behind a fresh admissible control.
+- open problem: the scalar-temperature question is closed on the locked PR809 legality line and launcher bypass on the promoted line is now also answered negatively from a fresh admissible pair. The next refinement round should move to a genuinely different single-variable question rather than another launcher-path rerun.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_032_eval031_temperature_confirmation_pair`
+## Newest Critical Result - `eval_033_eval031_direct_launch_pair`
+
+- The reviewed refinement-phase launcher-path control pair executed cleanly on the locked promoted `eval_031` legality lineage at `EVAL_LOGIT_TEMP=0.95` with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after both runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
+  - reused the exact locked `eval_031` helper with no edits
+  - reused the exact same checkpoint, artifact, tokenizer, dataset, stride, legal TTT settings, and PR809 vectorized n-gram settings
+  - kept `EVAL_LOGIT_TEMP=0.95` fixed in both arms
+  - changed only the outer launcher path between fresh control `runner` and fresh candidate `direct launch`
+  - changed only operational identifiers such as `RUN_ID` and capture directories
+- The fresh runner control in `physicslm` on GPUs `0,1,2,3,4,5,6,7` scored:
+  - `legal_ttt_exact val_loss=0.49102692`
+  - `legal_ttt_exact val_bpb=0.29081380`
+  - script eval wallclock `585452ms`
+  - runner-managed wallclock `627968ms`
+  - external top-level wallclock `628139ms`
+- The fresh control passed the reviewed admissibility gate against `eval_032`:
+  - `val_bpb` drift `+0.00000109` vs `0.29081271`
+  - external wallclock drift `+718ms` vs `627421ms`
+- The direct-launch candidate recovered the exact wrapped child command from the fresh control metadata and reused the same cwd, same `physicslm`, and same pinned GPUs via `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7`. The only wrapped-command token difference was the allowed `RUN_ID`.
+- The fresh direct-launch candidate scored:
+  - `legal_ttt_exact val_loss=0.49102993`
+  - `legal_ttt_exact val_bpb=0.29081558`
+  - script eval wallclock `583370ms`
+  - external top-level wallclock `625537ms`
+- Required comparisons:
+  - candidate vs fresh control: `+0.00000178 BPB`, `-2082ms` script, `-2602ms` external
+  - fresh control vs `eval_032`: `+0.00000109 BPB`, `+718ms` external
+  - candidate vs `eval_032`: `+0.00000287 BPB`, `-1884ms` external
+- Decision label: `negative`.
+- Interpretation: launcher bypass on the promoted `eval_031` `T=0.95` line preserves BPB but only saves `2.602s` externally, below the reviewed `<3s -> negative` threshold. Direct launch should therefore not become the new legality/runtime baseline on this line.
+
+## Previous Critical Result - `eval_032_eval031_temperature_confirmation_pair`
 
 - The reviewed refinement-phase fresh official confirmation pair executed cleanly on the locked `eval_031` legality lineage with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after both runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
@@ -195,8 +226,9 @@ This line is in **REFINEMENT phase**:
 - `eval_030`: the direct-launcher ablation did not reach its candidate because the fresh control missed the reviewed managed-wallclock gate by `1554ms`; treat this as drift, not as evidence for or against direct launch.
 - `eval_031`: scoring-only neural-logit temperature scaling on the locked PR809 legality line was locally positive and selected `T=0.95`; it is now superseded by `eval_032`, which cleanly confirmed the same setting on a fresh full official control/candidate pair.
 - `eval_032`: fresh same-helper full official control/candidate confirmation on the locked `eval_031` line promoted `EVAL_LOGIT_TEMP=0.95` as the default. The fresh control stayed admissible, the fresh candidate won by `0.00036820 BPB`, and nearby scalar-temperature tuning on this line should now be treated as closed.
+- `eval_033`: fresh admissible runner control plus direct-launch candidate on the promoted `eval_031` `T=0.95` line preserved BPB but saved only `2602ms` externally, which is below the reviewed `3s` floor; launcher bypass should now be treated as answered negatively on this line.
 
 ## Best Next Step
 
 Keep the locked `eval_031` legality line with promoted `EVAL_LOGIT_TEMP=0.95` as the active baseline.  
-Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend the next round on nearby scalar-temperature sweeps. Move the next refinement round to a genuinely different single-variable question; if launcher-path runtime work is revisited, require a fresh admissible control first.
+Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend the next round on nearby scalar-temperature sweeps or another runner-vs-direct-launch rerun on this line. Move the next refinement round to a genuinely different single-variable question.

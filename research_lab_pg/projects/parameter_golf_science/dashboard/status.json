@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-03-27T06:04:20Z",
+  "generated_at_utc": "2026-03-27T06:41:56Z",
   "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
   "repo_root": "/newcpfs/lxh/parameter-golf",
   "external_sota_bpb": 1.1194,
@@ -24,36 +24,37 @@
   "local_best_bpb": {
     "val_bpb": 0.29081271,
     "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
-    "matched_text": "Local PR `#809` temperature confirmation pair: fresh `eval_032` `T=1.0` control vs fresh `eval_032` `T=0.95` candidate | Candidate: `0.29081271`"
+    "matched_text": "Local PR `#809` promoted-line launcher admissibility: fresh `eval_032` confirmed candidate vs fresh `eval_033` runner control | Baseline: `0.29081271`"
   },
   "gap_to_sota": -0.828587,
   "latest_status_sections": {
-    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, but the active legality baseline on the locked PR `#809` line is now the promoted `eval_031` lineage confirmed by `eval_032_eval031_temperature_confirmation_pair`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest scored refinement round is `eval_032_eval031_temperature_confirmation_pair`.\n- The helper/artifact guardrail stayed clean across both fresh official runs:\n  - helper `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`: `125663` bytes, SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`\n  - checkpoint `final_model.pt`: `106178569` bytes, SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - artifact `final_model.int6.ptz`: `15555121` bytes, SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- The exact experiment scope stayed within the reviewed evaluation-only confirmation lane:\n  - no code edits\n  - no export edits\n  - no runner edits\n  - reused the locked `eval_031` helper exactly\n  - changed only `EVAL_LOGIT_TEMP` between fresh official control `1.0` and fresh official candidate `0.95`\n- Fresh official pair on GPUs `0,1,2,3,4,5,6,7`:\n  - control `T=1.0`: `val_loss=0.49164677`, `val_bpb=0.29118091`, script `591399ms`, runner `633253ms`, external `633409ms`\n  - candidate `T=0.95`: `val_loss=0.49102508`, `val_bpb=0.29081271`, script `584876ms`, runner `627182ms`, external `627421ms`\n- Decision comparisons:\n  - fresh `T=0.95` vs fresh `T=1.0`: `-0.00036820 BPB`\n  - fresh `T=0.95` vs prior `eval_031`: `-0.00000214 BPB`\n  - fresh `T=1.0` vs `eval_027`: `+0.00000252 BPB`\n  - fresh `T=1.0` vs `eval_030`: `+0.00000130 BPB`\n- Interpretation:\n  - fresh-control admissibility passed cleanly\n  - promotion threshold `>=0.0002 BPB` passed comfortably\n  - conclusion label is `promote`\n  - `EVAL_LOGIT_TEMP=0.95` is now the promoted default on the locked `eval_031` PR809 legality line\n  - nearby scalar-temperature tuning on this line is now closed",
-    "Most Important Open Question": "What is the next genuinely different single-variable refinement question on top of the now-promoted `eval_031` `T=0.95` legality line, given that nearby scalar-temperature tuning is closed and the separate direct-launch runtime question remains unanswered?",
-    "Active Experiment ID": "`eval_032_eval031_temperature_confirmation_pair`",
-    "Latest Result Summary": "- Completed the reviewed fresh confirmation pair on the locked `eval_031` helper lineage with no code edits.\n- Controlled intervention actually executed:\n  - fresh official control at `EVAL_LOGIT_TEMP=1.0`\n  - fresh official candidate at `EVAL_LOGIT_TEMP=0.95`\n  - same helper, checkpoint, artifact, runner path, environment, stride, legal TTT settings, and PR809 vectorized n-gram settings\n- Managed runs:\n  - environment: `physicslm`\n  - GPU allocation: `8x NVIDIA L20Z`, specifically `0,1,2,3,4,5,6,7`\n  - fresh control result: `legal_ttt_exact val_bpb=0.29118091`, `val_loss=0.49164677`\n  - fresh candidate result: `legal_ttt_exact val_bpb=0.29081271`, `val_loss=0.49102508`\n  - artifact bytes stayed unchanged at `15555121`\n  - helper code bytes are `125663`\n  - total bytes on the locked evaluation-helper line: `15680784`\n  - byte status: under cap by `319216`\n- Timing:\n  - fresh control: `591399ms` script, `633253ms` runner, `633409ms` external\n  - fresh candidate: `584876ms` script, `627182ms` runner, `627421ms` external\n- Decision:\n  - fresh-control admissibility passed\n  - fresh candidate beat fresh control by `0.00036820 BPB`\n  - label: `promote`\n  - the locked `eval_031` line with `EVAL_LOGIT_TEMP=0.95` is now the active legality baseline\n  - nearby scalar-temperature work is closed on this line",
-    "Recommended Next Step": "Keep the locked PR809 legality stack fixed with promoted `EVAL_LOGIT_TEMP=0.95` and move the next refinement round to a genuinely different single-variable question rather than another nearby scalar calibration. If managed-runtime work is revisited, require a fresh admissible control first and treat it as a separate question from the now-closed temperature result."
+    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, but the active legality baseline on the locked PR `#809` line is now the promoted `eval_031` lineage confirmed by `eval_032_eval031_temperature_confirmation_pair`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest scored refinement round is `eval_033_eval031_direct_launch_pair`.\n- The helper/artifact guardrail stayed clean across both fresh official runs:\n  - helper `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`: `125663` bytes, SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`\n  - checkpoint `final_model.pt`: `106178569` bytes, SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - artifact `final_model.int6.ptz`: `15555121` bytes, SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- The exact experiment scope stayed within the reviewed evaluation-only launcher-path lane:\n  - no code edits\n  - no export edits\n  - no runner edits\n  - reused the locked `eval_031` helper exactly\n  - kept `EVAL_LOGIT_TEMP=0.95` fixed\n  - changed only launch path between fresh runner control and fresh direct-launch candidate\n- Fresh launcher pair on GPUs `0,1,2,3,4,5,6,7`:\n  - runner control: `val_loss=0.49102692`, `val_bpb=0.29081380`, script `585452ms`, runner `627968ms`, external `628139ms`\n  - direct-launch candidate: `val_loss=0.49102993`, `val_bpb=0.29081558`, script `583370ms`, external `625537ms`\n- Decision comparisons:\n  - fresh runner control vs `eval_032`: `+0.00000109 BPB`, `+718ms` external\n  - direct-launch candidate vs fresh runner control: `+0.00000178 BPB`, `-2602ms` external\n  - direct-launch candidate vs `eval_032`: `+0.00000287 BPB`, `-1884ms` external\n- Interpretation:\n  - fresh-control admissibility passed cleanly\n  - direct-launch BPB comparability passed cleanly\n  - external runtime saving was only `2602ms`, below the reviewed `<3s -> negative` threshold\n  - conclusion label is `negative`\n  - `EVAL_LOGIT_TEMP=0.95` remains the promoted default on the locked `eval_031` PR809 legality line\n  - direct launch should not replace the runner path as the new legality/runtime baseline on this line",
+    "Most Important Open Question": "What is the next genuinely different single-variable refinement question on top of the promoted `eval_031` `T=0.95` legality line, now that nearby scalar-temperature tuning is closed and direct-launch bypass is also negative on this line?",
+    "Active Experiment ID": "`eval_033_eval031_direct_launch_pair`",
+    "Latest Result Summary": "- Completed the reviewed launcher-path control pair on the locked promoted `eval_031` helper lineage with no code edits.\n- Controlled intervention actually executed:\n  - fresh runner control at `EVAL_LOGIT_TEMP=0.95`\n  - fresh direct-launch candidate at `EVAL_LOGIT_TEMP=0.95`\n  - same helper, checkpoint, artifact, environment, stride, legal TTT settings, and PR809 vectorized n-gram settings\n  - direct-launch command recovered from fresh control metadata and reused with the same wrapped child command, same cwd, same `physicslm`, and same pinned GPUs\n- Managed runs:\n  - environment: `physicslm`\n  - GPU allocation: `8x NVIDIA L20Z`, specifically `0,1,2,3,4,5,6,7`\n  - fresh runner control result: `legal_ttt_exact val_bpb=0.29081380`, `val_loss=0.49102692`\n  - fresh direct-launch result: `legal_ttt_exact val_bpb=0.29081558`, `val_loss=0.49102993`\n  - artifact bytes stayed unchanged at `15555121`\n  - helper code bytes are `125663`\n  - total bytes on the locked evaluation-helper line: `15680784`\n  - byte status: under cap by `319216`\n- Timing:\n  - fresh runner control: `585452ms` script, `627968ms` runner, `628139ms` external\n  - fresh direct launch: `583370ms` script, `625537ms` external\n- Decision:\n  - fresh-control admissibility passed\n  - direct launch preserved BPB within `±0.0001`\n  - direct launch saved only `2602ms` externally\n  - label: `negative`\n  - the locked `eval_031` line with `EVAL_LOGIT_TEMP=0.95` remains the active legality baseline\n  - launcher bypass should be treated as closed negative on this line",
+    "Recommended Next Step": "Keep the locked PR809 legality stack fixed with promoted `EVAL_LOGIT_TEMP=0.95` and move the next refinement round to a genuinely different single-variable question rather than another nearby launcher-path or scalar-calibration rerun."
   },
   "next_experiment_sections": {
-    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase fresh official confirmation pair on the locked `eval_031` PR809 legality lineage.\n\n- Executed the reviewed brief materially as written:\n  - re-read `context/reference_materials/latest_sota_snapshot.md`, the required planning/report files, and the locked `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py` helper before running anything\n  - re-verified helper, checkpoint, and artifact identities before launch and again after both runs\n  - made no code edits, no export edits, no checkpoint edits, and no runner edits\n  - ran exactly one fresh full official control at `EVAL_LOGIT_TEMP=1.0`\n  - ran exactly one fresh full official candidate at `EVAL_LOGIT_TEMP=0.95`\n  - used `tools/gpu_experiment_runner.py` in `physicslm` on pinned GPUs `0,1,2,3,4,5,6,7`\n  - recorded script eval wallclock, runner-managed wallclock, and external top-level wallclock for both runs",
-    "Experiment ID": "`eval_032_eval031_temperature_confirmation_pair`",
-    "Category": "- evaluation\n\nOperational subtype: `fresh full-official same-helper confirmation pair for global neural-logit temperature`",
-    "Baseline / Comparison": "Primary decision pair on the locked `eval_031` lineage:\n- fresh official control `EVAL_LOGIT_TEMP=1.0`\n- fresh official candidate `EVAL_LOGIT_TEMP=0.95`\n\nHistorical anchors reported but not used as the primary promotion decision:\n- `eval_027`: `val_bpb=0.29117839`, script eval `574202ms`, managed `615000ms`\n- `eval_030` fresh control: `val_bpb=0.29117961`, script eval `583199ms`, managed `626554ms`, external `626721ms`\n- prior `eval_031` selected official run at `T=0.95`: `val_bpb=0.29081485`, script eval `584865ms`, managed `628844ms`, external `629130ms`",
-    "Hypothesis": "On the locked PR809 legality line, `EVAL_LOGIT_TEMP=0.95` gives a real repeatable full-official BPB improvement over `EVAL_LOGIT_TEMP=1.0` rather than reflecting a one-off selected run.",
-    "Why It Might Work": "- `eval_031` already showed aligned selector evidence on the fixed held-out slice plus one official `T=0.95` win.\n- This round isolates the only unresolved variable: fresh same-helper repeatability on a back-to-back official control/candidate pair.",
-    "Minimal Intervention": "No helper or runner edits in this round.\n\nOnly varied:\n- `EVAL_LOGIT_TEMP=1.0` for the fresh control\n- `EVAL_LOGIT_TEMP=0.95` for the fresh candidate\n\nAlso changed only the operational identifiers required to keep the runs separate:\n- `RUN_ID`\n- runner `--log-dir`\n- runner `--run-name`",
-    "Variables To Change": "- `EVAL_LOGIT_TEMP`\n  - control `1.0`\n  - candidate `0.95`",
-    "Variables To Hold Fixed": "- exact `eval_031` helper path, bytes, and SHA-256\n- exact saved checkpoint path, bytes, and SHA-256\n- exact saved artifact path, bytes, and SHA-256\n- exact PR809-style vectorized chunked n-gram settings\n- exact legal TTT settings\n- tokenizer and dataset\n- evaluation stride `64`\n- runner path\n- `physicslm` environment\n- pinned GPU set `0,1,2,3,4,5,6,7`\n- no retraining\n- no export rewrite\n- no other eval-side calibration change\n- no additional temperature values",
+    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase launcher-path control pair on the locked promoted `eval_031` PR809 legality lineage at `EVAL_LOGIT_TEMP=0.95`.\n\n- Executed the reviewed brief materially as written:\n  - re-read `context/reference_materials/latest_sota_snapshot.md`, the required planning/report files, the locked helper, and `tools/gpu_experiment_runner.py` before running anything\n  - re-verified helper, checkpoint, and artifact identities before launch and again after both runs\n  - made no code edits, no helper edits, no export edits, no checkpoint edits, and no runner edits\n  - ran exactly one fresh runner control through `tools/gpu_experiment_runner.py`\n  - recovered the exact wrapped child command from the fresh control `metadata.json`\n  - ran exactly one direct-launch candidate only after the fresh control passed the reviewed admissibility gate\n  - kept the same `physicslm` environment, cwd, GPU pinning, helper, checkpoint, artifact, `EVAL_LOGIT_TEMP=0.95`, legal TTT settings, PR809 vectorized n-gram settings, tokenizer, dataset, and stride\n  - recorded script eval wallclock, runner-managed wallclock for the control, and external top-level wallclock for both arms",
+    "Experiment ID": "`eval_033_eval031_direct_launch_pair`",
+    "Category": "- evaluation\n\nOperational subtype: `fresh promoted-line launcher-path control pair`",
+    "Baseline / Comparison": "Primary comparison on the locked promoted `eval_031` lineage:\n- fresh runner control at `EVAL_LOGIT_TEMP=0.95`\n- fresh direct-launch candidate reusing the exact same wrapped child command and env, bypassing only the outer runner path\n\nHistorical admissibility anchors:\n- `eval_031` official candidate: `val_bpb=0.29081485`\n- `eval_032` fresh confirmation candidate: `val_bpb=0.29081271`, script eval `584876ms`, runner `627182ms`, external `627421ms`",
+    "Hypothesis": "On the locked promoted `eval_031` legality line, materially remaining runtime overhead is still in the outer launcher path, so bypassing `tools/gpu_experiment_runner.py` should reduce end-to-end wallclock without changing post-export `val_bpb`.",
+    "Why It Might Work": "- `eval_028` showed helper-local total process time could already fit under budget.\n- `eval_029` showed runner-internal micro-trims were not enough.\n- `eval_030` did not answer the direct-launch question because its fresh control failed the gate before the candidate ran.\n- That left direct launcher bypass as the clean remaining launcher-path variable on the current promoted line.",
+    "Minimal Intervention": "No helper or runner edits in this round.\n\nOnly varied:\n- launcher path\n  - control: `tools/gpu_experiment_runner.py`\n  - candidate: direct launch of the same wrapped child command\n\nAlso changed only the operational identifiers required to keep the runs separate:\n- `RUN_ID`\n- runner `--log-dir`\n- runner `--run-name`\n- direct-launch capture directory",
+    "Variables To Change": "- outer launch path\n  - `runner`\n  - `direct launch`",
+    "Variables To Hold Fixed": "- exact `eval_031` helper path, bytes, and SHA-256\n- exact saved checkpoint path, bytes, and SHA-256\n- exact saved artifact path, bytes, and SHA-256\n- `EVAL_LOGIT_TEMP=0.95`\n- exact legal TTT settings\n- exact PR809-style vectorized chunked n-gram settings\n- tokenizer and dataset\n- evaluation stride `64`\n- `physicslm` environment\n- working directory\n- pinned GPU set `0,1,2,3,4,5,6,7`\n- no retraining\n- no export rewrite\n- no helper edits",
     "Identity Checks": "- Helper:\n  - path: `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`\n  - bytes: `125663`\n  - SHA-256: `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`\n- Saved checkpoint:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`\n  - bytes: `106178569`\n  - SHA-256: `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n- Saved artifact:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz`\n  - bytes: `15555121`\n  - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n\nIdentity status:\n- helper unchanged before vs after both fresh runs\n- checkpoint unchanged before vs after both fresh runs\n- artifact unchanged before vs after both fresh runs",
-    "Exact Top-Level Commands Actually Run": "Fresh control:\n\n```bash\npython tools/gpu_experiment_runner.py \\\n  --gpus 8 \\\n  --gpu-indices 0,1,2,3,4,5,6,7 \\\n  --conda-env physicslm \\\n  --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \\\n  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_032_eval031_temp_confirmation_pair/official_t1p0_8gpu \\\n  --run-name eval_032_official_t1p0 \\\n  --timeout-seconds 7200 -- \\\n  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \\\n    RUN_ID=eval_032_eval031_temp_confirmation_pair_official_t1p0 \\\n    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \\\n    EVAL_LOGIT_TEMP=1.0 \\\n    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \\\n    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \\\n    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \\\n    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \\\n    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \\\n    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \\\n    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \\\n    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \\\n    torchrun --standalone --nproc_per_node=8 \\\n    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py\n```\n\nFresh candidate:\n\n```bash\npython tools/gpu_experiment_runner.py \\\n  --gpus 8 \\\n  --gpu-indices 0,1,2,3,4,5,6,7 \\\n  --conda-env physicslm \\\n  --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \\\n  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_032_eval031_temp_confirmation_pair/official_t0p95_8gpu \\\n  --run-name eval_032_official_t0p95 \\\n  --timeout-seconds 7200 -- \\\n  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \\\n    RUN_ID=eval_032_eval031_temp_confirmation_pair_official_t0p95 \\\n    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \\\n    EVAL_LOGIT_TEMP=0.95 \\\n    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \\\n    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \\\n    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \\\n    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \\\n    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \\\n    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \\\n    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \\\n    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \\\n    torchrun --standalone --nproc_per_node=8 \\\n    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py\n```",
-    "Fresh Official Results": "- Fresh control `T=1.0`\n  - GPU indices: `0,1,2,3,4,5,6,7`\n  - `val_loss=0.49164677`\n  - `val_bpb=0.29118091`\n  - script eval wallclock: `591399ms`\n  - runner-managed wallclock: `633253ms`\n  - external top-level wallclock: `633409ms`\n- Fresh candidate `T=0.95`\n  - GPU indices: `0,1,2,3,4,5,6,7`\n  - `val_loss=0.49102508`\n  - `val_bpb=0.29081271`\n  - script eval wallclock: `584876ms`\n  - runner-managed wallclock: `627182ms`\n  - external top-level wallclock: `627421ms`",
-    "Required Comparisons": "- Fresh candidate vs fresh control:\n  - `val_loss`: `0.49164677 -> 0.49102508` (`-0.00062169`)\n  - `val_bpb`: `0.29118091 -> 0.29081271` (`-0.00036820`)\n  - script eval wallclock: `591399ms -> 584876ms` (`-6523ms`)\n  - runner-managed wallclock: `633253ms -> 627182ms` (`-6071ms`)\n  - external top-level wallclock: `633409ms -> 627421ms` (`-5988ms`)\n- Fresh candidate vs prior `eval_031` selected official run:\n  - `val_bpb`: `0.29081485 -> 0.29081271` (`-0.00000214`)\n- Fresh control vs `eval_027`:\n  - `val_bpb`: `0.29117839 -> 0.29118091` (`+0.00000252`)\n  - script eval wallclock: `574202ms -> 591399ms` (`+17197ms`)\n  - runner-managed wallclock: `615000ms -> 633253ms` (`+18253ms`)\n- Fresh control vs `eval_030`:\n  - `val_bpb`: `0.29117961 -> 0.29118091` (`+0.00000130`)\n  - script eval wallclock: `583199ms -> 591399ms` (`+8200ms`)\n  - runner-managed wallclock: `626554ms -> 633253ms` (`+6699ms`)\n  - external top-level wallclock: `626721ms -> 633409ms` (`+6688ms`)\n- Fresh candidate vs `eval_027`:\n  - `val_bpb`: `0.29117839 -> 0.29081271` (`-0.00036568`)\n  - script eval wallclock: `574202ms -> 584876ms` (`+10674ms`)\n  - runner-managed wallclock: `615000ms -> 627182ms` (`+12182ms`)",
-    "Fresh-Control Admissibility Check": "- control drift vs `eval_027`: `+0.00000252`\n- control drift vs `eval_030`: `+0.00000130`\n- reviewed drift threshold: `0.0002`\n- admissibility decision: `pass`",
-    "Success Metric": "Primary success criterion:\n- fresh official `T=0.95` beats fresh official `T=1.0` on post-export `val_bpb`\n\nPromotion threshold:\n- improvement of at least `0.0002` BPB vs the fresh `T=1.0` control\n\nGuardrails:\n- helper bytes/hash unchanged\n- checkpoint bytes/hash unchanged\n- artifact bytes/hash unchanged\n- script eval remains below `600000ms`\n\nOutcome:\n- primary success criterion: `pass`\n- promotion threshold: `pass` with `-0.00036820`\n- fresh-control admissibility: `pass`\n- script eval guardrail: `pass` for both runs",
-    "Expected Effect": "If the prior `eval_031` win was real, then the fresh full official `T=0.95` run should again beat the fresh full official `T=1.0` run by a meaningful margin without any identity drift.",
-    "Actual Result": "- The pair stayed controlled and identity-clean.\n- The fresh `T=1.0` control remained fully in-family with both `eval_027` and `eval_030`.\n- The fresh `T=0.95` candidate beat the fresh `T=1.0` control by `0.00036820 BPB`, comfortably above the reviewed `0.0002` promotion threshold.\n- The fresh `T=0.95` candidate also slightly beat the prior `eval_031` selected official run by `0.00000214 BPB`, so the earlier result was not a one-off spike.",
-    "Interpretation": "This is a cleanly confirmatory refinement result.\n\n- Conclusion label: `promote`\n- `EVAL_LOGIT_TEMP=0.95` is now confirmed as the default evaluation setting on the locked `eval_031` PR809 legality line.\n- Nearby scalar-temperature tuning on this line should now be treated as closed unless a materially different calibration mechanism is proposed.",
-    "Next Step": "Hold the promoted `EVAL_LOGIT_TEMP=0.95` setting fixed and move the next refinement round to a genuinely different single-variable question. If managed-runtime work is revisited, do not use this temperature round for launcher conclusions; re-open that path only behind a fresh admissible control."
+    "Exact Top-Level Commands Actually Run": "Fresh runner control:\n\n```bash\npython tools/gpu_experiment_runner.py \\\n  --gpus 8 \\\n  --gpu-indices 0,1,2,3,4,5,6,7 \\\n  --conda-env physicslm \\\n  --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \\\n  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_033_eval031_direct_launch_pair/runner_control_8gpu \\\n  --run-name eval_033_runner_control_t0p95 \\\n  --timeout-seconds 7200 -- \\\n  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \\\n    RUN_ID=eval_033_eval031_direct_launch_pair_runner_control \\\n    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \\\n    EVAL_LOGIT_TEMP=0.95 \\\n    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \\\n    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \\\n    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \\\n    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \\\n    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \\\n    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \\\n    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \\\n    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \\\n    torchrun --standalone --nproc_per_node=8 \\\n    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py\n```\n\nFresh direct-launch candidate:\n\n```bash\nCUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \\\nconda run --no-capture-output -n physicslm \\\n  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \\\n    RUN_ID=eval_033_eval031_direct_launch_pair_direct_candidate \\\n    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \\\n    EVAL_LOGIT_TEMP=0.95 \\\n    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \\\n    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \\\n    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \\\n    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \\\n    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \\\n    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \\\n    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \\\n    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \\\n    torchrun --standalone --nproc_per_node=8 \\\n    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py\n```",
+    "Fresh Official Results": "- Fresh runner control:\n  - GPU indices: `0,1,2,3,4,5,6,7`\n  - `val_loss=0.49102692`\n  - `val_bpb=0.29081380`\n  - script eval wallclock: `585452ms`\n  - runner-managed wallclock: `627968ms`\n  - runner start-to-spawn: `389ms`\n  - child runtime: `627579ms`\n  - external top-level wallclock: `628139ms`\n- Fresh direct-launch candidate:\n  - GPU indices: `0,1,2,3,4,5,6,7`\n  - `val_loss=0.49102993`\n  - `val_bpb=0.29081558`\n  - script eval wallclock: `583370ms`\n  - external top-level wallclock: `625537ms`",
+    "Required Comparisons": "- Fresh control vs `eval_032` anchor:\n  - `val_bpb`: `0.29081271 -> 0.29081380` (`+0.00000109`)\n  - external top-level wallclock: `627421ms -> 628139ms` (`+718ms`)\n- Fresh candidate vs fresh control:\n  - `val_loss`: `0.49102692 -> 0.49102993` (`+0.00000301`)\n  - `val_bpb`: `0.29081380 -> 0.29081558` (`+0.00000178`)\n  - script eval wallclock: `585452ms -> 583370ms` (`-2082ms`)\n  - external top-level wallclock: `628139ms -> 625537ms` (`-2602ms`)\n- Fresh candidate vs `eval_032` anchor:\n  - `val_bpb`: `0.29081271 -> 0.29081558` (`+0.00000287`)\n  - external top-level wallclock: `627421ms -> 625537ms` (`-1884ms`)",
+    "Fresh-Control Admissibility Check": "- control drift vs `eval_032` BPB anchor: `+0.00000109`\n- control external wallclock vs `eval_032`: `+718ms`\n- reviewed thresholds:\n  - BPB within `0.0002`\n  - external wallclock no worse than `+15000ms`\n- admissibility decision: `pass`",
+    "Command / Environment Parity Check": "- same cwd across arms: `pass`\n- same `physicslm` environment across arms: `pass`\n- same pinned GPUs across arms via `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7`: `pass`\n- same wrapped child command recovered from fresh control metadata and reused for direct launch: `pass`\n- only wrapped-command token difference was the allowed operational identifier:\n  - `RUN_ID=eval_033_eval031_direct_launch_pair_runner_control`\n  - `RUN_ID=eval_033_eval031_direct_launch_pair_direct_candidate`",
+    "Success Metric": "Primary success criterion:\n- candidate `val_bpb` within `±0.0001` of fresh control\n- candidate external wallclock at least `5s` lower than fresh control\n\nPromotion threshold:\n- candidate `val_bpb` within `±0.0001` of fresh control\n- candidate external wallclock at least `10s` lower than fresh control\n\nGuardrails:\n- helper bytes/hash unchanged\n- checkpoint bytes/hash unchanged\n- artifact bytes/hash unchanged\n\nOutcome:\n- fresh-control admissibility: `pass`\n- BPB comparability guardrail: `pass`\n- primary runtime success criterion: `fail` with only `-2602ms`\n- reviewed classification threshold for `<3s` runtime savings: `negative`\n- secondary runtime target vs `eval_032` anchor: `pass` only by `-1884ms`, which is not enough to overturn the round classification",
+    "Expected Effect": "If outer launcher overhead was still materially unresolved on the promoted line, the direct-launch candidate should preserve BPB while saving at least `5s` externally and ideally at least `10s`.",
+    "Actual Result": "- The fresh control was fully admissible against the `eval_032` anchor.\n- The direct-launch candidate preserved BPB cleanly on the promoted line.\n- Direct launch was only `2602ms` faster externally than the fresh runner control.\n- That runtime delta is below the reviewed `3s` minimum for a meaningful positive signal.",
+    "Interpretation": "This is a controlled negative refinement result for launcher bypass on the promoted `eval_031` `T=0.95` line.\n\n- Conclusion label: `negative`\n- Direct launch does not save enough top-level wallclock on this line to become the new legality/runtime baseline.\n- The launcher-path question is now effectively closed on this promoted line unless a genuinely different platform-side condition appears.",
+    "Next Step": "Hold the promoted `EVAL_LOGIT_TEMP=0.95` setting fixed and stop spending immediate rounds on runner-vs-direct-launch path changes for this line. Move the next refinement round to a genuinely different single-variable question rather than another nearby launcher-path rerun."
   },
   "experiment_rows": [
     {
@@ -324,6 +325,70 @@
     }
   ],
   "comparison_rows_all": [
+    {
+      "Comparison": "Local PR `#809` promoted-line launcher admissibility: fresh `eval_032` confirmed candidate vs fresh `eval_033` runner control",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.29081271`",
+      "Candidate": "`0.29081380`",
+      "Delta": "`+0.00000109`",
+      "Notes": "The fresh runner control stayed trivially inside the reviewed `0.0002` BPB gate, so the direct-launch candidate was admissible on the promoted line."
+    },
+    {
+      "Comparison": "Local PR `#809` promoted-line launcher admissibility: fresh `eval_032` confirmed candidate vs fresh `eval_033` runner control",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`627421ms`",
+      "Candidate": "`628139ms`",
+      "Delta": "`+718ms`",
+      "Notes": "External timing also stayed well inside the reviewed `+15000ms` gate, so this round is real launcher evidence rather than another drift stop."
+    },
+    {
+      "Comparison": "Local PR `#809` launcher-path pair on promoted `eval_031 T=0.95`: fresh runner control vs fresh direct-launch candidate",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.29081380`",
+      "Candidate": "`0.29081558`",
+      "Delta": "`+0.00000178`",
+      "Notes": "BPB stayed fully comparable, so the remaining question is purely runtime, not semantics."
+    },
+    {
+      "Comparison": "Local PR `#809` launcher-path pair on promoted `eval_031 T=0.95`: fresh runner control vs fresh direct-launch candidate",
+      "Metric": "script eval wallclock",
+      "Baseline": "`585452ms`",
+      "Candidate": "`583370ms`",
+      "Delta": "`-2082ms`",
+      "Notes": "Helper-side eval was slightly faster under direct launch, but the effect is small."
+    },
+    {
+      "Comparison": "Local PR `#809` launcher-path pair on promoted `eval_031 T=0.95`: fresh runner control vs fresh direct-launch candidate",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`628139ms`",
+      "Candidate": "`625537ms`",
+      "Delta": "`-2602ms`",
+      "Notes": "This is the decisive runtime result for the round: direct launch saved only `2.602s`, which is below the reviewed `<3s -> negative` threshold, so it should not be promoted."
+    },
+    {
+      "Comparison": "Local PR `#809` launcher-path pair on promoted `eval_031 T=0.95`: fresh runner control wrapped child vs fresh direct-launch wrapped child",
+      "Metric": "command parity",
+      "Baseline": "`same wrapped command recovered from control metadata`",
+      "Candidate": "`same wrapped command reused directly`",
+      "Delta": "`RUN_ID only`",
+      "Notes": "The only wrapped-command token difference was the allowed operational `RUN_ID`; cwd, `physicslm`, and `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7` stayed matched."
+    },
+    {
+      "Comparison": "Local PR `#809` launcher-path pair on promoted `eval_031 T=0.95`: fresh `eval_032` confirmed candidate vs fresh `eval_033` direct-launch candidate",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`627421ms`",
+      "Candidate": "`625537ms`",
+      "Delta": "`-1884ms`",
+      "Notes": "Direct launch did beat the historical `eval_032` anchor, but only by about `1.9s`, which is too small to overturn the round-level negative classification."
+    },
+    {
+      "Comparison": "Local PR `#809` launcher-path pair on promoted `eval_031 T=0.95`: fresh `eval_032` confirmed candidate vs fresh `eval_033` direct-launch candidate",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.29081271`",
+      "Candidate": "`0.29081558`",
+      "Delta": "`+0.00000287`",
+      "Notes": "The direct-launch candidate stayed numerically in-family with the already-promoted `eval_032` line."
+    },
     {
       "Comparison": "Local PR `#809` temperature confirmation admissibility: locked `eval_027` vs fresh `eval_032` control `T=1.0`",
       "Metric": "post-export `val_bpb`",
@@ -3560,41 +3625,54 @@
         "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_005.worker.prompt.txt",
         "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_005.worker.final.txt",
         "worker_exit_code": "0"
+      },
+      "round_006.meta": {
+        "round": "6",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.worker.final.txt",
+        "worker_exit_code": "0"
       }
     },
     "phase_meta": {
       "planner": {
         "phase": "planner",
-        "round": "6",
-        "start_time": "2026-03-27T05:31:19Z",
-        "end_time": "2026-03-27T05:33:30Z",
+        "round": "7",
+        "start_time": "2026-03-27T06:05:01Z",
+        "end_time": "2026-03-27T06:08:24Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.planner.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.planner.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.planner.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.planner.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.planner.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.planner.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.planner.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.planner.final.txt"
       },
       "review": {
         "phase": "review",
-        "round": "6",
-        "start_time": "2026-03-27T05:33:31Z",
-        "end_time": "2026-03-27T05:35:02Z",
+        "round": "7",
+        "start_time": "2026-03-27T06:08:24Z",
+        "end_time": "2026-03-27T06:10:26Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.review.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.review.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.review.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.review.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.review.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.review.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.review.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.review.final.txt"
       },
       "worker": {
         "phase": "worker",
-        "round": "6",
-        "start_time": "2026-03-27T05:35:02Z",
-        "end_time": "2026-03-27T06:04:18Z",
+        "round": "7",
+        "start_time": "2026-03-27T06:10:26Z",
+        "end_time": "2026-03-27T06:41:53Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.worker.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.worker.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.worker.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_006.worker.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.worker.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.worker.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.worker.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_007.worker.final.txt"
       }
     }
   },
@@ -3602,11 +3680,11 @@
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z",
       "configured_rounds": 50,
-      "completed_rounds": 6,
-      "latest_round": "6",
+      "completed_rounds": 7,
+      "latest_round": "7",
       "latest_phase": "worker",
       "state": "in progress",
-      "latest_timestamp": "2026-03-27T06:04:18Z"
+      "latest_timestamp": "2026-03-27T06:41:53Z"
     },
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z",
@@ -3656,6 +3734,30 @@
   ],
   "training_runs": [
     {
+      "name": "eval_033_eval031_direct_launch_pair_direct_candidate",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_033_eval031_direct_launch_pair_direct_candidate.txt",
+      "updated_at_utc": "2026-03-27T06:34:28Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
+      "name": "eval_033_eval031_direct_launch_pair_runner_control",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_033_eval031_direct_launch_pair_runner_control.txt",
+      "updated_at_utc": "2026-03-27T06:23:05Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
       "name": "eval_032_eval031_temp_confirmation_pair_official_t0p95",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_032_eval031_temp_confirmation_pair_official_t0p95.txt",
       "updated_at_utc": "2026-03-27T05:58:08Z",
@@ -3695,30 +3797,6 @@
       "name": "eval_031_eval027_global_temperature_calibration_t1p05",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_031_eval027_global_temperature_calibration_t1p05.txt",
       "updated_at_utc": "2026-03-27T05:10:48Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_031_eval027_global_temperature_calibration_t1p025",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_031_eval027_global_temperature_calibration_t1p025.txt",
-      "updated_at_utc": "2026-03-27T05:09:41Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_031_eval027_global_temperature_calibration_t1p00",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_031_eval027_global_temperature_calibration_t1p00.txt",
-      "updated_at_utc": "2026-03-27T05:08:34Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -4029,8 +4107,6 @@
       "D docs/sota_records/sota_record_15_1.20576_2026-03-18_LongContextSeq2048.md",
       "M docs/sota_records/sota_records_index.md",
       "M research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md",
-      "M research_lab_pg/projects/parameter_golf_science/dashboard/index.html",
-      "M research_lab_pg/projects/parameter_golf_science/dashboard/status.json",
       "M research_lab_pg/projects/parameter_golf_science/planning/experiment_ledger.md",
       "M research_lab_pg/projects/parameter_golf_science/planning/next_experiment.md",
       "M research_lab_pg/projects/parameter_golf_science/planning/research_memory.md",
@@ -4068,17 +4144,15 @@
       "...ord_15_1.20576_2026-03-18_LongContextSeq2048.md | 1231 ---------------",
       "docs/sota_records/sota_records_index.md            |   30 +-",
       ".../reference_materials/latest_sota_snapshot.md    |    2 +-",
-      ".../parameter_golf_science/dashboard/index.html    |   21 +-",
-      ".../parameter_golf_science/dashboard/status.json   |  283 +---",
       ".../planning/experiment_ledger.md                  |    1 +",
-      ".../planning/next_experiment.md                    |  297 ++--",
-      ".../planning/research_memory.md                    |   49 +-",
-      ".../reports/comparison_summary.md                  |   11 +",
-      ".../reports/latest_status.md                       |   96 +-",
+      ".../planning/next_experiment.md                    |  190 +--",
+      ".../planning/research_memory.md                    |   42 +-",
+      ".../reports/comparison_summary.md                  |    8 +",
+      ".../reports/latest_status.md                       |   61 +-",
       ".../tools/gpu_experiment_runner.py                 |   31 +-",
       "research_lab_pg/scripts/codex_research_loop.sh     |    3 +-",
       ".../scripts/start_parameter_golf_iteration.sh      |    5 +-",
-      "23 files changed, 327 insertions(+), 13253 deletions(-)"
+      "21 files changed, 206 insertions(+), 12918 deletions(-)"
     ]
   }
 }
