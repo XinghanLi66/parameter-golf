@@ -3,77 +3,83 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase clean-idle runtime-diagnosis control on the exact promoted `eval_038` legality line.
+Completed on `2026-03-27` as the reviewed refinement-phase same-session promoted-line `TTT_EPOCHS=4 -> 3` evaluation attempt, but the round stopped before launch because the required clean-idle gate on pinned GPUs `0..7` never passed.
 
-- Executed the reviewed brief through the required file re-read, identity verification, promoted-command recovery, full clean-idle gating, synchronized telemetry capture, exact promoted-line launch, and post-run comparison.
+- Executed the reviewed brief through the required file re-read, exact promoted-command recovery, helper/checkpoint/artifact identity verification, and bounded clean-idle gate watch.
 - No code edits were made in this round.
-- One valid clean-idle control was launched and finished on pinned GPUs `0..7`.
-- This round did not test a new leaderboard motif; it remained a refinement-phase operational control needed to make later `TTT_EPOCHS=4 -> 3` comparisons interpretable again.
+- No runner-managed control launched.
+- No `TTT_EPOCHS=3` candidate launched.
+- The round therefore remains a controlled blocker report rather than an epoch-count result.
 
 ## Experiment ID
-`eval_042_eval038_clean_idle_telemetry_control`
+`eval_043_eval038_ttt_epochs_pair_clean_idle_blocked`
 
 ## Category
 - evaluation
 
-Operational subtype: `exact promoted-line clean-idle telemetry control`
+Operational subtype: `same-session promoted-line epoch-pair clean-idle gate attempt`
 
 ## Baseline / Comparison
-Primary runtime-restoration target:
-- promoted `eval_038=0.19974237`
-- promoted script eval wallclock `588813ms`
-- promoted runner-managed wallclock `634685ms`
-- promoted external wallclock `634926ms`
+Intended primary comparison:
+- fresh same-session control on the exact promoted line with `TTT_EPOCHS=4`
+- immediate same-session candidate on the exact promoted line with only `TTT_EPOCHS=3`
 
-Recent slowdown anchors:
-- `eval_039=0.19974161` at `1237494ms` external
-- `eval_040 control A=0.19974193` at `1365195ms` external
-- `eval_040 control B=0.19974367` at `1298755ms` external
+Interpretation anchors:
+- promoted `eval_038=0.19974237`, script `588813ms`, runner `634685ms`, external `634926ms`
+- current-regime clean-idle control `eval_042=0.19974395`, script `1507653ms`, runner `1555810ms`, external `1556076ms`
+- older same-family result `eval_034`: `TTT_EPOCHS=3` was `+0.00004098` BPB worse and about `70s` faster on the older `EVAL_LOGIT_TEMP=0.95` line
+
+Actual comparison obtained this round:
+- required clean-idle gate versus observed pinned-GPU occupancy during the bounded prelaunch watch
 
 ## Hypothesis
-The promoted helper/checkpoint/artifact stack is still semantically stable, and the current slowdown is operational rather than semantic.
+On the exact promoted `EVAL_LOGIT_TEMP=1.0`, `NGRAM_EVAL_BUCKETS=2097152` legality line, reducing only `TTT_EPOCHS` from `4` to `3` would preserve `val_bpb` within `+0.00005` of the same-session control while saving meaningful wallclock under the current runtime regime.
 
-Falsifiable version:
-- if one exact clean-idle rerun launched after a genuinely clean-idle gate returns near the `eval_038` runtime band, the slowdown was transient or externally induced
-- if one exact clean-idle rerun launched after a genuinely clean-idle gate remains in the `eval_039` / `eval_040` runtime regime, the slowdown is intrinsic to the current environment or process regime
-- if BPB no longer matches the promoted line, semantic drift has appeared
+Operational blocker falsifier for this round:
+- if a clean-idle gate on pinned GPUs `0..7` cannot be obtained, the pair cannot be launched interpretabily and the round must stop as `no-launch / clean-idle-gate-fail`
 
 ## Why It Might Work
-- `eval_039` and `eval_040` already showed that BPB and n-gram telemetry stayed in-family
-- the unresolved variable is localization, not semantics
-- one exact rerun with enforced clean-idle launch is the smallest refinement-phase experiment that can distinguish external contention from host-side launch overhead and from true in-process runtime drift
+- The live `#1` snapshot line uses legal score-first TTT with `3` epochs, so this remains the cleanest matched evaluation-side SOTA motif left on the locked local stack.
+- `eval_034` already showed `TTT_EPOCHS=3` is a real runtime lever on the older same-family line.
+- `eval_042` re-established that the promoted stack is semantically stable and that current slowdown interpretation should be anchored to the current regime rather than to historical promoted runtime.
+- This remains the smallest refinement-phase intervention: no architecture, optimization, export, or code-path changes.
 
 ## Minimal Intervention
 No helper, checkpoint, artifact, runner, eval-hyperparameter, or export changes were made.
 
-Operational-only changes:
-- prelaunch clean-idle verification on GPUs `0..7`
-- synchronized runtime telemetry capture
+Intended semantic change:
+- candidate `TTT_EPOCHS: 4 -> 3`
+
+Actual executed changes:
+- fresh operational identifiers for the intended control and candidate
+- bounded clean-idle verification on pinned GPUs `0..7`
+- on-disk recording of intended commands and gate evidence after the launch was blocked
+
+## Variables To Change
+Intended semantic change:
+- candidate `TTT_EPOCHS: 4 -> 3`
+
+Operational-only:
 - fresh `RUN_ID`
 - fresh runner `--log-dir`
 - fresh runner `--run-name`
+- synchronized telemetry capture if launch became admissible
 
-## Variables To Change
-Semantic variables:
-- none
-
-Operational-only variables:
-- clean-idle gate enforcement on GPUs `0..7`
-- telemetry capture
-- `RUN_ID`
-- runner `--log-dir`
-- runner `--run-name`
+Actual executed this round:
+- clean-idle gate watch only
 
 ## Variables To Hold Fixed
-- exact helper path, bytes, and SHA-256 from promoted `eval_038`
-- exact checkpoint path, bytes, and SHA-256
-- exact artifact path, bytes, and SHA-256
+- helper path `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`
+- helper bytes/hash `125663 / 2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`
+- checkpoint path `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`
+- checkpoint bytes/hash `106178569 / b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`
+- artifact path `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz`
+- artifact bytes/hash `15555121 / eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 - `EVAL_ONLY=1`
 - `TTT_ENABLED=1`
 - `EVAL_STRIDE=64`
 - `EVAL_LOGIT_TEMP=1.0`
 - `TTT_LR=0.0025`
-- `TTT_EPOCHS=4`
 - `TTT_CHUNK_TOKENS=32768`
 - `TTT_FREEZE_BLOCKS=0`
 - `TTT_MOMENTUM=0.9`
@@ -84,11 +90,9 @@ Operational-only variables:
 - `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`
 - `NGRAM_EVAL_BATCH_TORCH_STATS=1`
 - `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`
-- tokenizer, dataset, and stride `64`
-- `physicslm` environment
-- working directory
+- tokenizer, dataset, cwd, `physicslm`
 - pinned GPU set `0,1,2,3,4,5,6,7`
-- launcher path `tools/gpu_experiment_runner.py`
+- launcher `tools/gpu_experiment_runner.py`
 
 ## Identity Checks
 - Helper:
@@ -110,102 +114,56 @@ Identity status:
 - artifact unchanged before vs after the round
 
 ## Commands Actually Run
-Clean-idle acquisition and synchronized telemetry were executed from a single top-level control script, then the exact promoted-line eval launched through the runner:
+No runner-managed eval command was launched because the required clean-idle gate never passed.
 
-```bash
-TIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.py \
-  --gpus 8 \
-  --gpu-indices 0,1,2,3,4,5,6,7 \
-  --min-free-memory-gb 10.0 \
-  --conda-env physicslm \
-  --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \
-  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_042_eval038_clean_idle_telemetry_control/runner_control_8gpu \
-  --run-name eval_042_runner_control_t1p00_e4_b2097152_lr0025 \
-  --timeout-seconds 7200 -- \
-  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-    RUN_ID=eval_042_eval038_clean_idle_telemetry_control_runner_control \
-    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
-    EVAL_LOGIT_TEMP=1.0 \
-    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
-    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \
-    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BUCKETS=2097152 \
-    NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \
-    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \
-    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \
-    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \
-    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \
-    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \
-    torchrun --standalone --nproc_per_node=8 \
-    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py
-```
+The round executed a bounded prelaunch clean-idle watch on pinned GPUs `0..7`, recorded in:
+- `runs/eval_043_eval038_ttt_epochs_pair_clean_idle_blocked/clean_idle_gate.log`
+
+The exact intended control and candidate commands were recorded, but not executed, in:
+- `runs/eval_043_eval038_ttt_epochs_pair_clean_idle_blocked/command.txt`
 
 ## Clean-Idle Gate Result
-- gate status: `pass`
-- the declared clean-idle acquisition protocol was honored and passed on the first required sample at `2026-03-27T11:40:19Z`
-- pinned GPUs `0..7` were all clean-idle at gate pass:
-  - each GPU showed about `81007 MiB` free and `0 MiB` used
-  - each GPU showed `0%` utilization
-  - `nvidia-smi --query-compute-apps` returned no foreign compute processes
-- synchronized telemetry began immediately after the gate pass and continued through the run
-- telemetry artifacts:
-  - gate log: `runs/eval_042_eval038_clean_idle_telemetry_control/clean_idle_gate.log`
-  - runtime telemetry: `runs/eval_042_eval038_clean_idle_telemetry_control/runtime_telemetry.log`
-  - top-level command log: `runs/eval_042_eval038_clean_idle_telemetry_control/top_level.log`
+- gate status: `fail`
+- bounded watch interval: `2026-03-27T12:27:56Z` through `2026-03-27T12:30:45Z`
+- pinned GPU `0` remained occupied for the full watch:
+  - free memory stayed at `6512 MiB`
+  - used memory stayed at `74495 MiB`
+  - utilization stayed at `100%`
+  - compute-app snapshot stayed `GPU-d45bfedb-df91-05be-293c-7375698e87dd, PID 3676150, process_name=[Not Found], used_memory=74486 MiB`
+- GPUs `1..7` stayed idle with about `81007 MiB` free, `0 MiB` used, and `0%` utilization
+- because the gate never passed:
+  - synchronized telemetry was not started
+  - no fresh `TTT_EPOCHS=4` control launched
+  - no immediate `TTT_EPOCHS=3` candidate launched
 
 ## Success Metric
-Primary diagnostic success required:
-- clean-idle gate passes on GPUs `0..7`
-- one exact promoted-line run finishes
-- BPB stays within `±0.00005` of promoted `eval_038`
-- telemetry is sufficient to classify the slowdown locus
+Primary success required:
+- fresh same-session `TTT_EPOCHS=4` control launches on a valid clean-idle gate
+- immediate `TTT_EPOCHS=3` candidate launches in the same session
+- candidate finishes within `+0.00005 BPB` of the fresh control
 
 Secondary success required:
-- runtime returns to within `+15s` of promoted `eval_038`
+- candidate saves at least `50s` external wallclock versus the fresh control
 
 Actual status:
-- clean-idle gate pass: `pass`
-- exact promoted-line run: `completed`
-- diagnostic localization from aligned launch telemetry: `obtained`
+- clean-idle gate: `fail`
+- fresh control launch: `not attempted`
+- candidate launch: `not attempted`
+- decision on `hold 4` vs `runtime-only 3` vs `promote 3`: `unanswered`
 
 ## Expected Effect
-If the slowdown was operational rather than semantic, one exact clean-idle rerun with aligned telemetry should localize whether the drift sits in external contention, launch-side overhead, or the child runtime itself.
+If the gate had passed, the exact same-session pair would have cleanly answered whether reducing only `TTT_EPOCHS` from `4` to `3` is a promotable runtime-quality trade on the current runtime regime.
 
 ## Actual Result
-- the exact promoted-line control launched cleanly and finished
-- final scored metrics:
-  - `legal_ttt_exact val_loss=0.33725929`
-  - `legal_ttt_exact val_bpb=0.19974395`
-  - script eval wallclock `1507653ms`
-  - runner-managed wallclock `1555810ms`
-  - external wallclock `1556076ms`
-  - `runner_start_to_child_spawn_ms=479`
-  - `child_runtime_ms=1555330`
-- versus promoted `eval_038`, deltas were:
-  - `+0.00000266 val_loss`
-  - `+0.00000158 BPB`
-  - `+918840ms` script
-  - `+921125ms` runner
-  - `+921150ms` external
-- versus `eval_039`, external wallclock was `+318582ms`
-- versus `eval_040 control B`, external wallclock was `+257321ms`
-- n-gram telemetry stayed in-family:
-  - any-match `0.98387585`
-  - avg alpha `0.65459237`
-  - matched-order histogram identical to promoted `eval_038`
-- runtime telemetry showed:
-  - no meaningful launch-side stall
-  - child execution began on a clean-idle machine
-  - late in the run, GPU `0` picked up an extra non-run PID `3384110` using about `74486 MiB`, but the run was already far behind promoted pace before this appeared
-  - `ngram_postlookup_vectorized_elapsed_ms=1540712`, up `+378529ms` vs promoted `eval_038`
+- The exact promoted-line epoch pair did not launch.
+- The round stopped before telemetry start or runner launch because the pinned `0..7` clean-idle requirement stayed unsatisfied throughout the bounded watch.
+- No new `val_loss`, `val_bpb`, script wallclock, runner wallclock, external wallclock, any-match, avg alpha, matched-order histogram, or `ngram_postlookup_vectorized_elapsed_ms` fields were produced.
 
 ## Interpretation
-- Decision label: `clean-launch persistent-runtime-shift / child-runtime-inflation`
-- The promoted helper/checkpoint/artifact stack remains semantically stable: BPB, any-match, avg alpha, and matched-order histogram all stayed in-family.
-- The slowdown is not primarily explained by clean-idle failure or launch overhead, because the gate passed cleanly and `runner_start_to_child_spawn_ms` was only `479ms`.
-- The dominant slowdown locus is inside child execution under the current environment/process regime, with especially large inflation in vectorized postlookup time.
-- The late extra PID on GPU `0` is real telemetry contamination, but it appeared after the run had already fallen far behind the promoted band, so it does not explain the main classification.
-- This round closes the unresolved protocol gap left by `eval_041`.
-- The dedicated `TTT_EPOCHS=4 -> 3` refinement pair is now admissible again, but it should be interpreted against the current runtime regime rather than as a restoration test against the old `eval_038` wallclock band.
+- Decision label: `no-launch / clean-idle-gate-fail`
+- This round does not supersede `eval_042` and does not answer the promoted-line `TTT_EPOCHS=4 -> 3` question.
+- The current blocker is external occupancy on pinned GPU `0`, not a semantic change in the promoted helper/checkpoint/artifact stack.
+- Under the reviewed refinement brief, forcing a dirty launch would have produced a non-interpretable pair, so the correct action was to stop.
 
 ## Next Step
-Reopen the exact same promoted-line `TTT_EPOCHS=4 -> 3` pair as a controlled same-session refinement comparison on the now-diagnosed current runtime regime, while keeping helper/checkpoint/artifact and all non-epoch variables fixed. If runtime-localization work continues, keep synchronized GPU-process telemetry because late foreign occupancy on GPU `0` can still contaminate long runs.
+Retry the exact same promoted-line same-session `TTT_EPOCHS=4 -> 3` pair when pinned GPUs `0..7` can be confirmed clean-idle. Keep the helper/checkpoint/artifact and all non-epoch variables fixed, and keep the decision baseline anchored to the fresh same-session `TTT_EPOCHS=4` control rather than to the historical `eval_038` runtime band.
