@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-03-27T11:31:24Z",
+  "generated_at_utc": "2026-03-27T12:21:06Z",
   "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
   "repo_root": "/newcpfs/lxh/parameter-golf",
   "external_sota_bpb": 1.1194,
@@ -28,31 +28,30 @@
   },
   "gap_to_sota": -0.919658,
   "latest_status_sections": {
-    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, and the active promoted legality line remains `eval_038_eval035_temperature_pair` at `0.19974237`, only `+0.00000035` behind that historical same-family anchor.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest refinement round is `eval_041_eval038_clean_idle_telemetry_control`, and it did not launch because the required clean-idle gate on pinned GPUs `0..7` never passed.\n- The helper/artifact guardrail stayed clean before and after the round:\n  - helper `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`: `125663` bytes, SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`\n  - checkpoint `final_model.pt`: `106178569` bytes, SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - artifact `final_model.int6.ptz`: `15555121` bytes, SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- The exact experiment scope stayed within the reviewed evaluation-only runtime-diagnosis lane:\n  - no code edits\n  - no export edits\n  - no runner edits\n  - reused the locked `eval_031` helper exactly\n  - held promoted `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, `TTT_EPOCHS=4`, and `NGRAM_EVAL_BUCKETS=2097152` fixed\n  - actual executed commands were limited to prelaunch `nvidia-smi` / process-state probes because the clean-idle gate failed\n- Clean-idle gate result on GPUs `0,1,2,3,4,5,6,7`:\n  - repeated UTC samples from `2026-03-27T11:23:11Z` through `2026-03-27T11:25:26Z`\n  - GPU `0` stayed occupied at about `6512 MiB` free, `74495 MiB` used, and `100%` utilization\n  - compute-app snapshots showed `GPU-d45bfedb-df91-05be-293c-7375698e87dd`, `PID 3106138`, `process_name=[Not Found]`, `used_memory=74486 MiB`\n  - GPUs `1..7` stayed idle with about `81007 MiB` free and `0%` utilization\n- Interpretation:\n  - no valid diagnostic control was launched\n  - no new `val_loss`, `val_bpb`, script wallclock, runner wallclock, external wallclock, `runner_start_to_child_spawn_ms`, or `child_runtime_ms` fields were produced\n  - the existing `persistent-runtime-shift` classification from `eval_040` remains the last completed runtime-diagnosis evidence, but this round did not localize the slowdown further\n  - `TTT_EPOCHS=3` remains unanswered on the promoted `EVAL_LOGIT_TEMP=1.0` line because the required clean-idle exact control is still missing",
-    "Most Important Open Question": "When can the exact promoted `eval_038` control be launched on a genuinely clean-idle pinned `0..7` set, and once that happens does aligned telemetry localize the existing slowdown to external contention, launch-side overhead, or true in-process runtime drift?",
-    "Active Experiment ID": "`eval_041_eval038_clean_idle_telemetry_control`",
-    "Latest Result Summary": "- Completed the reviewed clean-idle runtime-diagnosis attempt on the promoted `eval_038` legality line, but the attempt stopped before launch because the gate failed.\n- Controlled intervention actually executed:\n  - required file re-read\n  - helper/checkpoint/artifact byte and SHA-256 verification\n  - promoted command-family reconstruction from on-disk metadata\n  - repeated GPU/process gate probes on pinned GPUs `0..7`\n- No managed eval run was launched:\n  - environment intended: `physicslm`\n  - GPU allocation intended: `8x NVIDIA L20Z`, specifically `0,1,2,3,4,5,6,7`\n  - actual gate blocker: foreign compute occupancy on GPU `0`\n  - new quality/runtime fields: none\n  - artifact bytes stayed unchanged at `15555121`\n  - helper code bytes are `125663`\n  - total bytes on the locked evaluation-helper line remain `15680784`\n  - byte status: under cap by `319216`\n- Decision:\n  - this round is `no-launch / clean-idle-gate-fail`\n  - it does not supersede `eval_040` as the main runtime classification evidence\n  - the exact clean-idle control remains pending",
-    "Recommended Next Step": "Retry the exact same `eval_041` clean-idle telemetry control once exclusive access to GPUs `0,1,2,3,4,5,6,7` can be guaranteed. Do not return to the `TTT_EPOCHS=4 -> 3` pair until that diagnostic control succeeds."
+    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, and the active promoted legality line remains `eval_038_eval035_temperature_pair` at `0.19974237`, only `+0.00000035` behind that historical same-family anchor.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest refinement round is `eval_042_eval038_clean_idle_telemetry_control`, and it completed with a valid clean-idle launch on pinned GPUs `0..7`.\n- The helper/artifact guardrail stayed clean before and after the round:\n  - helper `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`: `125663` bytes, SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`\n  - checkpoint `final_model.pt`: `106178569` bytes, SHA-256 `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - artifact `final_model.int6.ptz`: `15555121` bytes, SHA-256 `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n- The exact experiment scope stayed within the reviewed evaluation-only runtime-diagnosis lane:\n  - no code edits\n  - no export edits\n  - no runner edits\n  - reused the locked `eval_031` helper exactly\n  - held promoted `EVAL_LOGIT_TEMP=1.0`, `TTT_LR=0.0025`, `TTT_EPOCHS=4`, and `NGRAM_EVAL_BUCKETS=2097152` fixed\n  - changed only clean-idle acquisition, synchronized telemetry capture, and fresh operational identifiers\n- Clean-idle gate result on GPUs `0,1,2,3,4,5,6,7`:\n  - the declared clean-idle acquisition protocol was honored and passed on the first required sample at `2026-03-27T11:40:19Z`\n  - all eight GPUs were idle with about `81007 MiB` free, `0 MiB` used, and `0%` utilization\n  - `nvidia-smi --query-compute-apps` returned no foreign compute processes at launch time\n- Interpretation:\n  - the exact promoted-line control finished at `legal_ttt_exact val_loss=0.33725929`, `val_bpb=0.19974395`\n  - wallclocks were script `1507653ms`, runner `1555810ms`, external `1556076ms`\n  - `runner_start_to_child_spawn_ms=479`, so the slowdown is not primarily launch-side\n  - the existing `persistent-runtime-shift` classification is now strengthened and localized as `clean-launch persistent-runtime-shift / child-runtime-inflation`\n  - n-gram semantics stayed in-family, while vectorized postlookup time inflated sharply to `1540712ms`\n  - `TTT_EPOCHS=3` is now admissible again as a same-session current-regime comparison on the promoted `EVAL_LOGIT_TEMP=1.0` line",
+    "Most Important Open Question": "Now that the exact promoted `eval_038` control has launched cleanly and localized the slowdown inside child execution, does reducing only `TTT_EPOCHS` from `4` to `3` recover meaningful runtime on the current regime without losing more than the reviewed BPB tolerance?",
+    "Active Experiment ID": "`eval_042_eval038_clean_idle_telemetry_control`",
+    "Latest Result Summary": "- Completed the reviewed clean-idle runtime-diagnosis control on the promoted `eval_038` legality line with a valid clean-idle launch and full telemetry.\n- Controlled intervention actually executed:\n  - required file re-read\n  - helper/checkpoint/artifact byte and SHA-256 verification\n  - promoted command-family reconstruction from on-disk metadata\n  - full clean-idle gate on pinned GPUs `0..7`\n  - synchronized telemetry during the run\n- Managed eval run launched and finished:\n  - environment: `physicslm`\n  - GPU allocation: `8x NVIDIA L20Z`, specifically `0,1,2,3,4,5,6,7`\n  - final `legal_ttt_exact val_loss=0.33725929`\n  - final `legal_ttt_exact val_bpb=0.19974395`\n  - script eval wallclock `1507653ms`\n  - runner-managed wallclock `1555810ms`\n  - external wallclock `1556076ms`\n  - `runner_start_to_child_spawn_ms=479`\n  - `child_runtime_ms=1555330`\n  - artifact bytes stayed unchanged at `15555121`\n  - helper code bytes are `125663`\n  - total bytes on the locked evaluation-helper line remain `15680784`\n  - byte status: under cap by `319216`\n- Decision:\n  - this round is `clean-launch persistent-runtime-shift / child-runtime-inflation`\n  - it closes the unresolved protocol gap from `eval_041`\n  - it makes the dedicated `TTT_EPOCHS=4 -> 3` pair admissible again on the current runtime regime",
+    "Recommended Next Step": "Run the exact promoted-line `TTT_EPOCHS=4 -> 3` pair as a controlled same-session refinement comparison on top of the now-diagnosed current regime, keeping helper/checkpoint/artifact and all non-epoch variables fixed. Keep runtime telemetry enabled if late foreign GPU occupancy remains possible."
   },
   "next_experiment_sections": {
-    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase clean-idle runtime-diagnosis attempt on the exact promoted `eval_038` legality line.\n\n- Executed the reviewed brief through the required file re-read, identity verification, promoted-command recovery, and repeated prelaunch gate sampling.\n- No code edits were made in this round.\n- No evaluation run was launched because the required clean-idle gate on GPUs `0..7` never passed.\n- This round did not test a new leaderboard motif; it remained a refinement-phase operational control needed to make later `TTT_EPOCHS=4 -> 3` comparisons interpretable again.",
-    "Experiment ID": "`eval_041_eval038_clean_idle_telemetry_control`",
-    "Category": "- evaluation\n\nOperational subtype: `clean-idle gated runtime diagnosis on the exact promoted stack`",
-    "Baseline / Comparison": "Primary runtime-restoration target:\n- promoted `eval_038=0.19974237`\n- promoted script eval wallclock `588813ms`\n- promoted runner-managed wallclock `634685ms`\n- promoted external wallclock `634926ms`\n\nRecent slowdown anchors:\n- `eval_039=0.19974161` at `1237494ms` external\n- `eval_040 control B=0.19974367` at `1298755ms` external",
-    "Hypothesis": "The promoted helper/checkpoint/artifact stack is still semantically stable, and the current slowdown is operational rather than semantic.\n\nFalsifiable version:\n- if one exact clean-idle rerun still shows inflated child runtime with no foreign-process overlap and no large launch-side stall, the slowdown is intrinsic to the current infrastructure/process regime\n- if telemetry instead shows overlap, idle gaps, or launch-side stalls, the slowdown is operationally localized and not an in-process semantic shift",
+    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase clean-idle runtime-diagnosis control on the exact promoted `eval_038` legality line.\n\n- Executed the reviewed brief through the required file re-read, identity verification, promoted-command recovery, full clean-idle gating, synchronized telemetry capture, exact promoted-line launch, and post-run comparison.\n- No code edits were made in this round.\n- One valid clean-idle control was launched and finished on pinned GPUs `0..7`.\n- This round did not test a new leaderboard motif; it remained a refinement-phase operational control needed to make later `TTT_EPOCHS=4 -> 3` comparisons interpretable again.",
+    "Experiment ID": "`eval_042_eval038_clean_idle_telemetry_control`",
+    "Category": "- evaluation\n\nOperational subtype: `exact promoted-line clean-idle telemetry control`",
+    "Baseline / Comparison": "Primary runtime-restoration target:\n- promoted `eval_038=0.19974237`\n- promoted script eval wallclock `588813ms`\n- promoted runner-managed wallclock `634685ms`\n- promoted external wallclock `634926ms`\n\nRecent slowdown anchors:\n- `eval_039=0.19974161` at `1237494ms` external\n- `eval_040 control A=0.19974193` at `1365195ms` external\n- `eval_040 control B=0.19974367` at `1298755ms` external",
+    "Hypothesis": "The promoted helper/checkpoint/artifact stack is still semantically stable, and the current slowdown is operational rather than semantic.\n\nFalsifiable version:\n- if one exact clean-idle rerun launched after a genuinely clean-idle gate returns near the `eval_038` runtime band, the slowdown was transient or externally induced\n- if one exact clean-idle rerun launched after a genuinely clean-idle gate remains in the `eval_039` / `eval_040` runtime regime, the slowdown is intrinsic to the current environment or process regime\n- if BPB no longer matches the promoted line, semantic drift has appeared",
     "Why It Might Work": "- `eval_039` and `eval_040` already showed that BPB and n-gram telemetry stayed in-family\n- the unresolved variable is localization, not semantics\n- one exact rerun with enforced clean-idle launch is the smallest refinement-phase experiment that can distinguish external contention from host-side launch overhead and from true in-process runtime drift",
-    "Minimal Intervention": "No helper, checkpoint, artifact, runner, eval-hyperparameter, or export changes were made.\n\nIntended operational-only changes:\n- prelaunch clean-idle verification on GPUs `0..7`\n- synchronized runtime telemetry capture\n- fresh `RUN_ID`\n- fresh runner `--log-dir`\n- fresh runner `--run-name`\n\nActual executed changes:\n- only prelaunch clean-idle and process-state measurements",
+    "Minimal Intervention": "No helper, checkpoint, artifact, runner, eval-hyperparameter, or export changes were made.\n\nOperational-only changes:\n- prelaunch clean-idle verification on GPUs `0..7`\n- synchronized runtime telemetry capture\n- fresh `RUN_ID`\n- fresh runner `--log-dir`\n- fresh runner `--run-name`",
     "Variables To Change": "Semantic variables:\n- none\n\nOperational-only variables:\n- clean-idle gate enforcement on GPUs `0..7`\n- telemetry capture\n- `RUN_ID`\n- runner `--log-dir`\n- runner `--run-name`",
     "Variables To Hold Fixed": "- exact helper path, bytes, and SHA-256 from promoted `eval_038`\n- exact checkpoint path, bytes, and SHA-256\n- exact artifact path, bytes, and SHA-256\n- `EVAL_ONLY=1`\n- `TTT_ENABLED=1`\n- `EVAL_STRIDE=64`\n- `EVAL_LOGIT_TEMP=1.0`\n- `TTT_LR=0.0025`\n- `TTT_EPOCHS=4`\n- `TTT_CHUNK_TOKENS=32768`\n- `TTT_FREEZE_BLOCKS=0`\n- `TTT_MOMENTUM=0.9`\n- `TTT_BATCH_SEQS=32`\n- `TTT_GRAD_CLIP=1.0`\n- `NGRAM_EVAL_ENABLED=1`\n- `NGRAM_EVAL_BUCKETS=2097152`\n- `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`\n- `NGRAM_EVAL_BATCH_TORCH_STATS=1`\n- `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`\n- tokenizer, dataset, and stride `64`\n- `physicslm` environment\n- working directory\n- pinned GPU set `0,1,2,3,4,5,6,7`\n- launcher path `tools/gpu_experiment_runner.py`",
     "Identity Checks": "- Helper:\n  - path: `runs/eval_031_eval027_global_temperature_calibration/train_gpt.py`\n  - bytes: `125663`\n  - SHA-256: `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`\n- Saved checkpoint:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt`\n  - bytes: `106178569`\n  - SHA-256: `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n- Saved artifact:\n  - path: `runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz`\n  - bytes: `15555121`\n  - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`\n\nIdentity status:\n- helper unchanged before vs after the round\n- checkpoint unchanged before vs after the round\n- artifact unchanged before vs after the round",
-    "Commands Actually Run": "Prelaunch gate and process-state probes:\n\n```bash\ndate -u --iso-8601=seconds\nnvidia-smi --query-gpu=index,name,memory.total,memory.free,memory.used,utilization.gpu,utilization.memory --format=csv,noheader,nounits -i 0,1,2,3,4,5,6,7\nnvidia-smi --query-compute-apps=gpu_uuid,gpu_name,pid,process_name,used_memory --format=csv,noheader,nounits\nnvidia-smi pmon -i 0,1,2,3,4,5,6,7 -c 1\n```\n\nBounded clean-idle watch:\n\n```bash\nfor i in 1 2 3 4 5 6; do\n  date -u --iso-8601=seconds\n  nvidia-smi --query-gpu=index,memory.free,memory.used,utilization.gpu --format=csv,noheader,nounits -i 0,1,2,3,4,5,6,7\n  nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader,nounits\n  echo '---'\n  sleep 20\ndone\n```",
-    "Exact Top-Level Eval Command Prepared But Not Launched": "```bash\nTIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.py \\\n  --gpus 8 \\\n  --gpu-indices 0,1,2,3,4,5,6,7 \\\n  --conda-env physicslm \\\n  --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \\\n  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_041_eval038_clean_idle_telemetry_control/runner_control_8gpu \\\n  --run-name eval_041_runner_control_t1p00_e4_b2097152_lr0025 \\\n  --timeout-seconds 7200 -- \\\n  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \\\n    RUN_ID=eval_041_eval038_clean_idle_telemetry_control_runner_control \\\n    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \\\n    EVAL_LOGIT_TEMP=1.0 \\\n    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \\\n    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \\\n    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BUCKETS=2097152 \\\n    NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \\\n    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \\\n    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \\\n    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \\\n    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \\\n    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \\\n    torchrun --standalone --nproc_per_node=8 \\\n    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py\n```\n\nOperational note:\n- this command was intentionally not launched because the reviewed clean-idle gate never passed",
-    "Clean-Idle Gate Result": "- gate status: `fail`\n- repeated UTC samples from `2026-03-27T11:23:11Z` through `2026-03-27T11:25:26Z` showed the pinned GPU set was not clean-idle\n- GPU `0` remained occupied the entire watch window:\n  - free memory `6512 MiB`\n  - used memory `74495 MiB`\n  - utilization `100%`\n  - compute-app snapshot `GPU-d45bfedb-df91-05be-293c-7375698e87dd, PID 3106138, process_name=[Not Found], used_memory=74486 MiB`\n- GPUs `1..7` stayed idle with about `81007 MiB` free and `0%` utilization\n- because the gate never passed, no synchronized prelaunch/child/teardown telemetry loop and no runner-managed eval launch were started",
-    "Success Metric": "Primary diagnostic success required:\n- clean-idle gate passes on GPUs `0..7`\n- one exact promoted-line run finishes\n- BPB stays within `±0.00005` of promoted `eval_038`\n- telemetry is sufficient to classify the slowdown locus\n\nSecondary success required:\n- runtime returns to within `+15s` of promoted `eval_038`\n\nActual status:\n- clean-idle gate pass: `fail`\n- exact promoted-line run: `not launched`\n- diagnostic localization from aligned launch telemetry: `not obtained`",
-    "Expected Effect": "If the slowdown was operational rather than semantic, one exact clean-idle rerun with aligned telemetry should have localized whether the drift sits in external contention, launch-side overhead, or the child runtime itself.",
-    "Actual Result": "- no valid diagnostic control was launched\n- no new `val_loss`, `val_bpb`, script wallclock, runner wallclock, external wallclock, `runner_start_to_child_spawn_ms`, or `child_runtime_ms` fields were produced\n- the round produced only a clean-idle gate failure record on the pinned `0..7` GPU set",
-    "Interpretation": "- Decision label: `no-launch / clean-idle-gate-fail`\n- The round does not update the existing `persistent-runtime-shift` classification from `eval_040`; it only shows that the reviewed clean-idle diagnostic control could not be executed because the required pinned GPU set was externally occupied.\n- Because the exact clean-idle control did not run, the slowdown locus is still not newly localized in this round.",
-    "Next Step": "Retry the exact same clean-idle telemetry control once exclusive access to GPUs `0,1,2,3,4,5,6,7` can be guaranteed. Do not reopen the dedicated `TTT_EPOCHS=4 -> 3` refinement pair until that clean-idle diagnostic control succeeds."
+    "Commands Actually Run": "Clean-idle acquisition and synchronized telemetry were executed from a single top-level control script, then the exact promoted-line eval launched through the runner:\n\n```bash\nTIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.py \\\n  --gpus 8 \\\n  --gpu-indices 0,1,2,3,4,5,6,7 \\\n  --min-free-memory-gb 10.0 \\\n  --conda-env physicslm \\\n  --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \\\n  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_042_eval038_clean_idle_telemetry_control/runner_control_8gpu \\\n  --run-name eval_042_runner_control_t1p00_e4_b2097152_lr0025 \\\n  --timeout-seconds 7200 -- \\\n  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \\\n    RUN_ID=eval_042_eval038_clean_idle_telemetry_control_runner_control \\\n    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \\\n    EVAL_LOGIT_TEMP=1.0 \\\n    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \\\n    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \\\n    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BUCKETS=2097152 \\\n    NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \\\n    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \\\n    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \\\n    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \\\n    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \\\n    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \\\n    torchrun --standalone --nproc_per_node=8 \\\n    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py\n```",
+    "Clean-Idle Gate Result": "- gate status: `pass`\n- the declared clean-idle acquisition protocol was honored and passed on the first required sample at `2026-03-27T11:40:19Z`\n- pinned GPUs `0..7` were all clean-idle at gate pass:\n  - each GPU showed about `81007 MiB` free and `0 MiB` used\n  - each GPU showed `0%` utilization\n  - `nvidia-smi --query-compute-apps` returned no foreign compute processes\n- synchronized telemetry began immediately after the gate pass and continued through the run\n- telemetry artifacts:\n  - gate log: `runs/eval_042_eval038_clean_idle_telemetry_control/clean_idle_gate.log`\n  - runtime telemetry: `runs/eval_042_eval038_clean_idle_telemetry_control/runtime_telemetry.log`\n  - top-level command log: `runs/eval_042_eval038_clean_idle_telemetry_control/top_level.log`",
+    "Success Metric": "Primary diagnostic success required:\n- clean-idle gate passes on GPUs `0..7`\n- one exact promoted-line run finishes\n- BPB stays within `±0.00005` of promoted `eval_038`\n- telemetry is sufficient to classify the slowdown locus\n\nSecondary success required:\n- runtime returns to within `+15s` of promoted `eval_038`\n\nActual status:\n- clean-idle gate pass: `pass`\n- exact promoted-line run: `completed`\n- diagnostic localization from aligned launch telemetry: `obtained`",
+    "Expected Effect": "If the slowdown was operational rather than semantic, one exact clean-idle rerun with aligned telemetry should localize whether the drift sits in external contention, launch-side overhead, or the child runtime itself.",
+    "Actual Result": "- the exact promoted-line control launched cleanly and finished\n- final scored metrics:\n  - `legal_ttt_exact val_loss=0.33725929`\n  - `legal_ttt_exact val_bpb=0.19974395`\n  - script eval wallclock `1507653ms`\n  - runner-managed wallclock `1555810ms`\n  - external wallclock `1556076ms`\n  - `runner_start_to_child_spawn_ms=479`\n  - `child_runtime_ms=1555330`\n- versus promoted `eval_038`, deltas were:\n  - `+0.00000266 val_loss`\n  - `+0.00000158 BPB`\n  - `+918840ms` script\n  - `+921125ms` runner\n  - `+921150ms` external\n- versus `eval_039`, external wallclock was `+318582ms`\n- versus `eval_040 control B`, external wallclock was `+257321ms`\n- n-gram telemetry stayed in-family:\n  - any-match `0.98387585`\n  - avg alpha `0.65459237`\n  - matched-order histogram identical to promoted `eval_038`\n- runtime telemetry showed:\n  - no meaningful launch-side stall\n  - child execution began on a clean-idle machine\n  - late in the run, GPU `0` picked up an extra non-run PID `3384110` using about `74486 MiB`, but the run was already far behind promoted pace before this appeared\n  - `ngram_postlookup_vectorized_elapsed_ms=1540712`, up `+378529ms` vs promoted `eval_038`",
+    "Interpretation": "- Decision label: `clean-launch persistent-runtime-shift / child-runtime-inflation`\n- The promoted helper/checkpoint/artifact stack remains semantically stable: BPB, any-match, avg alpha, and matched-order histogram all stayed in-family.\n- The slowdown is not primarily explained by clean-idle failure or launch overhead, because the gate passed cleanly and `runner_start_to_child_spawn_ms` was only `479ms`.\n- The dominant slowdown locus is inside child execution under the current environment/process regime, with especially large inflation in vectorized postlookup time.\n- The late extra PID on GPU `0` is real telemetry contamination, but it appeared after the run had already fallen far behind the promoted band, so it does not explain the main classification.\n- This round closes the unresolved protocol gap left by `eval_041`.\n- The dedicated `TTT_EPOCHS=4 -> 3` refinement pair is now admissible again, but it should be interpreted against the current runtime regime rather than as a restoration test against the old `eval_038` wallclock band.",
+    "Next Step": "Reopen the exact same promoted-line `TTT_EPOCHS=4 -> 3` pair as a controlled same-session refinement comparison on the now-diagnosed current runtime regime, while keeping helper/checkpoint/artifact and all non-epoch variables fixed. If runtime-localization work continues, keep synchronized GPU-process telemetry because late foreign occupancy on GPU `0` can still contaminate long runs."
   },
   "experiment_rows": [
     {
@@ -323,6 +322,102 @@
     }
   ],
   "comparison_rows_all": [
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "prelaunch clean-idle gate",
+      "Baseline": "`required: all 8 GPUs idle, no foreign compute, >=10 GiB free each`",
+      "Candidate": "`pass at 2026-03-27T11:40:19Z`",
+      "Delta": "`valid launch`",
+      "Notes": "The declared clean-idle acquisition protocol was honored and passed on the first required sample. GPUs `0..7` all showed about `81007 MiB` free, `0 MiB` used, `0%` utilization, and no compute-app processes before launch."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.19974237`",
+      "Candidate": "`0.19974395`",
+      "Delta": "`+0.00000158`",
+      "Notes": "BPB stayed fully in-family, so the clean-launch rerun confirms semantic stability rather than drift."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "script eval wallclock",
+      "Baseline": "`588813ms`",
+      "Candidate": "`1507653ms`",
+      "Delta": "`+918840ms`",
+      "Notes": "The exact promoted stack remained catastrophically slow even after a clean-idle launch, so the slowdown is not explained by the failed gate from `eval_041`."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "runner-managed wallclock",
+      "Baseline": "`634685ms`",
+      "Candidate": "`1555810ms`",
+      "Delta": "`+921125ms`",
+      "Notes": "Runner-managed timing confirms the slowdown sits on the real managed path rather than in an outer-bash wrapper."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`634926ms`",
+      "Candidate": "`1556076ms`",
+      "Delta": "`+921150ms`",
+      "Notes": "This is the decisive runtime classification evidence from the clean-launch rerun: the promoted runtime band does not restore under the current environment/process regime."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "runner start to child spawn",
+      "Baseline": "`not separately recorded`",
+      "Candidate": "`479ms`",
+      "Delta": "`n/a`",
+      "Notes": "The clean-launch rerun shows no meaningful launch-side stall, which rules out outer launch overhead as the primary cause of the slowdown."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "any-match fraction",
+      "Baseline": "`0.98387585`",
+      "Candidate": "`0.98387585`",
+      "Delta": "`+0.00000000`",
+      "Notes": "Match coverage stayed identical, which supports the interpretation that the same scorer regime ran."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "avg alpha on matched",
+      "Baseline": "`0.65459911`",
+      "Candidate": "`0.65459237`",
+      "Delta": "`-0.00000674`",
+      "Notes": "Avg alpha stayed effectively unchanged; this is not hidden scorer drift."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-idle runtime-diagnosis control: promoted `eval_038` vs fresh `eval_042` exact clean-idle rerun",
+      "Metric": "vectorized postlookup elapsed",
+      "Baseline": "`1162183ms`",
+      "Candidate": "`1540712ms`",
+      "Delta": "`+378529ms`",
+      "Notes": "The largest measured timing inflation sits in vectorized postlookup work, which is the strongest current localization clue inside child execution."
+    },
+    {
+      "Comparison": "Local PR `#809` drift-regime context: fresh `eval_039` drifted control vs fresh `eval_042` clean-idle control",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`1237494ms`",
+      "Candidate": "`1556076ms`",
+      "Delta": "`+318582ms`",
+      "Notes": "The clean-idle rerun is even slower than the earlier drift anchor, so the current regime has not stabilized back toward promoted runtime."
+    },
+    {
+      "Comparison": "Local PR `#809` drift-regime context: fresh `eval_040` control B vs fresh `eval_042` clean-idle control",
+      "Metric": "external top-level wallclock",
+      "Baseline": "`1298755ms`",
+      "Candidate": "`1556076ms`",
+      "Delta": "`+257321ms`",
+      "Notes": "Even compared with the best exact-control runtime after the first slowdown surfaced, the clean-idle rerun remains materially slower."
+    },
+    {
+      "Comparison": "Local PR `#809` clean-launch telemetry note: base eval PIDs vs late GPU `0` foreign PID during `eval_042`",
+      "Metric": "foreign overlap timing",
+      "Baseline": "`none at launch`",
+      "Candidate": "`late extra PID 3384110 on GPU 0`",
+      "Delta": "`appeared after slowdown was already obvious`",
+      "Notes": "Telemetry showed a late extra foreign process on GPU `0`, but the run was already far behind promoted pace before it appeared, so it does not explain the main classification."
+    },
     {
       "Comparison": "Local PR `#809` clean-idle runtime-diagnosis admissibility: required pinned `0..7` gate vs attempted `eval_041` launch",
       "Metric": "prelaunch clean-idle gate",
@@ -4244,41 +4339,54 @@
         "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_014.worker.prompt.txt",
         "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_014.worker.final.txt",
         "worker_exit_code": "0"
+      },
+      "round_015.meta": {
+        "round": "15",
+        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.planner.prompt.txt",
+        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.planner.final.txt",
+        "planner_exit_code": "0",
+        "review_enabled": "1",
+        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.review.prompt.txt",
+        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.review.final.txt",
+        "review_exit_code": "0",
+        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.worker.prompt.txt",
+        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.worker.final.txt",
+        "worker_exit_code": "0"
       }
     },
     "phase_meta": {
       "planner": {
         "phase": "planner",
-        "round": "15",
-        "start_time": "2026-03-27T11:17:31Z",
-        "end_time": "2026-03-27T11:19:30Z",
+        "round": "16",
+        "start_time": "2026-03-27T11:32:04Z",
+        "end_time": "2026-03-27T11:33:54Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.planner.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.planner.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.planner.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.planner.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.planner.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.planner.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.planner.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.planner.final.txt"
       },
       "review": {
         "phase": "review",
-        "round": "15",
-        "start_time": "2026-03-27T11:19:30Z",
-        "end_time": "2026-03-27T11:21:01Z",
+        "round": "16",
+        "start_time": "2026-03-27T11:33:54Z",
+        "end_time": "2026-03-27T11:36:00Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.review.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.review.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.review.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.review.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.review.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.review.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.review.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.review.final.txt"
       },
       "worker": {
         "phase": "worker",
-        "round": "15",
-        "start_time": "2026-03-27T11:21:02Z",
-        "end_time": "2026-03-27T11:31:22Z",
+        "round": "16",
+        "start_time": "2026-03-27T11:36:00Z",
+        "end_time": "2026-03-27T12:21:03Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.worker.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.worker.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.worker.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_015.worker.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.worker.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.worker.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.worker.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_016.worker.final.txt"
       }
     }
   },
@@ -4286,11 +4394,11 @@
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z",
       "configured_rounds": 50,
-      "completed_rounds": 15,
-      "latest_round": "15",
+      "completed_rounds": 16,
+      "latest_round": "16",
       "latest_phase": "worker",
       "state": "in progress",
-      "latest_timestamp": "2026-03-27T11:31:22Z"
+      "latest_timestamp": "2026-03-27T12:21:03Z"
     },
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z",
@@ -4339,6 +4447,18 @@
     }
   ],
   "training_runs": [
+    {
+      "name": "eval_042_eval038_clean_idle_telemetry_control_runner_control",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_042_eval038_clean_idle_telemetry_control_runner_control.txt",
+      "updated_at_utc": "2026-03-27T12:06:13Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
     {
       "name": "eval_040_eval038_duplicate_control_runner_control_b",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_040_eval038_duplicate_control_runner_control_b.txt",
@@ -4391,18 +4511,6 @@
       "name": "eval_038_eval035_temperature_pair_runner_control",
       "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_038_eval035_temperature_pair_runner_control.txt",
       "updated_at_utc": "2026-03-27T09:03:14Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_037_eval035_temperature_pair_runner_control",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_037_eval035_temperature_pair_runner_control.txt",
-      "updated_at_utc": "2026-03-27T08:40:05Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -4751,14 +4859,14 @@
       "docs/sota_records/sota_records_index.md            |   30 +-",
       ".../reference_materials/latest_sota_snapshot.md    |    2 +-",
       ".../planning/experiment_ledger.md                  |    1 +",
-      ".../planning/next_experiment.md                    |  263 ++--",
-      ".../planning/research_memory.md                    |   29 +-",
-      ".../reports/comparison_summary.md                  |    1 +",
-      ".../reports/latest_status.md                       |   73 +-",
+      ".../planning/next_experiment.md                    |  123 +-",
+      ".../planning/research_memory.md                    |   50 +-",
+      ".../reports/comparison_summary.md                  |   12 +",
+      ".../reports/latest_status.md                       |   53 +-",
       ".../tools/gpu_experiment_runner.py                 |   31 +-",
       "research_lab_pg/scripts/codex_research_loop.sh     |    3 +-",
       ".../scripts/start_parameter_golf_iteration.sh      |    5 +-",
-      "21 files changed, 178 insertions(+), 13011 deletions(-)"
+      "21 files changed, 184 insertions(+), 12877 deletions(-)"
     ]
   }
 }

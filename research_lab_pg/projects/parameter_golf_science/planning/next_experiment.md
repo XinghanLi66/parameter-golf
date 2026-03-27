@@ -3,20 +3,20 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase clean-idle runtime-diagnosis attempt on the exact promoted `eval_038` legality line.
+Completed on `2026-03-27` as the reviewed refinement-phase clean-idle runtime-diagnosis control on the exact promoted `eval_038` legality line.
 
-- Executed the reviewed brief through the required file re-read, identity verification, promoted-command recovery, and repeated prelaunch gate sampling.
+- Executed the reviewed brief through the required file re-read, identity verification, promoted-command recovery, full clean-idle gating, synchronized telemetry capture, exact promoted-line launch, and post-run comparison.
 - No code edits were made in this round.
-- No evaluation run was launched because the required clean-idle gate on GPUs `0..7` never passed.
+- One valid clean-idle control was launched and finished on pinned GPUs `0..7`.
 - This round did not test a new leaderboard motif; it remained a refinement-phase operational control needed to make later `TTT_EPOCHS=4 -> 3` comparisons interpretable again.
 
 ## Experiment ID
-`eval_041_eval038_clean_idle_telemetry_control`
+`eval_042_eval038_clean_idle_telemetry_control`
 
 ## Category
 - evaluation
 
-Operational subtype: `clean-idle gated runtime diagnosis on the exact promoted stack`
+Operational subtype: `exact promoted-line clean-idle telemetry control`
 
 ## Baseline / Comparison
 Primary runtime-restoration target:
@@ -27,14 +27,16 @@ Primary runtime-restoration target:
 
 Recent slowdown anchors:
 - `eval_039=0.19974161` at `1237494ms` external
+- `eval_040 control A=0.19974193` at `1365195ms` external
 - `eval_040 control B=0.19974367` at `1298755ms` external
 
 ## Hypothesis
 The promoted helper/checkpoint/artifact stack is still semantically stable, and the current slowdown is operational rather than semantic.
 
 Falsifiable version:
-- if one exact clean-idle rerun still shows inflated child runtime with no foreign-process overlap and no large launch-side stall, the slowdown is intrinsic to the current infrastructure/process regime
-- if telemetry instead shows overlap, idle gaps, or launch-side stalls, the slowdown is operationally localized and not an in-process semantic shift
+- if one exact clean-idle rerun launched after a genuinely clean-idle gate returns near the `eval_038` runtime band, the slowdown was transient or externally induced
+- if one exact clean-idle rerun launched after a genuinely clean-idle gate remains in the `eval_039` / `eval_040` runtime regime, the slowdown is intrinsic to the current environment or process regime
+- if BPB no longer matches the promoted line, semantic drift has appeared
 
 ## Why It Might Work
 - `eval_039` and `eval_040` already showed that BPB and n-gram telemetry stayed in-family
@@ -44,15 +46,12 @@ Falsifiable version:
 ## Minimal Intervention
 No helper, checkpoint, artifact, runner, eval-hyperparameter, or export changes were made.
 
-Intended operational-only changes:
+Operational-only changes:
 - prelaunch clean-idle verification on GPUs `0..7`
 - synchronized runtime telemetry capture
 - fresh `RUN_ID`
 - fresh runner `--log-dir`
 - fresh runner `--run-name`
-
-Actual executed changes:
-- only prelaunch clean-idle and process-state measurements
 
 ## Variables To Change
 Semantic variables:
@@ -111,40 +110,20 @@ Identity status:
 - artifact unchanged before vs after the round
 
 ## Commands Actually Run
-Prelaunch gate and process-state probes:
-
-```bash
-date -u --iso-8601=seconds
-nvidia-smi --query-gpu=index,name,memory.total,memory.free,memory.used,utilization.gpu,utilization.memory --format=csv,noheader,nounits -i 0,1,2,3,4,5,6,7
-nvidia-smi --query-compute-apps=gpu_uuid,gpu_name,pid,process_name,used_memory --format=csv,noheader,nounits
-nvidia-smi pmon -i 0,1,2,3,4,5,6,7 -c 1
-```
-
-Bounded clean-idle watch:
-
-```bash
-for i in 1 2 3 4 5 6; do
-  date -u --iso-8601=seconds
-  nvidia-smi --query-gpu=index,memory.free,memory.used,utilization.gpu --format=csv,noheader,nounits -i 0,1,2,3,4,5,6,7
-  nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader,nounits
-  echo '---'
-  sleep 20
-done
-```
-
-## Exact Top-Level Eval Command Prepared But Not Launched
+Clean-idle acquisition and synchronized telemetry were executed from a single top-level control script, then the exact promoted-line eval launched through the runner:
 
 ```bash
 TIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.py \
   --gpus 8 \
   --gpu-indices 0,1,2,3,4,5,6,7 \
+  --min-free-memory-gb 10.0 \
   --conda-env physicslm \
   --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \
-  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_041_eval038_clean_idle_telemetry_control/runner_control_8gpu \
-  --run-name eval_041_runner_control_t1p00_e4_b2097152_lr0025 \
+  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_042_eval038_clean_idle_telemetry_control/runner_control_8gpu \
+  --run-name eval_042_runner_control_t1p00_e4_b2097152_lr0025 \
   --timeout-seconds 7200 -- \
   env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-    RUN_ID=eval_041_eval038_clean_idle_telemetry_control_runner_control \
+    RUN_ID=eval_042_eval038_clean_idle_telemetry_control_runner_control \
     EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
     EVAL_LOGIT_TEMP=1.0 \
     TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
@@ -160,19 +139,18 @@ TIMEFORMAT='external_real_seconds=%3R'; time python tools/gpu_experiment_runner.
     /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py
 ```
 
-Operational note:
-- this command was intentionally not launched because the reviewed clean-idle gate never passed
-
 ## Clean-Idle Gate Result
-- gate status: `fail`
-- repeated UTC samples from `2026-03-27T11:23:11Z` through `2026-03-27T11:25:26Z` showed the pinned GPU set was not clean-idle
-- GPU `0` remained occupied the entire watch window:
-  - free memory `6512 MiB`
-  - used memory `74495 MiB`
-  - utilization `100%`
-  - compute-app snapshot `GPU-d45bfedb-df91-05be-293c-7375698e87dd, PID 3106138, process_name=[Not Found], used_memory=74486 MiB`
-- GPUs `1..7` stayed idle with about `81007 MiB` free and `0%` utilization
-- because the gate never passed, no synchronized prelaunch/child/teardown telemetry loop and no runner-managed eval launch were started
+- gate status: `pass`
+- the declared clean-idle acquisition protocol was honored and passed on the first required sample at `2026-03-27T11:40:19Z`
+- pinned GPUs `0..7` were all clean-idle at gate pass:
+  - each GPU showed about `81007 MiB` free and `0 MiB` used
+  - each GPU showed `0%` utilization
+  - `nvidia-smi --query-compute-apps` returned no foreign compute processes
+- synchronized telemetry began immediately after the gate pass and continued through the run
+- telemetry artifacts:
+  - gate log: `runs/eval_042_eval038_clean_idle_telemetry_control/clean_idle_gate.log`
+  - runtime telemetry: `runs/eval_042_eval038_clean_idle_telemetry_control/runtime_telemetry.log`
+  - top-level command log: `runs/eval_042_eval038_clean_idle_telemetry_control/top_level.log`
 
 ## Success Metric
 Primary diagnostic success required:
@@ -185,22 +163,49 @@ Secondary success required:
 - runtime returns to within `+15s` of promoted `eval_038`
 
 Actual status:
-- clean-idle gate pass: `fail`
-- exact promoted-line run: `not launched`
-- diagnostic localization from aligned launch telemetry: `not obtained`
+- clean-idle gate pass: `pass`
+- exact promoted-line run: `completed`
+- diagnostic localization from aligned launch telemetry: `obtained`
 
 ## Expected Effect
-If the slowdown was operational rather than semantic, one exact clean-idle rerun with aligned telemetry should have localized whether the drift sits in external contention, launch-side overhead, or the child runtime itself.
+If the slowdown was operational rather than semantic, one exact clean-idle rerun with aligned telemetry should localize whether the drift sits in external contention, launch-side overhead, or the child runtime itself.
 
 ## Actual Result
-- no valid diagnostic control was launched
-- no new `val_loss`, `val_bpb`, script wallclock, runner wallclock, external wallclock, `runner_start_to_child_spawn_ms`, or `child_runtime_ms` fields were produced
-- the round produced only a clean-idle gate failure record on the pinned `0..7` GPU set
+- the exact promoted-line control launched cleanly and finished
+- final scored metrics:
+  - `legal_ttt_exact val_loss=0.33725929`
+  - `legal_ttt_exact val_bpb=0.19974395`
+  - script eval wallclock `1507653ms`
+  - runner-managed wallclock `1555810ms`
+  - external wallclock `1556076ms`
+  - `runner_start_to_child_spawn_ms=479`
+  - `child_runtime_ms=1555330`
+- versus promoted `eval_038`, deltas were:
+  - `+0.00000266 val_loss`
+  - `+0.00000158 BPB`
+  - `+918840ms` script
+  - `+921125ms` runner
+  - `+921150ms` external
+- versus `eval_039`, external wallclock was `+318582ms`
+- versus `eval_040 control B`, external wallclock was `+257321ms`
+- n-gram telemetry stayed in-family:
+  - any-match `0.98387585`
+  - avg alpha `0.65459237`
+  - matched-order histogram identical to promoted `eval_038`
+- runtime telemetry showed:
+  - no meaningful launch-side stall
+  - child execution began on a clean-idle machine
+  - late in the run, GPU `0` picked up an extra non-run PID `3384110` using about `74486 MiB`, but the run was already far behind promoted pace before this appeared
+  - `ngram_postlookup_vectorized_elapsed_ms=1540712`, up `+378529ms` vs promoted `eval_038`
 
 ## Interpretation
-- Decision label: `no-launch / clean-idle-gate-fail`
-- The round does not update the existing `persistent-runtime-shift` classification from `eval_040`; it only shows that the reviewed clean-idle diagnostic control could not be executed because the required pinned GPU set was externally occupied.
-- Because the exact clean-idle control did not run, the slowdown locus is still not newly localized in this round.
+- Decision label: `clean-launch persistent-runtime-shift / child-runtime-inflation`
+- The promoted helper/checkpoint/artifact stack remains semantically stable: BPB, any-match, avg alpha, and matched-order histogram all stayed in-family.
+- The slowdown is not primarily explained by clean-idle failure or launch overhead, because the gate passed cleanly and `runner_start_to_child_spawn_ms` was only `479ms`.
+- The dominant slowdown locus is inside child execution under the current environment/process regime, with especially large inflation in vectorized postlookup time.
+- The late extra PID on GPU `0` is real telemetry contamination, but it appeared after the run had already fallen far behind the promoted band, so it does not explain the main classification.
+- This round closes the unresolved protocol gap left by `eval_041`.
+- The dedicated `TTT_EPOCHS=4 -> 3` refinement pair is now admissible again, but it should be interpreted against the current runtime regime rather than as a restoration test against the old `eval_038` wallclock band.
 
 ## Next Step
-Retry the exact same clean-idle telemetry control once exclusive access to GPUs `0,1,2,3,4,5,6,7` can be guaranteed. Do not reopen the dedicated `TTT_EPOCHS=4 -> 3` refinement pair until that clean-idle diagnostic control succeeds.
+Reopen the exact same promoted-line `TTT_EPOCHS=4 -> 3` pair as a controlled same-session refinement comparison on the now-diagnosed current runtime regime, while keeping helper/checkpoint/artifact and all non-epoch variables fixed. If runtime-localization work continues, keep synchronized GPU-process telemetry because late foreign occupancy on GPU `0` can still contaminate long runs.
