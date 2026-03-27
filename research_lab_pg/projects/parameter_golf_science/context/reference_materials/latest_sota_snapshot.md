@@ -51,8 +51,14 @@ The older review explains the broad design space; this file keeps the research l
 ## How planner/reviewer should use this
 
 - READ `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` FIRST before planning.
-- The ONLY priority right now is implementing n-gram backoff eval cache in our `train_gpt.py`.
-- This is an eval-time change only. Run it against our best existing checkpoint first.
-- Expected outcome: ~1.119 BPB → ~0.67 BPB from n-gram alone; ~0.44 with complementary training.
+- The ONLY priority right now is getting the n-gram backoff eval within the 600s budget.
+- Our best run eval_026 is at 0.29118 BPB in 606,325ms — only 6,325ms over budget.
+- The update_batch bincount costs 32,367ms total (63 calls). This is the primary target.
 - Before proposing a new experiment, identify which top-run motif you are testing, extending, or intentionally excluding.
-- If you are not testing n-gram backoff, you MUST explicitly justify why this deviation is warranted.
+- If you are not testing n-gram backoff runtime optimization, you MUST explicitly justify why.
+
+## IMPORTANT: Do NOT overwrite this file
+
+This file is managed manually to reflect unmerged PRs (#803, #809, #813 etc.).
+The auto-refresh script only knows about merged commits to the main branch (SOTA=1.1194).
+If this file appears to show SOTA=1.1194, it has been incorrectly overwritten — restore it.

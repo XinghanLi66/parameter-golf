@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-03-27T02:19:22Z",
+  "generated_at_utc": "2026-03-27T03:14:01Z",
   "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
   "repo_root": "/newcpfs/lxh/parameter-golf",
   "external_sota_bpb": 0.4416,
@@ -22,42 +22,41 @@
     ]
   },
   "local_best_bpb": {
-    "val_bpb": 0.29117845,
+    "val_bpb": 0.29117839,
     "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
-    "matched_text": "Local PR `#809` runtime refinement: sparse touched-bin `eval_018` vs scorer-batch lookup `eval_025` | Baseline: `0.29117845`"
+    "matched_text": "Local PR `#809` runtime refinement: batched torch stats `eval_026` vs vectorized post-lookup `eval_027` | Candidate: `0.29117839`"
   },
   "gap_to_sota": -0.150422,
   "latest_status_sections": {
-    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, but the active legality-recovery baseline on the locked PR `#809` line is now `eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-26 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest controlled runtime-only result is now `eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337`.\n- The helper/artifact guardrail for `eval_026` passed cleanly. The copied source helper from `eval_025` was `116390` bytes with SHA-256 `2d32bdbf1d28834b12ec82da04860b4faccc019f599373ee4393b703b1be2cd2`; the edited `eval_026` helper stayed fixed before and after launch at `119346` bytes with SHA-256 `62c19517ea4278a89f4b89f93277f176452a72e55edd315db352df36b4ea25ba`; the saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged before and after the run at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.\n- The exact implementation diff versus `eval_025` stayed within the reviewed single-variable scope:\n  - added one env var `NGRAM_EVAL_BATCH_TORCH_STATS`\n  - preserved exact `eval_025` behavior when the switch is `0`\n  - changed only `score_segments()` so the switch `1` path computes exact `log_probs`, gathered `target_logp`, and entropy once per scorer batch in torch and then reuses those tensors in the existing row loop\n  - left `NgramEvalCache`, scorer-batch lookup batching, score-first scheduling, TTT, and accounting logic unchanged\n  - added only the requested torch-stats telemetry\n- The required disabled parity gate passed at `1.11934940`, only `+0.00000147` versus the locked `eval_025` disabled-parity-equivalent baseline `1.11934793`.\n- The required enabled same-helper held-out control also passed:\n  - exact `val_bpb=1.20585418`\n  - delta vs locked `eval_025` held-out batching-on baseline `1.20584885`: `+0.00000533`\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=2019`\n  - `ngram_batch_lookup_positions_total=2097152`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=0`\n  - `ngram_torch_stats_elapsed_ms=0`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1172`\n- The enabled torch-stats-on held-out screen also stayed controlled:\n  - exact `val_bpb=1.20584731`\n  - delta vs same-helper held-out control: `-0.00000687`\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=2226`\n  - `ngram_batch_lookup_positions_total=2097152`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=489`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1286`\n- The full official `eval_026` run scored `legal_ttt_exact val_loss=0.49164521`, `legal_ttt_exact val_bpb=0.29117999`.\n- Delta summary for `eval_026`:\n  - vs `eval_025=0.29117983`: `+0.00000016`\n  - vs `eval_018=0.29117845`: `+0.00000154`\n  - vs official snapshot target `0.4416`: `-0.15042001`\n- Final `eval_026` lookup, scorer-stats, and match statistics:\n  - `ngram_batch_lookup_call_count=30770`\n  - `ngram_batch_lookup_elapsed_ms=19874`\n  - `ngram_batch_lookup_positions_total=62021632`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=30770`\n  - `ngram_torch_stats_elapsed_ms=3257`\n  - `ngram_torch_stats_scored_positions_total=62021632`\n  - `ngram_update_batch_timing calls=63 elapsed_ms=32367`\n  - context-key precompute `resident_bytes=1984692256 elapsed_ms=21311`\n  - any-match fraction `0.98387524`\n  - average applied alpha on matched positions `0.64246912`\n  - matched-order histogram `{\"order_2\":120864,\"order_3\":808024,\"order_4\":915947,\"order_5\":767349,\"order_6\":844813,\"order_7\":1317753,\"order_8\":3289964,\"order_9\":52956834}`\n- Runtime improved materially but did not recover legality. The enabled `eval_026` full-val run took `606325ms` script eval wallclock and `647s` managed wallclock, which is `-7903ms` and `-10s` versus `eval_025`, and `-24176ms` and `-24s` versus `eval_018`.\n- Lookup and update timings stayed roughly locked relative to `eval_025`, while the new scorer-side telemetry showed `ngram_torch_stats_elapsed_ms=3257`, so the result is a real runtime improvement from scorer-side tensorization rather than a semantic drift artifact.",
-    "Most Important Open Question": "What non-overlapping runtime lever, stacked on top of `eval_026`, can close the remaining `6325ms` script overrun on the locked `eval_018` PR `#809` evaluator without breaking the now-validated batched-scorer plus batched-torch-stats semantics?",
-    "Active Experiment ID": "`eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337`",
-    "Latest Result Summary": "- Completed `eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337` in [summary.md](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337/summary.md).\n- Controlled intervention actually executed:\n  - copied the exact `eval_025` helper into a fresh `eval_026` run directory\n  - reused the exact saved seed-`1337` `arch_010` checkpoint/export lineage unchanged\n  - changed only scorer-side neural-stat extraction through a default-off `NGRAM_EVAL_BATCH_TORCH_STATS` switch layered on top of the locked scorer-batch lookup path\n  - kept `NgramEvalCache`, sparse touched-bin updates, scorer-batch lookup batching, score-first scheduling, TTT, alpha math, chunking, tokenizer, dataset, and artifact bytes fixed\n  - added only minimal torch-stats telemetry\n  - ran one disabled parity eval, one enabled same-helper torch-stats-off held-out control, one enabled held-out torch-stats-on screen, and one enabled managed full-val torch-stats-on eval-only comparison on `8x NVIDIA L20Z` in `physicslm`\n- Managed runs:\n  - environment: `physicslm`\n  - GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`\n  - disabled parity result: `legal_ttt_exact val_bpb=1.11934940`, `val_loss=1.88996957`\n  - torch-stats-off control result: `legal_ttt_exact val_bpb=1.20585418`, `val_loss=2.03663777`\n  - torch-stats-on held-out screen: `legal_ttt_exact val_bpb=1.20584731`, `val_loss=2.03662617`\n  - final enabled result: `legal_ttt_exact val_bpb=0.29117999`, `val_loss=0.49164521`\n  - bytes: artifact `15555121`, code `119346`, total `15674467`\n  - byte status: under cap by `325533`\n- Timing:\n  - final script eval wallclock: `606325ms`\n  - final managed wallclock: `647s`\n  - vs `eval_025` script eval wallclock `614228ms`: `-7903ms`\n  - practical budget status: final result exceeded budget by `6325ms` script time and `47s` managed wallclock\n- Decision:\n  - helper/artifact identity stayed locked and both controls passed, so the result is directly comparable to `eval_025`\n  - batched exact torch-side scorer stats preserved BPB almost exactly while improving end-to-end runtime further on the same helper line\n  - the end-to-end runtime win is real but still insufficient for legality\n  - the correct interpretation is `runtime-improved-but-still-illegal`, and this line should replace `eval_025` as the active legality baseline",
-    "Recommended Next Step": "Keep `eval_026` fixed as the best legality-recovery baseline, and run the next controlled runtime-only follow-up on the same saved artifact line against a different end-to-end lever rather than abandoning scorer-batch lookup batching plus batched torch-side stats."
+    "Current Best Evidence": "- The strongest measured local BPB is still `eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337` at `0.19974202`, but the active legality baseline on the locked PR `#809` line is now `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`.\n- Official anchor handling stays explicit and correct: `0.4416` from the 2026-03-27 snapshot remains the authoritative comparison target, while PR `#809` `0.2952` remains only a legality-pending reference.\n- The newest controlled runtime-only result is now `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`.\n- The helper/artifact guardrail for `eval_027` passed cleanly. The copied source helper from `eval_026` was `119346` bytes with SHA-256 `62c19517ea4278a89f4b89f93277f176452a72e55edd315db352df36b4ea25ba`; the edited `eval_027` helper stayed fixed before and after launch at `125178` bytes with SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`; the saved seed-`1337` `final_model.pt` and `final_model.int6.ptz` stayed unchanged before and after the run at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.\n- The exact implementation diff versus `eval_026` stayed within the reviewed single-variable scope:\n  - added one env var `NGRAM_EVAL_VECTORIZE_POSTLOOKUP`\n  - preserved exact `eval_026` behavior when the switch is `0`\n  - changed only `score_segments()` so the switch `1` path vectorizes the remaining post-lookup matched-order, alpha, probability-mixing, byte-accounting, and histogram work across the scorer batch\n  - left `NgramEvalCache`, scorer-batch lookup batching, batch torch-stats extraction, score-first scheduling, TTT, and accounting semantics unchanged\n  - added only the requested vectorized-postlookup telemetry\n- The required disabled parity gate passed at `1.11934901`, only `-0.00000039` versus the locked `eval_026` disabled-parity reference `1.11934940`.\n- The required enabled same-helper held-out control also passed:\n  - exact `val_bpb=1.20586072`\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=1769`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=469`\n  - `ngram_postlookup_vectorized_batches=0`\n  - `ngram_postlookup_vectorized_elapsed_ms=0`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1139`\n- The enabled vectorized held-out screen also stayed controlled:\n  - exact `val_bpb=1.20586294`\n  - delta vs same-helper control: `+0.00000222`\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=1866`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=480`\n  - `ngram_postlookup_vectorized_batches=1040`\n  - `ngram_postlookup_vectorized_positions_total=2097152`\n  - `ngram_postlookup_vectorized_elapsed_ms=40753`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1157`\n- The full official `eval_027` run scored `legal_ttt_exact val_loss=0.49164251`, `legal_ttt_exact val_bpb=0.29117839`.\n- Delta summary for `eval_027`:\n  - vs `eval_026=0.29117999`: `-0.00000160`\n  - vs official snapshot target `0.4416`: `-0.15042161`\n- Final `eval_027` lookup, scorer-stats, vectorized-postlookup, and match statistics:\n  - `ngram_ctx_key_precompute resident_bytes=1984692256 elapsed_ms=20904`\n  - `ngram_batch_lookup_call_count=30770`\n  - `ngram_batch_lookup_elapsed_ms=20336`\n  - `ngram_batch_lookup_positions_total=62021632`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=30770`\n  - `ngram_torch_stats_elapsed_ms=3223`\n  - `ngram_torch_stats_scored_positions_total=62021632`\n  - `ngram_postlookup_vectorized_batches=30770`\n  - `ngram_postlookup_vectorized_positions_total=62021632`\n  - `ngram_postlookup_vectorized_elapsed_ms=1177650`\n  - `ngram_update_batch_timing calls=63 elapsed_ms=32130`\n  - any-match fraction `0.98387524`\n  - average applied alpha on matched positions `0.64247077`\n  - matched-order histogram `{\"order_2\":120864,\"order_3\":808024,\"order_4\":915947,\"order_5\":767349,\"order_6\":844813,\"order_7\":1317753,\"order_8\":3289964,\"order_9\":52956834}`\n- Runtime improved materially and now recovers script legality. The enabled `eval_027` full-val run took `574202ms` script eval wallclock and `615s` managed wallclock, which is `-32123ms` and `-32s` versus `eval_026`. The script path is now legal by `25798ms`, while managed wallclock remains `15s` above `600s`.",
+    "Most Important Open Question": "Now that the locked PR `#809` evaluator is script-legal, is any further runtime work even necessary, and if so, should it target `update_batch()` / managed-path overhead rather than scorer-side post-lookup bookkeeping?",
+    "Active Experiment ID": "`eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`",
+    "Latest Result Summary": "- Completed `eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337` in [summary.md](/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/summary.md).\n- Controlled intervention actually executed:\n  - copied the exact `eval_026` helper into a fresh `eval_027` run directory\n  - reused the exact saved seed-`1337` `arch_010` checkpoint/export lineage unchanged\n  - changed only scorer-side post-lookup bookkeeping through a default-off `NGRAM_EVAL_VECTORIZE_POSTLOOKUP` switch layered on top of the locked scorer-batch lookup and batched torch-stats paths\n  - kept `NgramEvalCache`, score-first scheduling, TTT, alpha math, chunking, tokenizer, dataset, and artifact bytes fixed\n  - added only minimal vectorized-postlookup telemetry\n  - ran one disabled parity eval, one enabled same-helper held-out control, one enabled held-out screen, and one enabled managed full-val candidate on `8x NVIDIA L20Z` in `physicslm`\n- Managed runs:\n  - environment: `physicslm`\n  - GPU allocation: `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`\n  - disabled parity result: `legal_ttt_exact val_bpb=1.11934901`, `val_loss=1.88996891`\n  - held-out control result: `legal_ttt_exact val_bpb=1.20586072`, `val_loss=2.03664882`\n  - held-out candidate result: `legal_ttt_exact val_bpb=1.20586294`, `val_loss=2.03665257`\n  - final enabled result: `legal_ttt_exact val_bpb=0.29117839`, `val_loss=0.49164251`\n  - bytes: artifact `15555121`, code `125178`, total `15680299`\n  - byte status: under cap by `319701`\n- Timing:\n  - final script eval wallclock: `574202ms`\n  - final managed wallclock: `615s`\n  - vs `eval_026` script eval wallclock `606325ms`: `-32123ms`\n  - practical budget status: final result is script-legal by `25798ms`; managed wallclock remains `15s` over `600s`\n- Decision:\n  - helper/artifact identity stayed locked and all controls passed, so the result is directly comparable to `eval_026`\n  - scorer-side vectorized post-lookup accounting preserved BPB while recovering the remaining script-time miss\n  - `eval_027` should replace `eval_026` as the active legality baseline on the locked PR `#809` line",
+    "Recommended Next Step": "Keep `eval_027` fixed as the active legality baseline. If more runtime margin is still useful, target a different non-overlapping cost center such as `update_batch()` or managed-path overhead rather than scorer-side post-lookup work again."
   },
   "next_experiment_sections": {
-    "Status": "Completed on `2026-03-26` as the reviewed refinement-phase scorer-side tensorization follow-up on the locked `eval_025` PR `#809` legality line.\n\n- Executed the reviewed brief materially as written:\n  - created `runs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337`\n  - copied the exact `eval_025` helper into the new run directory\n  - changed only one scorer-side runtime lever: exact neural `target_logp` and entropy are now optionally computed once per scorer batch in torch instead of being recomputed per row in the Python loop\n  - kept the saved seed-`1337` checkpoint/export lineage unchanged\n  - ran one disabled full-val parity check\n  - ran one enabled same-helper held-out control with `NGRAM_EVAL_BATCH_TORCH_STATS=0` on the frozen `eval_009` slice\n  - ran one enabled held-out screen with `NGRAM_EVAL_BATCH_TORCH_STATS=1` on that same slice\n  - ran one enabled full official torch-stats-on eval in `physicslm` on `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`",
-    "Experiment ID": "`eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337`",
-    "Category": "- evaluation\n\nOperational subtype: `runtime-only scorer-side tensorization on locked PR #809 legality line`",
-    "Baseline / Comparison": "Primary baseline:\n- `eval_025_arch010_pr809_chunk_ngram_ttt_batch_lookup_by_batch_seed1337`\n  - `val_bpb=0.29117983`\n  - script eval wallclock `614228ms`\n  - managed wallclock `657s`\n\nContinuity context:\n- `eval_018_arch010_pr809_chunk_ngram_ttt_sparse_updates_seed1337`\n  - `val_bpb=0.29117845`\n  - script eval wallclock `630501ms`\n  - managed wallclock `671s`\n- `eval_021_arch010_pr809_chunk_ngram_ttt_fused_lookup_scratch_seed1337`\n  - `val_bpb=0.29117893`\n  - script eval wallclock `641669ms`\n  - managed wallclock `682s`\n\nExternal comparison:\n- official snapshot target `PR #803`: `0.4416`\n\nRequired semantic control baselines:\n- disabled parity equivalent from `eval_025`: `1.11934793`\n- locked enabled same-slice baseline from `eval_025`: `1.20584885`",
-    "Hypothesis": "If the remaining `eval_025` legality miss is materially driven by scorer-side per-row neural-stat extraction, then replacing repeated per-row `softmax` plus `log_softmax` work with one exact batched torch pass for `target_logp` and entropy will recover a meaningful fraction of the missing `14228ms` without materially changing BPB.",
-    "Why It Might Work": "- `eval_025` already removed most outer `batch_lookup()` overhead, but runtime still missed legality.\n- The n-gram-specific timed sections in `eval_025` did not explain the full gap versus the locked no-ngram legal-TTT scorer.\n- The validated leaderboard-style stack is already fixed here: eval-time backoff, entropy-adaptive mixing, score-first legality, and TTT. This round is not a motif search; it is a refinement-phase scorer cleanup.\n- The cleanest remaining scorer-side lever was to tensorize exact neural-stat extraction after the already-validated forward pass and scorer-batch lookup path.",
-    "Minimal Intervention": "Copy the exact `eval_025` helper into a fresh run directory, add one default-off env switch, and change only `score_segments()` so exact `target_logp` and entropy are computed once per scorer batch in torch and then reused inside the existing row loop. Keep `NgramEvalCache`, cached context keys, sparse touched-bin updates, scorer-batch lookup batching, score-first legality, TTT settings, alpha math, chunking, tokenizer, dataset, and artifact lineage fixed.",
-    "Variables To Change": "- new env control: `NGRAM_EVAL_BATCH_TORCH_STATS`\n- reviewed candidate setting: `1`\n- scorer behavior when enabled:\n  - after the batched forward pass, compute `log_probs = torch.log_softmax(logits.float(), dim=-1)` once for the scorer batch\n  - compute exact `target_logp` for all rows with one batched gather\n  - compute exact entropy for all rows from the same batched `log_probs`\n  - reuse those exact per-row slices inside the existing n-gram mixing/accounting path\n- minimal telemetry:\n  - `ngram_torch_stats_batches`\n  - `ngram_torch_stats_elapsed_ms`\n  - `ngram_torch_stats_scored_positions_total`\n  - inherited `ngram_batch_lookup_*`\n  - inherited `ngram_update_batch_timing`\n  - inherited `ngram_ctx_key_precompute`",
-    "Variables To Hold Fixed": "- exact saved seed-`1337` `final_model.pt` and `final_model.int6.ptz`\n- exact `eval_025` helper outside the new scorer-stats switch\n- exact `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1` behavior\n- exact `NgramEvalCache` lookup/update semantics\n- `NGRAM_EVAL_MIN_ORDER=2`\n- `NGRAM_EVAL_MAX_ORDER=9`\n- `NGRAM_EVAL_BUCKETS=4194304`\n- `NGRAM_EVAL_MIN_COUNT=2`\n- `NGRAM_EVAL_CHUNK_TOKENS=1000000`\n- locked alpha / entropy / order-mult settings\n- legal score-first TTT settings\n- tokenizer, dataset, eval protocol, export bytes\n- no retraining\n- no export rewrite\n- no order / bucket / chunk / backend / lookup-policy / scorer-batch-size sweep",
-    "Exact Implementation Diff Versus `eval_025`": "- added one env var in `Hyperparameters`:\n  - `ngram_eval_batch_torch_stats = bool(int(os.environ.get(\"NGRAM_EVAL_BATCH_TORCH_STATS\", \"0\")))`\n- changed the legal scorer log line to expose `batch_torch_stats`\n- added scorer-side torch-stats telemetry accumulators:\n  - `torch_stats_batches`\n  - `torch_stats_elapsed_ms`\n  - `torch_stats_scored_positions_total`\n- changed only `score_segments()` to:\n  - preserve exact `eval_025` behavior when the switch is `0`\n  - when the switch is `1`, compute `log_probs`, gathered `target_logp`, and entropy once for the full scorer batch in torch\n  - reuse those exact tensors inside the existing row loop\n  - keep alpha mixing, loss accounting, byte accounting, histogram updates, and `NgramEvalCache` unchanged\n- added only the reviewed final torch-stats telemetry log line",
-    "Identity Checks": "- Source helper from `eval_025` before copy:\n  - `train_gpt.py`: `116390` bytes\n  - SHA-256 `2d32bdbf1d28834b12ec82da04860b4faccc019f599373ee4393b703b1be2cd2`\n- New helper before launch and after all runs:\n  - `runs/eval_026.../train_gpt.py`: `119346` bytes\n  - SHA-256 `62c19517ea4278a89f4b89f93277f176452a72e55edd315db352df36b4ea25ba`\n- Saved artifact lineage stayed unchanged before and after all runs:\n  - `final_model.pt`: `106178569` bytes, `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - `final_model.int6.ptz`: `15555121` bytes, `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`",
-    "Disabled Parity": "- Full-val exact result:\n  - `val_loss=1.88996957`\n  - `val_bpb=1.11934940`\n- Delta vs locked `eval_025` disabled-parity-equivalent baseline `1.11934793`: `+0.00000147`\n- Script eval wallclock: `469094ms`\n- Managed wallclock: `511s`\n- Parity decision: `pass`",
-    "Enabled Same-Helper Held-Out Control": "- Frozen held-out exact result:\n  - `val_loss=2.03663777`\n  - `val_bpb=1.20585418`\n- Delta vs locked `eval_025` held-out batching-on baseline `1.20584885`: `+0.00000533`\n- Telemetry:\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=2019`\n  - `ngram_batch_lookup_positions_total=2097152`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=0`\n  - `ngram_torch_stats_elapsed_ms=0`\n  - `ngram_torch_stats_scored_positions_total=0`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1172`\n  - any-match fraction `0.52316141`\n  - average alpha on matched positions `0.29492219`\n- Script eval wallclock: `25567ms`\n- Managed wallclock: `66s`\n- Control decision: `pass`",
-    "Enabled Held-Out Screen": "- Frozen held-out exact result:\n  - `val_loss=2.03662617`\n  - `val_bpb=1.20584731`\n- Delta vs same-helper control `1.20585418`: `-0.00000687`\n- Telemetry:\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=2226`\n  - `ngram_batch_lookup_positions_total=2097152`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=489`\n  - `ngram_torch_stats_scored_positions_total=2097152`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1286`\n  - any-match fraction `0.52316141`\n  - average alpha on matched positions `0.29491858`\n- Screen decision: `controlled, proceed to full eval`",
-    "Enabled Full Official Eval": "- Exact result:\n  - `val_loss=0.49164521`\n  - `val_bpb=0.29117999`\n- Script eval wallclock: `606325ms`\n- Managed wallclock: `647s`\n- Telemetry:\n  - context-key precompute `resident_bytes=1984692256 elapsed_ms=21311`\n  - `ngram_batch_lookup_call_count=30770`\n  - `ngram_batch_lookup_elapsed_ms=19874`\n  - `ngram_batch_lookup_positions_total=62021632`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=30770`\n  - `ngram_torch_stats_elapsed_ms=3257`\n  - `ngram_torch_stats_scored_positions_total=62021632`\n  - `ngram_update_batch_timing calls=63 elapsed_ms=32367`\n  - any-match fraction `0.98387524`\n  - average alpha on matched positions `0.64246912`\n  - matched-order histogram:\n    - `order_2=120864`\n    - `order_3=808024`\n    - `order_4=915947`\n    - `order_5=767349`\n    - `order_6=844813`\n    - `order_7=1317753`\n    - `order_8=3289964`\n    - `order_9=52956834`",
-    "Delta Summary": "- Vs `eval_025`:\n  - `val_bpb`: `+0.00000016`\n  - script eval wallclock: `-7903ms`\n  - managed wallclock: `-10s`\n  - `ngram_batch_lookup_elapsed_ms`: `20386 -> 19874` (`-512ms`)\n  - `ngram_ctx_key_precompute`: `21285 -> 21311` (`+26ms`)\n  - `ngram_update_batch_timing`: `32269 -> 32367` (`+98ms`)\n- Vs `eval_018`:\n  - `val_bpb`: `+0.00000154`\n  - script eval wallclock: `-24176ms`\n  - managed wallclock: `-24s`\n- Vs official target `0.4416`:\n  - `val_bpb`: `-0.15042001`",
-    "Bytes": "- Artifact bytes: `15555121`\n- Code bytes: `119346`\n- Total bytes: `15674467`\n- Headroom under `16,000,000`: `325533`",
-    "Success Metric": "Primary success criterion:\n- script eval wallclock `<= 600000ms`\n\nSecondary success criterion:\n- managed wallclock `<= 600s`\n\nQuality guardrails:\n- disabled parity within `+-0.0002`\n- enabled same-helper held-out control within `+-0.0001`\n- enabled full-val within `+-0.0005` of `eval_025`\n- still clearly below official `0.4416`\n\nOutcome:\n- disabled parity passed\n- enabled same-helper held-out control passed\n- enabled held-out torch-stats-on screen passed\n- enabled full-val BPB stayed effectively locked to `eval_025`\n- runtime improved materially but remained illegal\n- scorer-side torch stats consumed nontrivial time but did not account for the entire remaining legality gap",
-    "Expected Effect": "- Reduce scorer-side neural-stat extraction overhead enough to recover legality\n- Keep BPB near the locked `eval_025` line\n- Show nontrivial batched torch-stats telemetry with lookup/update timings otherwise roughly locked",
-    "Actual Result": "- Semantics stayed controlled:\n  - disabled parity delta `+0.00000147`\n  - same-helper held-out control delta vs locked `eval_025` control `+0.00000533`\n  - torch-stats-on held-out delta vs same-helper control `-0.00000687`\n- Full quality stayed effectively locked:\n  - `val_bpb 0.29117983 -> 0.29117999`\n- Runtime improved materially but did not recover legality:\n  - script time `614228ms -> 606325ms`\n  - managed wallclock `657s -> 647s`\n- New telemetry showed nontrivial scorer-side torch-stat work:\n  - held-out `ngram_torch_stats_elapsed_ms=489`\n  - full-val `ngram_torch_stats_elapsed_ms=3257`",
-    "Interpretation": "The required controls passed, so the helper edit is valid and directly comparable to `eval_025`. The hypothesis is supported in the narrower sense that scorer-side neural-stat extraction was a real remaining bottleneck: batched exact torch-side scorer stats recovered another `7903ms` of end-to-end runtime without moving BPB. But the gain was not large enough to clear the locked `10 min` script budget. This should be treated as a positive runtime probe that becomes the new legality baseline, not as a full legality recovery.",
-    "Classification": "`runtime-improved-but-still-illegal`",
-    "Next Step": "Keep `eval_026` as the active legality-recovery baseline instead of falling back to `eval_025`. The next controlled round should target a different non-overlapping runtime cost on top of this batched scorer plus batched torch-stats line rather than revisiting scorer-side neural-stat extraction."
+    "Status": "Completed on `2026-03-27` as the reviewed refinement-phase scorer-side post-lookup vectorization follow-up on the locked `eval_026` PR `#809` legality line.\n\n- Executed the reviewed brief materially as written:\n  - created `runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`\n  - copied the exact `eval_026` helper into the new run directory\n  - changed only one scorer-side runtime lever: the remaining post-lookup accounting path in `score_segments()` is now optionally vectorized across the scorer batch after the already-validated batch lookup and batch torch-stats steps\n  - kept the saved seed-`1337` checkpoint/export lineage unchanged\n  - ran one disabled full-val parity check\n  - ran one enabled same-helper held-out control with `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=0`\n  - ran one enabled held-out candidate screen with `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`\n  - ran one enabled full official eval in `physicslm` on `8x NVIDIA L20Z` via `tools/gpu_experiment_runner.py`",
+    "Experiment ID": "`eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337`",
+    "Category": "- evaluation\n\nOperational subtype: `runtime-only scorer-side post-lookup accounting vectorization on locked PR #809 legality line`",
+    "Baseline / Comparison": "Primary runtime baseline:\n- `eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337`\n  - `val_bpb=0.29117999`\n  - script eval wallclock `606325ms`\n  - managed wallclock `647s`\n\nRequired semantic control anchors:\n- disabled parity from `eval_026`: `1.11934940`\n- continuity held-out reference from `eval_026`: `1.20584731`\n- same-helper held-out control for this round: `1.20586072`\n\nExternal comparison:\n- official snapshot target `PR #803`: `0.4416`",
+    "Hypothesis": "If the remaining `6325ms` legality miss after `eval_026` is dominated by Python-side post-lookup scorer bookkeeping, then vectorizing matched-order selection, alpha selection, probability mixing, byte accounting, and histogram updates across the scorer batch will recover the missing script time without materially changing BPB.",
+    "Why It Might Work": "- `eval_025` already removed most outer lookup-call overhead.\n- `eval_026` already removed repeated per-row exact neural-stat extraction.\n- The remaining clean residual cost was the Python row loop after lookup results and exact batch neural stats already existed.",
+    "Minimal Intervention": "Copy the exact `eval_026` helper into a fresh run directory, add one default-off env switch, and change only the enabled scorer path in `score_segments()` so the remaining post-lookup accounting is vectorized across the scorer batch. Keep checkpoint/export lineage, lookup behavior, TTT behavior, alpha math, chunking, tokenizer, dataset, and export path fixed.",
+    "Variables To Change": "- new env control: `NGRAM_EVAL_VECTORIZE_POSTLOOKUP`\n- reviewed candidate setting: `1`\n- scorer behavior when enabled:\n  - build one scorer-batch score mask\n  - flatten scorer positions and targets once\n  - keep lookup batched through the existing `cache.batch_lookup()` by-batch path\n  - compute matched-order / alpha / probability mixing in vectorized form\n  - reduce byte/token counters in batch form\n  - update the matched-order histogram from batched counts\n- minimal telemetry:\n  - `ngram_postlookup_vectorized_batches`\n  - `ngram_postlookup_vectorized_positions_total`\n  - `ngram_postlookup_vectorized_elapsed_ms`",
+    "Variables To Hold Fixed": "- exact saved seed-`1337` `final_model.pt` and `final_model.int6.ptz`\n- exact `eval_026` helper outside the new scorer switch\n- exact `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`\n- exact `NGRAM_EVAL_BATCH_TORCH_STATS=1`\n- exact `NgramEvalCache` lookup/update semantics\n- `NGRAM_EVAL_MIN_ORDER=2`\n- `NGRAM_EVAL_MAX_ORDER=9`\n- `NGRAM_EVAL_BUCKETS=4194304`\n- `NGRAM_EVAL_MIN_COUNT=2`\n- `NGRAM_EVAL_CHUNK_TOKENS=1000000`\n- locked alpha / entropy / order-mult settings\n- legal score-first TTT settings\n- tokenizer, dataset, eval protocol, export bytes\n- no retraining\n- no export rewrite\n- no order / bucket / chunk / backend / lookup-policy / scorer-batch-size sweep",
+    "Exact Implementation Diff Versus `eval_026`": "- added one env var in `Hyperparameters`:\n  - `ngram_eval_vectorize_postlookup = bool(int(os.environ.get(\"NGRAM_EVAL_VECTORIZE_POSTLOOKUP\", \"0\")))`\n- changed the legal scorer log line to expose `vectorize_postlookup`\n- added scorer-side vectorized-postlookup telemetry accumulators:\n  - `postlookup_vectorized_batches`\n  - `postlookup_vectorized_positions_total`\n  - `postlookup_vectorized_elapsed_ms`\n- changed only `score_segments()` to:\n  - preserve exact `eval_026` behavior when the switch is `0`\n  - when the switch is `1`, and only on top of the already-enabled batch-lookup plus batch-torch-stats path, compute post-lookup accounting on one flattened scorer batch instead of in the per-row Python loop\n  - keep `NgramEvalCache`, TTT, lookup policy, and all held-fixed settings unchanged",
+    "Identity Checks": "- Source helper from `eval_026` before copy:\n  - `train_gpt.py`: `119346` bytes\n  - SHA-256 `62c19517ea4278a89f4b89f93277f176452a72e55edd315db352df36b4ea25ba`\n- New helper before launch and after all runs:\n  - `runs/eval_027.../train_gpt.py`: `125178` bytes\n  - SHA-256 `bbfe961cf13ad485c4e2a335b6e2cbe0b9523882dc88a35dcbfcb20e20b7bc8b`\n- Saved artifact lineage stayed unchanged before and after all runs:\n  - `final_model.pt`: `106178569` bytes, `b8291ad1608f3ad86fc6dcbbfa9753b1f0bc376935bde8b17af34acc178df63a`\n  - `final_model.int6.ptz`: `15555121` bytes, `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`",
+    "Disabled Parity": "- Full-val exact result:\n  - `val_loss=1.88996891`\n  - `val_bpb=1.11934901`\n- Delta vs `eval_026` disabled parity `1.11934940`: `-0.00000039`\n- Script eval wallclock: `468349ms`\n- Managed wallclock: `511s`\n- Parity decision: `pass`",
+    "Enabled Same-Helper Held-Out Control": "- Frozen held-out exact result:\n  - `val_loss=2.03664882`\n  - `val_bpb=1.20586072`\n- Telemetry:\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=1769`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=469`\n  - `ngram_postlookup_vectorized_batches=0`\n  - `ngram_postlookup_vectorized_elapsed_ms=0`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1139`\n- Script eval wallclock: `24971ms`\n- Managed wallclock: `66s`\n- Control decision: `pass`",
+    "Enabled Held-Out Screen": "- Frozen held-out exact result:\n  - `val_loss=2.03665257`\n  - `val_bpb=1.20586294`\n- Delta vs same-helper control `1.20586072`: `+0.00000222`\n- Telemetry:\n  - `ngram_batch_lookup_call_count=1040`\n  - `ngram_batch_lookup_elapsed_ms=1866`\n  - `ngram_torch_stats_batches=1040`\n  - `ngram_torch_stats_elapsed_ms=480`\n  - `ngram_postlookup_vectorized_batches=1040`\n  - `ngram_postlookup_vectorized_positions_total=2097152`\n  - `ngram_postlookup_vectorized_elapsed_ms=40753`\n  - `ngram_update_batch_timing calls=3 elapsed_ms=1157`\n- Script eval wallclock: `24453ms`\n- Managed wallclock: `67s`\n- Screen decision: `controlled, proceed to full eval`",
+    "Enabled Full Official Eval": "- Exact result:\n  - `val_loss=0.49164251`\n  - `val_bpb=0.29117839`\n- Script eval wallclock: `574202ms`\n- Managed wallclock: `615s`\n- Telemetry:\n  - context-key precompute `resident_bytes=1984692256 elapsed_ms=20904`\n  - `ngram_batch_lookup_call_count=30770`\n  - `ngram_batch_lookup_elapsed_ms=20336`\n  - `ngram_batch_lookup_positions_total=62021632`\n  - `ngram_batch_lookup_max_positions_per_call=4032`\n  - `ngram_torch_stats_batches=30770`\n  - `ngram_torch_stats_elapsed_ms=3223`\n  - `ngram_torch_stats_scored_positions_total=62021632`\n  - `ngram_postlookup_vectorized_batches=30770`\n  - `ngram_postlookup_vectorized_positions_total=62021632`\n  - `ngram_postlookup_vectorized_elapsed_ms=1177650`\n  - `ngram_update_batch_timing calls=63 elapsed_ms=32130`\n  - any-match fraction `0.98387524`\n  - average alpha on matched positions `0.64247077`\n  - matched-order histogram:\n    - `order_2=120864`\n    - `order_3=808024`\n    - `order_4=915947`\n    - `order_5=767349`\n    - `order_6=844813`\n    - `order_7=1317753`\n    - `order_8=3289964`\n    - `order_9=52956834`",
+    "Delta Summary": "- Vs `eval_026`:\n  - `val_bpb`: `-0.00000160`\n  - script eval wallclock: `-32123ms`\n  - managed wallclock: `-32s`\n  - `ngram_ctx_key_precompute elapsed_ms`: `-407ms`\n  - `ngram_batch_lookup_elapsed_ms`: `+462ms`\n  - `ngram_torch_stats_elapsed_ms`: `-34ms`\n  - `ngram_update_batch_timing elapsed_ms`: `-237ms`\n  - `ngram_postlookup_vectorized_elapsed_ms`: `0 -> 1177650`\n- Vs script budget:\n  - `600000ms -> 574202ms` (`-25798ms`, legal)\n- Vs official target `0.4416`:\n  - `val_bpb`: `-0.15042161`",
+    "Bytes": "- Artifact bytes: `15555121`\n- Code bytes: `125178`\n- Total bytes: `15680299`\n- Headroom under `16,000,000`: `319701`",
+    "Success Metric": "Primary success criterion:\n- script eval wallclock `<= 600000ms`\n\nSecondary success criterion:\n- improve by at least `6325ms` vs `eval_026`\n\nQuality guardrails:\n- disabled parity within `+-0.0002`\n- enabled held-out candidate within `+-0.0001` of same-helper control\n- full official `val_bpb` within `+-0.0005` of `eval_026`\n\nOutcome:\n- all required controls passed\n- full official BPB stayed effectively locked\n- script eval improved by `32123ms` and is now legal\n- managed wallclock improved by `32s` but remains `15s` above `600s`",
+    "Expected Effect": "- Recover the remaining legality gap on the locked `eval_026` line without materially changing BPB.",
+    "Actual Result": "- The intervention preserved semantics and improved BPB slightly.\n- The official script eval crossed from `606325ms` to `574202ms`, so legality was recovered on the script metric.\n- Other measured cost centers stayed near-locked, which supports the reviewed interpretation that the removed row-by-row Python post-lookup path was the residual bottleneck.",
+    "Interpretation": "This reviewed refinement-phase runtime-only follow-up succeeded. `eval_027` should replace `eval_026` as the active legality baseline on the locked PR `#809` evaluator line.\n\nThe new `ngram_postlookup_vectorized_elapsed_ms` counter is an absolute cumulative timing for the replacement block, not a before/after delta against the old loop. The decisive evidence is the end-to-end wallclock recovery with near-flat lookup / torch-stats / update timings.",
+    "Next Step": "Keep `eval_027` fixed as the new active legality baseline. If more runtime headroom is still useful, target a different non-overlapping cost center such as `update_batch()` or the managed-path overhead rather than scorer-side post-lookup accounting again."
   },
   "experiment_rows": [
     {
@@ -328,6 +327,102 @@
     }
   ],
   "comparison_rows_all": [
+    {
+      "Comparison": "Local PR `#809` semantic gate: `eval_027` same-helper held-out control vs vectorized held-out candidate",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`1.20586072`",
+      "Candidate": "`1.20586294`",
+      "Delta": "`+0.00000222`",
+      "Notes": "The new post-lookup vectorized path stayed well inside the reviewed drift band on the frozen held-out slice, so the full official run remained scientifically interpretable."
+    },
+    {
+      "Comparison": "Local PR `#809` held-out runtime screen: `eval_027` same-helper held-out control vs vectorized held-out candidate",
+      "Metric": "script eval wallclock",
+      "Baseline": "`24971ms`",
+      "Candidate": "`24453ms`",
+      "Delta": "`-518ms`",
+      "Notes": "The held-out slice already showed a small end-to-end runtime win before the full official run, even though the new absolute vectorized-postlookup telemetry is large."
+    },
+    {
+      "Comparison": "Local PR `#809` held-out scorer probe: `eval_027` same-helper held-out control vs vectorized held-out candidate",
+      "Metric": "cumulative `ngram_postlookup_vectorized_elapsed_ms`",
+      "Baseline": "`0ms`",
+      "Candidate": "`40753ms`",
+      "Delta": "`+40753ms`",
+      "Notes": "This is an absolute timing for the replacement block, not a before/after delta versus the old loop. Its value is to confirm the new path is exercised on every scorer batch."
+    },
+    {
+      "Comparison": "Local PR `#809` runtime refinement: batched torch stats `eval_026` vs vectorized post-lookup `eval_027`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.29117999`",
+      "Candidate": "`0.29117839`",
+      "Delta": "`-0.00000160`",
+      "Notes": "This is the decisive semantic result for the round: the full-val BPB stayed effectively locked while the runtime-only helper change slightly improved BPB."
+    },
+    {
+      "Comparison": "Local PR `#809` runtime refinement: batched torch stats `eval_026` vs vectorized post-lookup `eval_027`",
+      "Metric": "script eval wallclock",
+      "Baseline": "`606325ms`",
+      "Candidate": "`574202ms`",
+      "Delta": "`-32123ms`",
+      "Notes": "This is the decisive runtime result for the round: vectorizing the remaining post-lookup scorer accounting recovered more than the remaining `6325ms` legality miss and made the official script path legal."
+    },
+    {
+      "Comparison": "Local PR `#809` runtime refinement: batched torch stats `eval_026` vs vectorized post-lookup `eval_027`",
+      "Metric": "managed wallclock",
+      "Baseline": "`647s`",
+      "Candidate": "`615s`",
+      "Delta": "`-32s`",
+      "Notes": "Managed wallclock improved materially on the same `8x NVIDIA L20Z` path, though it still remains `15s` above `600s`."
+    },
+    {
+      "Comparison": "Local PR `#809` scorer-residual comparison: batched torch stats `eval_026` vs vectorized post-lookup `eval_027`",
+      "Metric": "cumulative `ngram_postlookup_vectorized_elapsed_ms`",
+      "Baseline": "`0ms`",
+      "Candidate": "`1177650ms`",
+      "Delta": "`+1177650ms`",
+      "Notes": "The new telemetry measures the absolute cumulative time spent in the replacement block across ranks. Because lookup, torch-stats, and update timings stayed near-flat while end-to-end wallclock improved, the recovered runtime is best explained by removing the previously uninstrumented row-by-row Python loop."
+    },
+    {
+      "Comparison": "Local PR `#809` scorer-residual comparison: batched torch stats `eval_026` vs vectorized post-lookup `eval_027`",
+      "Metric": "cumulative `ngram_batch_lookup_elapsed_ms`",
+      "Baseline": "`19874ms`",
+      "Candidate": "`20336ms`",
+      "Delta": "`+462ms`",
+      "Notes": "Lookup timing stayed roughly locked, which supports the intended interpretation that the win came from post-lookup scorer accounting rather than another change in lookup policy."
+    },
+    {
+      "Comparison": "Local PR `#809` scorer-residual comparison: batched torch stats `eval_026` vs vectorized post-lookup `eval_027`",
+      "Metric": "cumulative `ngram_torch_stats_elapsed_ms`",
+      "Baseline": "`3257ms`",
+      "Candidate": "`3223ms`",
+      "Delta": "`-34ms`",
+      "Notes": "Exact batched neural-stat extraction stayed essentially flat, so this round is not another scorer-stats win in disguise."
+    },
+    {
+      "Comparison": "Official 2026-03-27 snapshot target `PR #803` vs vectorized post-lookup `eval_027`",
+      "Metric": "post-export `val_bpb`",
+      "Baseline": "`0.4416`",
+      "Candidate": "`0.29117839`",
+      "Delta": "`-0.15042161`",
+      "Notes": "Quality remains far below the official target, so the active `PR #809` line is no longer limited by BPB on this comparison."
+    },
+    {
+      "Comparison": "Vectorized post-lookup path vs practical runtime budget",
+      "Metric": "script eval wallclock",
+      "Baseline": "`600000ms`",
+      "Candidate": "`574202ms`",
+      "Delta": "`-25798ms`",
+      "Notes": "The locked evaluator is now script-legal with roughly `25.8s` of headroom."
+    },
+    {
+      "Comparison": "Vectorized post-lookup path vs practical runtime budget",
+      "Metric": "managed wallclock",
+      "Baseline": "`600s`",
+      "Candidate": "`615s`",
+      "Delta": "`+15s`",
+      "Notes": "The managed path still has noticeable overhead beyond the script timing, so any further runtime work should target that margin rather than scorer-side post-lookup accounting again."
+    },
     {
       "Comparison": "Local PR `#809` semantic gate: locked `eval_025` held-out batching-on baseline vs `eval_026` same-helper torch-stats-off control",
       "Metric": "post-export `val_bpb`",
@@ -3122,696 +3217,54 @@
     }
   ],
   "latest_run": {
-    "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z",
-    "round_summary": {
-      "round_001.meta": {
-        "round": "1",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_001.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_001.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_001.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_001.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_001.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_001.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_002.meta": {
-        "round": "2",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_002.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_002.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_002.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_002.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_002.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_002.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_003.meta": {
-        "round": "3",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_003.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_003.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_003.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_003.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_003.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_003.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_004.meta": {
-        "round": "4",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_004.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_004.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_004.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_004.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_004.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_004.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_005.meta": {
-        "round": "5",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_005.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_005.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_005.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_005.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_005.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_005.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_006.meta": {
-        "round": "6",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_006.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_006.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_006.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_006.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_006.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_006.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_007.meta": {
-        "round": "7",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_007.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_007.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_007.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_007.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_007.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_007.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_008.meta": {
-        "round": "8",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_008.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_008.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_008.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_008.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_008.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_008.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_009.meta": {
-        "round": "9",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_009.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_009.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_009.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_009.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_009.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_009.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_010.meta": {
-        "round": "10",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_010.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_010.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_010.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_010.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_010.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_010.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_011.meta": {
-        "round": "11",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_011.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_011.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_011.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_011.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_011.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_011.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_012.meta": {
-        "round": "12",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_012.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_012.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_012.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_012.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_012.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_012.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_013.meta": {
-        "round": "13",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_013.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_013.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_013.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_013.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_013.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_013.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_014.meta": {
-        "round": "14",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_014.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_014.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_014.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_014.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_014.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_014.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_015.meta": {
-        "round": "15",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_015.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_015.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_015.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_015.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_015.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_015.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_016.meta": {
-        "round": "16",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_016.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_016.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_016.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_016.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_016.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_016.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_017.meta": {
-        "round": "17",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_017.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_017.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_017.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_017.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_017.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_017.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_018.meta": {
-        "round": "18",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_018.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_018.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_018.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_018.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_018.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_018.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_019.meta": {
-        "round": "19",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_019.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_019.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_019.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_019.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_019.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_019.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_020.meta": {
-        "round": "20",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_020.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_020.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_020.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_020.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_020.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_020.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_021.meta": {
-        "round": "21",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_021.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_021.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_021.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_021.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_021.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_021.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_022.meta": {
-        "round": "22",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_022.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_022.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_022.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_022.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_022.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_022.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_023.meta": {
-        "round": "23",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_023.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_023.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_023.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_023.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_023.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_023.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_024.meta": {
-        "round": "24",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_024.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_024.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_024.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_024.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_024.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_024.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_025.meta": {
-        "round": "25",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_025.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_025.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_025.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_025.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_025.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_025.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_026.meta": {
-        "round": "26",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_026.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_026.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_026.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_026.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_026.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_026.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_027.meta": {
-        "round": "27",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_027.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_027.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_027.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_027.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_027.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_027.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_028.meta": {
-        "round": "28",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_028.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_028.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_028.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_028.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_028.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_028.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_029.meta": {
-        "round": "29",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_029.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_029.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_029.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_029.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_029.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_029.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_030.meta": {
-        "round": "30",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_030.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_030.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_030.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_030.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_030.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_030.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_031.meta": {
-        "round": "31",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_031.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_032.meta": {
-        "round": "32",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_032.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_033.meta": {
-        "round": "33",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_033.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_034.meta": {
-        "round": "34",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_034.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_035.meta": {
-        "round": "35",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_035.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_036.meta": {
-        "round": "36",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_036.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_037.meta": {
-        "round": "37",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_037.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_037.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_037.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_037.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_037.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_037.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_038.meta": {
-        "round": "38",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_038.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_038.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_038.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_038.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_038.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_038.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_039.meta": {
-        "round": "39",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_039.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_039.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_039.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_039.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_039.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_039.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_040.meta": {
-        "round": "40",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_040.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_040.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_040.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_040.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_040.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_040.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_041.meta": {
-        "round": "41",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_041.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_041.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_041.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_041.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_041.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_041.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_042.meta": {
-        "round": "42",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_042.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_042.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_042.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_042.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_042.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_042.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_043.meta": {
-        "round": "43",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_043.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_043.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_043.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_043.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_043.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_043.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_044.meta": {
-        "round": "44",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_044.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_044.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_044.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_044.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_044.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_044.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_045.meta": {
-        "round": "45",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_045.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_045.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_045.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_045.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_045.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_045.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_046.meta": {
-        "round": "46",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_046.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_046.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_046.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_046.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_046.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_046.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_047.meta": {
-        "round": "47",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_047.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_047.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_047.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_047.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_047.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_047.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_048.meta": {
-        "round": "48",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_048.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_048.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_048.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_048.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_048.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_048.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_049.meta": {
-        "round": "49",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_049.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_049.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_049.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_049.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_049.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_049.worker.final.txt",
-        "worker_exit_code": "0"
-      },
-      "round_050.meta": {
-        "round": "50",
-        "planner_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.planner.prompt.txt",
-        "planner_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.planner.final.txt",
-        "planner_exit_code": "0",
-        "review_enabled": "1",
-        "review_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.review.prompt.txt",
-        "review_instructions": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.review.final.txt",
-        "review_exit_code": "0",
-        "worker_prompt": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.worker.prompt.txt",
-        "worker_summary": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.worker.final.txt",
-        "worker_exit_code": "0"
-      }
-    },
+    "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z",
+    "round_summary": {},
     "phase_meta": {
       "planner": {
         "phase": "planner",
-        "round": "50",
-        "start_time": "2026-03-26T16:57:17Z",
-        "end_time": "2026-03-26T17:00:32Z",
+        "round": "1",
+        "start_time": "2026-03-27T02:33:20Z",
+        "end_time": "2026-03-27T02:37:05Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.planner.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.planner.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.planner.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.planner.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.planner.final.txt"
       },
       "review": {
         "phase": "review",
-        "round": "50",
-        "start_time": "2026-03-26T17:00:33Z",
-        "end_time": "2026-03-26T17:02:25Z",
+        "round": "1",
+        "start_time": "2026-03-27T02:37:05Z",
+        "end_time": "2026-03-27T02:38:40Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.review.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.review.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.review.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.review.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.review.final.txt"
       },
       "worker": {
         "phase": "worker",
-        "round": "50",
-        "start_time": "2026-03-26T17:02:25Z",
-        "end_time": "2026-03-26T17:39:07Z",
+        "round": "1",
+        "start_time": "2026-03-27T02:38:41Z",
+        "end_time": "2026-03-27T03:13:59Z",
         "exit_code": "0",
-        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.worker.prompt.txt",
-        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.worker.stdout.log",
-        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.worker.stderr.log",
-        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z/round_050.worker.final.txt"
+        "prompt_file": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.prompt.txt",
+        "stdout_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.stdout.log",
+        "stderr_log": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.stderr.log",
+        "last_message": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z/round_001.worker.final.txt"
       }
     }
   },
   "run_batches": [
+    {
+      "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260327T023306Z",
+      "configured_rounds": 50,
+      "completed_rounds": 1,
+      "latest_round": "1",
+      "latest_phase": "worker",
+      "state": "in progress",
+      "latest_timestamp": "2026-03-27T03:13:59Z"
+    },
     {
       "run_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/codex_research_loop/20260325T120110Z",
       "configured_rounds": 50,
@@ -3860,9 +3313,57 @@
   ],
   "training_runs": [
     {
+      "name": "eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_final_vectorized_on",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_final_vectorized_on.txt",
+      "updated_at_utc": "2026-03-27T03:05:34Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
+      "name": "eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_screen_vectorized_on",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_screen_vectorized_on.txt",
+      "updated_at_utc": "2026-03-27T02:54:55Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
+      "name": "eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_control_vectorize_off",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_control_vectorize_off.txt",
+      "updated_at_utc": "2026-03-27T02:53:32Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
+      "name": "eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_parity_disabled",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/logs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337_parity_disabled.txt",
+      "updated_at_utc": "2026-03-27T02:52:08Z",
+      "latest_step": 0,
+      "total_steps": 0,
+      "is_complete": true,
+      "stop_reason": "",
+      "train_points": [],
+      "val_by_mode": {},
+      "latest_metrics": {}
+    },
+    {
       "name": "eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_final_batch_torch_on",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337/final_batch_torch_on_8gpu/logs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_final_batch_torch_on.txt",
-      "updated_at_utc": "2026-03-26T17:30:13Z",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/final_batch_torch_on_8gpu/logs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_final_batch_torch_on.txt",
+      "updated_at_utc": "2026-03-27T02:40:22Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -3873,56 +3374,8 @@
     },
     {
       "name": "eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_screen_batch_torch_on",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337/screen_batch_torch_on_8gpu/logs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_screen_batch_torch_on.txt",
-      "updated_at_utc": "2026-03-26T17:19:04Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_control_batch_off",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337/control_batch_off_8gpu/logs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_control_batch_off.txt",
-      "updated_at_utc": "2026-03-26T17:17:39Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_parity_disabled",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337/parity_8gpu/logs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_parity_disabled.txt",
-      "updated_at_utc": "2026-03-26T17:16:11Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_025_arch010_pr809_chunk_ngram_ttt_batch_lookup_by_batch_seed1337_final_batch_on",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_025_arch010_pr809_chunk_ngram_ttt_batch_lookup_by_batch_seed1337/logs/eval_025_arch010_pr809_chunk_ngram_ttt_batch_lookup_by_batch_seed1337_final_batch_on.txt",
-      "updated_at_utc": "2026-03-26T16:45:07Z",
-      "latest_step": 0,
-      "total_steps": 0,
-      "is_complete": true,
-      "stop_reason": "",
-      "train_points": [],
-      "val_by_mode": {},
-      "latest_metrics": {}
-    },
-    {
-      "name": "eval_025_arch010_pr809_chunk_ngram_ttt_batch_lookup_by_batch_seed1337_screen_batch_on",
-      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_025_arch010_pr809_chunk_ngram_ttt_batch_lookup_by_batch_seed1337/logs/eval_025_arch010_pr809_chunk_ngram_ttt_batch_lookup_by_batch_seed1337_screen_batch_on.txt",
-      "updated_at_utc": "2026-03-26T16:33:55Z",
+      "path": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337/screen_batch_torch_on_8gpu/logs/eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337_screen_batch_torch_on.txt",
+      "updated_at_utc": "2026-03-27T02:40:22Z",
       "latest_step": 0,
       "total_steps": 0,
       "is_complete": true,
@@ -3933,7 +3386,7 @@
     }
   ],
   "verifier": {
-    "generated_at_utc": "2026-03-25T12:00:06Z",
+    "generated_at_utc": "2026-03-27T02:31:42Z",
     "repo_root": "/newcpfs/lxh/parameter-golf",
     "project_root": "/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science",
     "executables": {
@@ -3992,7 +3445,7 @@
     },
     "git_status": {
       "ok": true,
-      "summary": "M docs/latest_sota_snapshot.md\n M research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md\n M research_lab_pg/projects/parameter_golf_science/dashboard/index.html\n M research_lab_pg/projects/parameter_golf_science/dashboard/status.json\n?? research_lab_pg/projects/gpu_runner_metadata.json\n?? research_lab_pg/projects/gpu_runner_metadata_export.json\n?? research_lab_pg/run_50rounds.log"
+      "summary": "M docs/latest_sota_snapshot.md\n D docs/sota_records/sota_record_06_1.14582_2026-03-20_Int6_MLP3x_SmearGate_BigramHash_MuonWD_SWA.md\n D docs/sota_records/sota_record_07_1.15015_2026-03-19_MLP3x_QAT_Int6_SlidingWindow.md\n D docs/sota_records/sota_record_08_1.15560_2026-03-19_smeargate_orthoinit_muonwd.md\n D docs/sota_records/sota_record_09_1.15744_2026-03-19_WarmdownQuantization.md\n D docs/sota_records/sota_record_10_1.15862_2026-03-19_Seq2048_FP16Emb_TunedLR.md\n D docs/sota_records/sota_record_11_1.16301_2026-03-19_MixedQuant_Int6Int8_SlidingWindow.md\n D docs/sota_records/sota_record_12_1.19250_2026-03-19_SlidingWindowEval.md\n D docs/sota_records/sota_record_13_1.19290_2026-03-17_LoRA_TTT.md\n D docs/sota_records/sota_record_14_1.20143_2026-03-19_TrainingOptSeq4096.md\n D docs/sota_records/sota_record_15_1.20576_2026-03-18_LongContextSeq2048.md\n M docs/sota_records/sota_records_index.md\n M research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md\n M research_lab_pg/projects/parameter_golf_science/dashboard/index.html\n M research_lab_pg/projects/parameter_golf_science/dashboard/status.json\n?? research_lab_pg/projects/gpu_runner_metadata.json\n?? research_lab_pg/projects/gpu_runner_metadata_export.json\n?? research_lab_pg/projects/parameter_golf_science/final_model.int8.ptz\n?? research_lab_pg/projects/parameter_golf_science/final_model.pt\n?? research_lab_pg/run_50rounds.log\n?? run_round2.log"
     },
     "data": {
       "datasets_root_exists": true,
@@ -4036,8 +3489,179 @@
       "ready_for_real_iteration": true
     }
   },
+  "eval_runs": [
+    {
+      "run": "eval_015_arch010_pr809_chunk_ngram_ttt_buckets2097152_seed1337",
+      "val_bpb": 0.19974202,
+      "wallclock_ms": 663957,
+      "over_budget": true
+    },
+    {
+      "run": "eval_026_arch010_pr809_chunk_ngram_ttt_batch_torch_stats_seed1337",
+      "val_bpb": 0.29117983,
+      "wallclock_ms": 469094,
+      "over_budget": false
+    },
+    {
+      "run": "eval_016_arch010_pr809_chunk_ngram_ttt_chunk2000000_seed1337",
+      "val_bpb": 0.29794332,
+      "wallclock_ms": 676651,
+      "over_budget": true
+    },
+    {
+      "run": "eval_014_arch010_pr809_chunk_ngram_ttt_maxorder7_seed1337",
+      "val_bpb": 0.34909253,
+      "wallclock_ms": 659969,
+      "over_budget": true
+    },
+    {
+      "run": "eval_021_arch010_pr809_chunk_ngram_ttt_fused_lookup_scratch_seed1337",
+      "val_bpb": 1.1193447,
+      "wallclock_ms": 468429,
+      "over_budget": false
+    },
+    {
+      "run": "eval_025_arch010_pr809_chunk_ngram_ttt_batch_lookup_by_batch_seed1337",
+      "val_bpb": 1.11934793,
+      "wallclock_ms": 467990,
+      "over_budget": false
+    },
+    {
+      "run": "eval_027_arch010_pr809_chunk_ngram_ttt_vectorized_postlookup_seed1337",
+      "val_bpb": 1.11934901,
+      "wallclock_ms": 606325,
+      "over_budget": true
+    },
+    {
+      "run": "eval_013_arch010_pr809_chunk_ngram_ttt_seed1337",
+      "val_bpb": 1.11934928,
+      "wallclock_ms": 468636,
+      "over_budget": false
+    },
+    {
+      "run": "eval_023_arch010_pr809_chunk_ngram_ttt_entropy_pregate_h3p0_seed1337",
+      "val_bpb": 1.11935003,
+      "wallclock_ms": 466947,
+      "over_budget": false
+    },
+    {
+      "run": "eval_006_arch010_legal_ttt_epochs4_seed1337",
+      "val_bpb": 1.11935008,
+      "wallclock_ms": null,
+      "over_budget": false
+    },
+    {
+      "run": "eval_009_arch010_legal_ttt_temperature_seed1337",
+      "val_bpb": 1.11935008,
+      "wallclock_ms": null,
+      "over_budget": false
+    },
+    {
+      "run": "eval_010_arch010_legal_ttt_prefix_bigram_interp_seed1337",
+      "val_bpb": 1.11935008,
+      "wallclock_ms": null,
+      "over_budget": false
+    },
+    {
+      "run": "eval_022_arch010_pr809_chunk_ngram_ttt_torch_cuda_tables_seed1337",
+      "val_bpb": 1.11935044,
+      "wallclock_ms": 457365,
+      "over_budget": false
+    },
+    {
+      "run": "eval_024_arch010_pr809_chunk_ngram_ttt_uint16_tables_seed1337",
+      "val_bpb": 1.11935059,
+      "wallclock_ms": 474602,
+      "over_budget": false
+    },
+    {
+      "run": "eval_012_arch010_legal_ttt_logit_bias_seed1337",
+      "val_bpb": 1.11935063,
+      "wallclock_ms": 470956,
+      "over_budget": false
+    },
+    {
+      "run": "eval_020_arch010_pr809_chunk_ngram_ttt_precompute_fullkeys_seed1337",
+      "val_bpb": 1.11935153,
+      "wallclock_ms": 459013,
+      "over_budget": false
+    },
+    {
+      "run": "eval_019_arch010_pr809_chunk_ngram_ttt_dedup_lookup_gathers_seed1337",
+      "val_bpb": 1.11935159,
+      "wallclock_ms": 461785,
+      "over_budget": false
+    },
+    {
+      "run": "eval_018_arch010_pr809_chunk_ngram_ttt_sparse_updates_seed1337",
+      "val_bpb": 1.11935177,
+      "wallclock_ms": 453755,
+      "over_budget": false
+    },
+    {
+      "run": "eval_017_arch010_pr809_chunk_ngram_ttt_precompute_ctxkeys_seed1337",
+      "val_bpb": 1.1193532,
+      "wallclock_ms": 457900,
+      "over_budget": false
+    },
+    {
+      "run": "eval_011_arch010_legal_ttt_backoff_ngram_seed1337",
+      "val_bpb": 1.11935518,
+      "wallclock_ms": 466883,
+      "over_budget": false
+    },
+    {
+      "run": "eval_005_arch010_legal_ttt_lr0025_seed1337",
+      "val_bpb": 1.11956042,
+      "wallclock_ms": null,
+      "over_budget": false
+    },
+    {
+      "run": "eval_007_arch010_legal_ttt_epochs4_seed2024_confirm",
+      "val_bpb": 1.11994397,
+      "wallclock_ms": null,
+      "over_budget": false
+    },
+    {
+      "run": "eval_008_arch010_legal_ttt_epochs4_seed42_confirm",
+      "val_bpb": 1.11998885,
+      "wallclock_ms": null,
+      "over_budget": false
+    },
+    {
+      "run": "eval_002_arch010_legal_ttt_seed1337_export_eval",
+      "val_bpb": 1.1221155,
+      "wallclock_ms": null,
+      "over_budget": false
+    },
+    {
+      "run": "eval_004_arch010_legal_ttt_seed2024_confirm",
+      "val_bpb": 1.12225535,
+      "wallclock_ms": null,
+      "over_budget": false
+    },
+    {
+      "run": "eval_003_arch010_legal_ttt_seed42_confirm",
+      "val_bpb": 1.12281449,
+      "wallclock_ms": null,
+      "over_budget": false
+    }
+  ],
   "git": {
     "changed_files": [
+      "M docs/latest_sota_snapshot.md",
+      "D docs/sota_records/sota_record_06_1.14582_2026-03-20_Int6_MLP3x_SmearGate_BigramHash_MuonWD_SWA.md",
+      "D docs/sota_records/sota_record_07_1.15015_2026-03-19_MLP3x_QAT_Int6_SlidingWindow.md",
+      "D docs/sota_records/sota_record_08_1.15560_2026-03-19_smeargate_orthoinit_muonwd.md",
+      "D docs/sota_records/sota_record_09_1.15744_2026-03-19_WarmdownQuantization.md",
+      "D docs/sota_records/sota_record_10_1.15862_2026-03-19_Seq2048_FP16Emb_TunedLR.md",
+      "D docs/sota_records/sota_record_11_1.16301_2026-03-19_MixedQuant_Int6Int8_SlidingWindow.md",
+      "D docs/sota_records/sota_record_12_1.19250_2026-03-19_SlidingWindowEval.md",
+      "D docs/sota_records/sota_record_13_1.19290_2026-03-17_LoRA_TTT.md",
+      "D docs/sota_records/sota_record_14_1.20143_2026-03-19_TrainingOptSeq4096.md",
+      "D docs/sota_records/sota_record_15_1.20576_2026-03-18_LongContextSeq2048.md",
+      "M docs/sota_records/sota_records_index.md",
+      "M research_lab_pg/projects/parameter_golf_science/context/reference_materials/latest_sota_snapshot.md",
       "M research_lab_pg/projects/parameter_golf_science/dashboard/index.html",
       "M research_lab_pg/projects/parameter_golf_science/dashboard/status.json",
       "M research_lab_pg/projects/parameter_golf_science/planning/experiment_ledger.md",
@@ -4045,23 +3669,47 @@
       "M research_lab_pg/projects/parameter_golf_science/planning/research_memory.md",
       "M research_lab_pg/projects/parameter_golf_science/reports/comparison_summary.md",
       "M research_lab_pg/projects/parameter_golf_science/reports/latest_status.md",
-      "M research_lab_pg/scripts/generate_progress_dashboard.py",
+      "M research_lab_pg/scripts/codex_research_loop.sh",
+      "M research_lab_pg/scripts/start_parameter_golf_iteration.sh",
       "?? research_lab_pg/projects/gpu_runner_metadata.json",
       "?? research_lab_pg/projects/gpu_runner_metadata_export.json",
+      "?? research_lab_pg/projects/parameter_golf_science/context/reference_materials/sota_record_01_1.11940_2026-03-23_LeakyReLU_LegalTTT_ParallelMuon.md",
+      "?? research_lab_pg/projects/parameter_golf_science/context/reference_materials/sota_record_02_1.12278_2026-03-22_11L_EMA_GPTQ-lite_warmdown3500_QAT015_1.1233.md",
+      "?? research_lab_pg/projects/parameter_golf_science/context/reference_materials/sota_record_03_1.12485_2026-03-21_11L_XSA4_EMA_PartialRoPE_LateQAT_1.1248.md",
+      "?? research_lab_pg/projects/parameter_golf_science/context/reference_materials/sota_record_04_1.12707_2026-03-20_11L_XSA4_EMA_Int6_MLP3x_WD04_1.1271.md",
+      "?? research_lab_pg/projects/parameter_golf_science/context/reference_materials/sota_record_05_1.13071_2026-03-20_11L_EfficientPartialXSA_FA3_SWA120.md",
+      "?? research_lab_pg/projects/parameter_golf_science/context/reference_materials/sota_records_index.md",
       "?? research_lab_pg/projects/parameter_golf_science/final_model.int8.ptz",
       "?? research_lab_pg/projects/parameter_golf_science/final_model.pt",
-      "?? research_lab_pg/run_50rounds.log"
+      "?? research_lab_pg/run_50rounds.log",
+      "?? research_lab_pg/scripts/.efc_2906510760244555859_13284774627281352291_1774579073654221_start_parameter_golf_iteration.sh",
+      "?? research_lab_pg/scripts/.efc_2906510760244555859_13701920400701144752_1774579039696814_codex_research_loop.sh",
+      "?? run_round2.log"
     ],
     "diff_stat": [
-      ".../parameter_golf_science/dashboard/index.html    |   32 +-",
-      ".../parameter_golf_science/dashboard/status.json   | 1357 ++++++++++++++++----",
-      ".../planning/experiment_ledger.md                  |   19 +",
-      ".../planning/next_experiment.md                    |  317 +++--",
-      ".../planning/research_memory.md                    |  347 +----",
-      ".../reports/comparison_summary.md                  |  136 ++",
-      ".../reports/latest_status.md                       |  114 +-",
-      ".../scripts/generate_progress_dashboard.py         |    2 +-",
-      "8 files changed, 1635 insertions(+), 689 deletions(-)"
+      "docs/latest_sota_snapshot.md                       |    2 +-",
+      "...0_Int6_MLP3x_SmearGate_BigramHash_MuonWD_SWA.md | 1348 -----------------",
+      "...5015_2026-03-19_MLP3x_QAT_Int6_SlidingWindow.md | 1561 --------------------",
+      "....15560_2026-03-19_smeargate_orthoinit_muonwd.md |  182 ---",
+      "...d_09_1.15744_2026-03-19_WarmdownQuantization.md | 1340 -----------------",
+      "...0_1.15862_2026-03-19_Seq2048_FP16Emb_TunedLR.md | 1420 ------------------",
+      "...2026-03-19_MixedQuant_Int6Int8_SlidingWindow.md | 1466 ------------------",
+      "...cord_12_1.19250_2026-03-19_SlidingWindowEval.md | 1489 -------------------",
+      ".../sota_record_13_1.19290_2026-03-17_LoRA_TTT.md  | 1470 ------------------",
+      "...ord_14_1.20143_2026-03-19_TrainingOptSeq4096.md | 1242 ----------------",
+      "...ord_15_1.20576_2026-03-18_LongContextSeq2048.md | 1231 ---------------",
+      "docs/sota_records/sota_records_index.md            |   30 +-",
+      ".../reference_materials/latest_sota_snapshot.md    |   14 +-",
+      ".../parameter_golf_science/dashboard/index.html    |   24 +-",
+      ".../parameter_golf_science/dashboard/status.json   |  959 +++---------",
+      ".../planning/experiment_ledger.md                  |    1 +",
+      ".../planning/next_experiment.md                    |  260 ++--",
+      ".../planning/research_memory.md                    |   62 +-",
+      ".../reports/comparison_summary.md                  |   12 +",
+      ".../reports/latest_status.md                       |  126 +-",
+      "research_lab_pg/scripts/codex_research_loop.sh     |    3 +-",
+      ".../scripts/start_parameter_golf_iteration.sh      |    5 +-",
+      "22 files changed, 471 insertions(+), 13776 deletions(-)"
     ]
   }
 }
