@@ -9,17 +9,39 @@ PR `#809` at `0.2952` remains legality-pending and is not the official target.
 
 This line is in **REFINEMENT phase**:
 - strongest measured local run: `eval_015=0.19974202`
-- strongest runtime-improved legality baseline: `eval_032=0.29081271`
+- promoted quality baseline on the locked legality line: `eval_032=0.29081271`
+- freshest admissible runner-managed control on the promoted line: `eval_033=0.29081380`
 - previous legality baseline: `eval_027=0.29117839`
-- newest scored refinement round: `eval_033 direct-launch pair -> negative launcher bypass on promoted eval_031 T=0.95 line`
-- newest runtime-only round: `eval_033 control=0.29081380, direct=0.29081558, external delta=-2602ms -> negative`
+- newest scored refinement round: `eval_034 TTT_EPOCHS=3 candidate -> runtime-only operational win on promoted eval_031 T=0.95 line`
+- newest runtime-only round: `eval_034 candidate=0.29085478 vs eval_033 control=0.29081380 with external delta=-69695ms`
 - official-anchor gap on the active legality line: `0.29081271 - 0.4416 = -0.15078729`
-- open problem: the scalar-temperature question is closed on the locked PR809 legality line and launcher bypass on the promoted line is now also answered negatively from a fresh admissible pair. The next refinement round should move to a genuinely different single-variable question rather than another launcher-path rerun.
+- open problem: scalar-temperature tuning is closed on the locked PR809 legality line, launcher bypass is answered negatively on the promoted line, and TTT epoch count is now also closed as quality-default `4` versus runtime-optimized `3`. The next refinement round should move to a genuinely different single-variable question.
 
 `context/reference_materials/URGENT_ngram_backoff_breakthrough.md` remains authoritative for the n-gram mechanism family.  
 `context/reference_materials/latest_sota_snapshot.md` remains authoritative for the official comparison target.
 
-## Newest Critical Result - `eval_033_eval031_direct_launch_pair`
+## Newest Critical Result - `eval_034_eval031_ttt_epochs3_candidate`
+
+- The reviewed refinement-phase epoch-count ablation executed cleanly on the locked promoted `eval_031` legality lineage at `EVAL_LOGIT_TEMP=0.95` with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after the run at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
+- The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
+  - reused the exact locked `eval_031` helper with no edits
+  - reused the exact same checkpoint, artifact, runner path, environment, tokenizer, dataset, stride, legal TTT settings, and PR809 vectorized n-gram settings
+  - kept `EVAL_LOGIT_TEMP=0.95` fixed
+  - changed only `TTT_EPOCHS` from `4` to `3`
+  - changed only operational identifiers such as `RUN_ID`, runner log dir, and runner run name
+- The fresh runner-managed candidate in `physicslm` on GPUs `0,1,2,3,4,5,6,7` scored:
+  - `legal_ttt_exact val_loss=0.49109611`
+  - `legal_ttt_exact val_bpb=0.29085478`
+  - script eval wallclock `514515ms`
+  - runner-managed wallclock `558261ms`
+  - external top-level wallclock `558444ms`
+- Required comparisons:
+  - candidate vs fresh `eval_033` runner control: `+0.00004098 BPB`, `-70937ms` script, `-69707ms` runner-managed, `-69695ms` external
+  - candidate vs promoted `eval_032`: `+0.00004207 BPB`, `-70361ms` script, `-68921ms` runner-managed, `-68977ms` external
+- Decision label: `runtime-only operational win`.
+- Interpretation: reducing to `TTT_EPOCHS=3` buys a very large runtime gain of about `70s`, but the fourth epoch still buys a small quality gain on the promoted line. Keep `TTT_EPOCHS=4` as the quality default, remember `TTT_EPOCHS=3` as the runtime-optimized variant, and move the next refinement round to a different single-variable question.
+
+## Previous Critical Result - `eval_033_eval031_direct_launch_pair`
 
 - The reviewed refinement-phase launcher-path control pair executed cleanly on the locked promoted `eval_031` legality lineage at `EVAL_LOGIT_TEMP=0.95` with no code edits. The helper stayed fixed at `125663` bytes with SHA-256 `2dea839e4045da88c3e1ae4b6696fbe12d31e5697ace2812509b530dce1d16ce`. The saved checkpoint and artifact also stayed fixed before and after both runs at `106178569` bytes / `b8291ad1...` and `15555121` bytes / `eb062c96...`.
 - The controlled experiment scope stayed exactly inside the reviewed single-variable lane:
@@ -227,8 +249,9 @@ This line is in **REFINEMENT phase**:
 - `eval_031`: scoring-only neural-logit temperature scaling on the locked PR809 legality line was locally positive and selected `T=0.95`; it is now superseded by `eval_032`, which cleanly confirmed the same setting on a fresh full official control/candidate pair.
 - `eval_032`: fresh same-helper full official control/candidate confirmation on the locked `eval_031` line promoted `EVAL_LOGIT_TEMP=0.95` as the default. The fresh control stayed admissible, the fresh candidate won by `0.00036820 BPB`, and nearby scalar-temperature tuning on this line should now be treated as closed.
 - `eval_033`: fresh admissible runner control plus direct-launch candidate on the promoted `eval_031` `T=0.95` line preserved BPB but saved only `2602ms` externally, which is below the reviewed `3s` floor; launcher bypass should now be treated as answered negatively on this line.
+- `eval_034`: fresh runner-managed `TTT_EPOCHS=3` on the promoted `eval_031` `T=0.95` line worsened BPB by `+0.00004098` versus fresh `eval_033` but saved about `70s` end-to-end, so epoch count is now closed as quality-default `4` versus runtime-optimized `3`.
 
 ## Best Next Step
 
-Keep the locked `eval_031` legality line with promoted `EVAL_LOGIT_TEMP=0.95` as the active baseline.  
-Do not revert to pre-batched scorer lookup, per-row neural-stat extraction, or per-row post-lookup bookkeeping, and do not spend the next round on nearby scalar-temperature sweeps or another runner-vs-direct-launch rerun on this line. Move the next refinement round to a genuinely different single-variable question.
+Keep the locked `eval_031` legality line with promoted `EVAL_LOGIT_TEMP=0.95` and quality-default `TTT_EPOCHS=4` as the active baseline.  
+Remember `TTT_EPOCHS=3` only as a runtime-optimized operational variant, and do not spend the next round on nearby scalar-temperature sweeps, launcher-path reruns, or more epoch-count repetitions on this line. Move the next refinement round to a genuinely different single-variable question.

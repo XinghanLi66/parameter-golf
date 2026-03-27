@@ -3,78 +3,75 @@
 Fill this in before a substantive implementation or experiment run.
 
 ## Status
-Completed on `2026-03-27` as the reviewed refinement-phase launcher-path control pair on the locked promoted `eval_031` PR809 legality lineage at `EVAL_LOGIT_TEMP=0.95`.
+Completed on `2026-03-27` as the reviewed refinement-phase single-variable epoch-count ablation on the promoted `eval_031 / eval_032 / eval_033` legality line at `EVAL_LOGIT_TEMP=0.95`.
 
 - Executed the reviewed brief materially as written:
-  - re-read `context/reference_materials/latest_sota_snapshot.md`, the required planning/report files, the locked helper, and `tools/gpu_experiment_runner.py` before running anything
-  - re-verified helper, checkpoint, and artifact identities before launch and again after both runs
-  - made no code edits, no helper edits, no export edits, no checkpoint edits, and no runner edits
-  - ran exactly one fresh runner control through `tools/gpu_experiment_runner.py`
-  - recovered the exact wrapped child command from the fresh control `metadata.json`
-  - ran exactly one direct-launch candidate only after the fresh control passed the reviewed admissibility gate
-  - kept the same `physicslm` environment, cwd, GPU pinning, helper, checkpoint, artifact, `EVAL_LOGIT_TEMP=0.95`, legal TTT settings, PR809 vectorized n-gram settings, tokenizer, dataset, and stride
-  - recorded script eval wallclock, runner-managed wallclock for the control, and external top-level wallclock for both arms
+  - re-read `context/reference_materials/latest_sota_snapshot.md`, `context/reference_materials/user_proposed_ideas_eval_mixing.md`, `context/reference_materials/sota_record_01_1.11940_2026-03-23_LeakyReLU_LegalTTT_ParallelMuon.md`, the required planning/report files, the active helper, and `tools/gpu_experiment_runner.py` before launching
+  - re-verified helper, checkpoint, and artifact identities before launch and again after the run
+  - confirmed `TTT_EPOCHS` was already env-configurable on the active helper, so no code edits were needed
+  - ran exactly one fresh runner-managed candidate through `tools/gpu_experiment_runner.py`
+  - kept the same `physicslm` environment, cwd, runner path, pinned GPUs, helper, checkpoint, artifact, tokenizer, dataset, stride, `EVAL_LOGIT_TEMP=0.95`, legal TTT settings, and PR809 vectorized n-gram settings
+  - changed only `TTT_EPOCHS` from `4` to `3` plus required operational identifiers such as `RUN_ID`, runner log dir, and runner run name
 
 ## Experiment ID
-`eval_033_eval031_direct_launch_pair`
+`eval_034_eval031_ttt_epochs3_candidate`
 
 ## Category
 - evaluation
 
-Operational subtype: `fresh promoted-line launcher-path control pair`
+Operational subtype: `single-variable TTT epoch-count refinement`
 
 ## Baseline / Comparison
-Primary comparison on the locked promoted `eval_031` lineage:
-- fresh runner control at `EVAL_LOGIT_TEMP=0.95`
-- fresh direct-launch candidate reusing the exact same wrapped child command and env, bypassing only the outer runner path
+Primary comparison:
+- fresh admissible runner-managed control from `eval_033` on the promoted line with `TTT_EPOCHS=4`: `val_bpb=0.29081380`
+- fresh runner-managed candidate on the same line with `TTT_EPOCHS=3`
 
 Historical admissibility anchors:
-- `eval_031` official candidate: `val_bpb=0.29081485`
-- `eval_032` fresh confirmation candidate: `val_bpb=0.29081271`, script eval `584876ms`, runner `627182ms`, external `627421ms`
+- `eval_032` promoted candidate: `val_bpb=0.29081271`, script `584876ms`, runner `627182ms`, external `627421ms`
+- `eval_033` fresh runner control: `val_bpb=0.29081380`, script `585452ms`, runner `627968ms`, external `628139ms`
 
 ## Hypothesis
-On the locked promoted `eval_031` legality line, materially remaining runtime overhead is still in the outer launcher path, so bypassing `tools/gpu_experiment_runner.py` should reduce end-to-end wallclock without changing post-export `val_bpb`.
+On the promoted `T=0.95` PR809 legality line, the fourth TTT epoch is unnecessary or mildly over-adapts each chunk after n-gram mixing and temperature calibration. Reducing to `TTT_EPOCHS=3` should preserve or improve post-export `val_bpb` while reducing eval runtime.
 
 ## Why It Might Work
-- `eval_028` showed helper-local total process time could already fit under budget.
-- `eval_029` showed runner-internal micro-trims were not enough.
-- `eval_030` did not answer the direct-launch question because its fresh control failed the gate before the candidate ran.
-- That left direct launcher bypass as the clean remaining launcher-path variable on the current promoted line.
+- the live official #1 record uses legal score-first TTT with `3` epochs
+- the promoted local line still used `4` epochs
+- temperature calibration and launcher-path variation were already closed, so epoch count was the clean remaining evaluation-side mismatch
 
 ## Minimal Intervention
-No helper or runner edits in this round.
+No code edits in this round.
 
 Only varied:
-- launcher path
-  - control: `tools/gpu_experiment_runner.py`
-  - candidate: direct launch of the same wrapped child command
+- `TTT_EPOCHS: 4 -> 3`
 
-Also changed only the operational identifiers required to keep the runs separate:
+Also changed only the operational identifiers required to keep the run separate:
 - `RUN_ID`
 - runner `--log-dir`
 - runner `--run-name`
-- direct-launch capture directory
 
 ## Variables To Change
-- outer launch path
-  - `runner`
-  - `direct launch`
+- `TTT_EPOCHS: 4 -> 3`
 
 ## Variables To Hold Fixed
-- exact `eval_031` helper path, bytes, and SHA-256
-- exact saved checkpoint path, bytes, and SHA-256
-- exact saved artifact path, bytes, and SHA-256
+- exact helper path, bytes, and SHA-256 from `eval_031`
+- exact checkpoint path, bytes, and SHA-256
+- exact artifact path, bytes, and SHA-256
 - `EVAL_LOGIT_TEMP=0.95`
-- exact legal TTT settings
-- exact PR809-style vectorized chunked n-gram settings
-- tokenizer and dataset
-- evaluation stride `64`
+- `TTT_LR=0.0025`
+- `TTT_CHUNK_TOKENS=32768`
+- `TTT_FREEZE_BLOCKS=0`
+- `TTT_MOMENTUM=0.9`
+- `TTT_BATCH_SEQS=32`
+- `TTT_GRAD_CLIP=1.0`
+- `NGRAM_EVAL_ENABLED=1`
+- `NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1`
+- `NGRAM_EVAL_BATCH_TORCH_STATS=1`
+- `NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1`
+- tokenizer, dataset, and stride `64`
 - `physicslm` environment
 - working directory
 - pinned GPU set `0,1,2,3,4,5,6,7`
-- no retraining
-- no export rewrite
-- no helper edits
+- launcher path `tools/gpu_experiment_runner.py`
 
 ## Identity Checks
 - Helper:
@@ -91,12 +88,11 @@ Also changed only the operational identifiers required to keep the runs separate
   - SHA-256: `eb062c96a4151946160731add43800617ce7fc47eb31934123a7283f8e9587e3`
 
 Identity status:
-- helper unchanged before vs after both fresh runs
-- checkpoint unchanged before vs after both fresh runs
-- artifact unchanged before vs after both fresh runs
+- helper unchanged before vs after the run
+- checkpoint unchanged before vs after the run
+- artifact unchanged before vs after the run
 
-## Exact Top-Level Commands Actually Run
-Fresh runner control:
+## Exact Top-Level Command Actually Run
 
 ```bash
 python tools/gpu_experiment_runner.py \
@@ -104,35 +100,14 @@ python tools/gpu_experiment_runner.py \
   --gpu-indices 0,1,2,3,4,5,6,7 \
   --conda-env physicslm \
   --cwd /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science \
-  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_033_eval031_direct_launch_pair/runner_control_8gpu \
-  --run-name eval_033_runner_control_t0p95 \
+  --log-dir /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_034_eval031_ttt_epochs3_candidate/runner_candidate_8gpu \
+  --run-name eval_034_ttt_epochs3_t0p95 \
   --timeout-seconds 7200 -- \
   env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-    RUN_ID=eval_033_eval031_direct_launch_pair_runner_control \
+    RUN_ID=eval_034_eval031_ttt_epochs3_candidate \
     EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
     EVAL_LOGIT_TEMP=0.95 \
-    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
-    TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \
-    NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \
-    NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \
-    EVAL_ONLY_FINAL_MODEL_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.pt \
-    EVAL_ONLY_ARTIFACT_PATH=/newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/arch_010_record02_leakyrelu2_keep_cudnn_recipe/full_8gpu/final_model.int6.ptz \
-    DATA_PATH=/newcpfs/lxh/parameter-golf/data/datasets/fineweb10B_sp1024 \
-    TOKENIZER_PATH=/newcpfs/lxh/parameter-golf/data/tokenizers/fineweb_1024_bpe.model \
-    torchrun --standalone --nproc_per_node=8 \
-    /newcpfs/lxh/parameter-golf/research_lab_pg/projects/parameter_golf_science/runs/eval_031_eval027_global_temperature_calibration/train_gpt.py
-```
-
-Fresh direct-launch candidate:
-
-```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
-conda run --no-capture-output -n physicslm \
-  env OMP_NUM_THREADS=1 PYTHONUNBUFFERED=1 \
-    RUN_ID=eval_033_eval031_direct_launch_pair_direct_candidate \
-    EVAL_ONLY=1 TTT_ENABLED=1 EVAL_STRIDE=64 \
-    EVAL_LOGIT_TEMP=0.95 \
-    TTT_LR=0.0025 TTT_EPOCHS=4 TTT_CHUNK_TOKENS=32768 \
+    TTT_LR=0.0025 TTT_EPOCHS=3 TTT_CHUNK_TOKENS=32768 \
     TTT_FREEZE_BLOCKS=0 TTT_MOMENTUM=0.9 TTT_BATCH_SEQS=32 TTT_GRAD_CLIP=1.0 \
     NGRAM_EVAL_ENABLED=1 NGRAM_EVAL_BATCH_LOOKUP_BY_BATCH=1 \
     NGRAM_EVAL_BATCH_TORCH_STATS=1 NGRAM_EVAL_VECTORIZE_POSTLOOKUP=1 \
@@ -145,88 +120,77 @@ conda run --no-capture-output -n physicslm \
 ```
 
 ## Fresh Official Results
-- Fresh runner control:
+- Fresh runner-managed candidate:
   - GPU indices: `0,1,2,3,4,5,6,7`
-  - `val_loss=0.49102692`
-  - `val_bpb=0.29081380`
-  - script eval wallclock: `585452ms`
-  - runner-managed wallclock: `627968ms`
-  - runner start-to-spawn: `389ms`
-  - child runtime: `627579ms`
-  - external top-level wallclock: `628139ms`
-- Fresh direct-launch candidate:
-  - GPU indices: `0,1,2,3,4,5,6,7`
-  - `val_loss=0.49102993`
-  - `val_bpb=0.29081558`
-  - script eval wallclock: `583370ms`
-  - external top-level wallclock: `625537ms`
+  - `val_loss=0.49109611`
+  - `val_bpb=0.29085478`
+  - script eval wallclock: `514515ms`
+  - runner-managed wallclock: `558261ms`
+  - runner start-to-spawn: `471ms`
+  - child runtime: `557790ms`
+  - external top-level wallclock: `558444ms`
 
 ## Required Comparisons
-- Fresh control vs `eval_032` anchor:
-  - `val_bpb`: `0.29081271 -> 0.29081380` (`+0.00000109`)
-  - external top-level wallclock: `627421ms -> 628139ms` (`+718ms`)
-- Fresh candidate vs fresh control:
-  - `val_loss`: `0.49102692 -> 0.49102993` (`+0.00000301`)
-  - `val_bpb`: `0.29081380 -> 0.29081558` (`+0.00000178`)
-  - script eval wallclock: `585452ms -> 583370ms` (`-2082ms`)
-  - external top-level wallclock: `628139ms -> 625537ms` (`-2602ms`)
-- Fresh candidate vs `eval_032` anchor:
-  - `val_bpb`: `0.29081271 -> 0.29081558` (`+0.00000287`)
-  - external top-level wallclock: `627421ms -> 625537ms` (`-1884ms`)
-
-## Fresh-Control Admissibility Check
-- control drift vs `eval_032` BPB anchor: `+0.00000109`
-- control external wallclock vs `eval_032`: `+718ms`
-- reviewed thresholds:
-  - BPB within `0.0002`
-  - external wallclock no worse than `+15000ms`
-- admissibility decision: `pass`
+- Fresh candidate vs fresh `eval_033` runner control:
+  - `val_loss`: `0.49102692 -> 0.49109611` (`+0.00006919`)
+  - `val_bpb`: `0.29081380 -> 0.29085478` (`+0.00004098`)
+  - script eval wallclock: `585452ms -> 514515ms` (`-70937ms`)
+  - runner-managed wallclock: `627968ms -> 558261ms` (`-69707ms`)
+  - external top-level wallclock: `628139ms -> 558444ms` (`-69695ms`)
+- Fresh candidate vs promoted `eval_032` anchor:
+  - `val_bpb`: `0.29081271 -> 0.29085478` (`+0.00004207`)
+  - script eval wallclock: `584876ms -> 514515ms` (`-70361ms`)
+  - runner-managed wallclock: `627182ms -> 558261ms` (`-68921ms`)
+  - external top-level wallclock: `627421ms -> 558444ms` (`-68977ms`)
 
 ## Command / Environment Parity Check
-- same cwd across arms: `pass`
-- same `physicslm` environment across arms: `pass`
-- same pinned GPUs across arms via `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7`: `pass`
-- same wrapped child command recovered from fresh control metadata and reused for direct launch: `pass`
-- only wrapped-command token difference was the allowed operational identifier:
-  - `RUN_ID=eval_033_eval031_direct_launch_pair_runner_control`
-  - `RUN_ID=eval_033_eval031_direct_launch_pair_direct_candidate`
+- same helper path: `pass`
+- same checkpoint path: `pass`
+- same artifact path: `pass`
+- same cwd: `pass`
+- same `physicslm` environment: `pass`
+- same runner path: `pass`
+- same pinned GPUs via `0,1,2,3,4,5,6,7`: `pass`
+- same wrapped child command family as fresh `eval_033` control: `pass`
+- only wrapped-command differences vs fresh `eval_033` control:
+  - allowed `RUN_ID`
+  - tested variable `TTT_EPOCHS=4 -> 3`
 
 ## Success Metric
 Primary success criterion:
-- candidate `val_bpb` within `±0.0001` of fresh control
-- candidate external wallclock at least `5s` lower than fresh control
+- candidate `val_bpb` improves on fresh `eval_033` control by at least `0.0001`
 
-Promotion threshold:
-- candidate `val_bpb` within `±0.0001` of fresh control
-- candidate external wallclock at least `10s` lower than fresh control
-
-Guardrails:
-- helper bytes/hash unchanged
-- checkpoint bytes/hash unchanged
-- artifact bytes/hash unchanged
+Secondary operational success criterion:
+- candidate stays within `±0.0001 BPB` of fresh `eval_033`
+- candidate saves at least `20s` on external or runner-managed wallclock
 
 Outcome:
-- fresh-control admissibility: `pass`
-- BPB comparability guardrail: `pass`
-- primary runtime success criterion: `fail` with only `-2602ms`
-- reviewed classification threshold for `<3s` runtime savings: `negative`
-- secondary runtime target vs `eval_032` anchor: `pass` only by `-1884ms`, which is not enough to overturn the round classification
+- primary quality success: `fail`
+- secondary operational success: `pass`
 
 ## Expected Effect
-If outer launcher overhead was still materially unresolved on the promoted line, the direct-launch candidate should preserve BPB while saving at least `5s` externally and ideally at least `10s`.
+If the fourth TTT epoch was unnecessary on the promoted `T=0.95` PR809 legality line, then `TTT_EPOCHS=3` should preserve or improve BPB while running faster than the fresh `TTT_EPOCHS=4` control.
 
 ## Actual Result
-- The fresh control was fully admissible against the `eval_032` anchor.
-- The direct-launch candidate preserved BPB cleanly on the promoted line.
-- Direct launch was only `2602ms` faster externally than the fresh runner control.
-- That runtime delta is below the reviewed `3s` minimum for a meaningful positive signal.
+- The candidate preserved full command and identity parity with the fresh `eval_033` runner control except for the intended `TTT_EPOCHS` change and operational `RUN_ID`.
+- Reducing `TTT_EPOCHS` to `3` made the run much faster:
+  - `-70937ms` script
+  - `-69707ms` runner-managed
+  - `-69695ms` external
+- But quality regressed:
+  - `val_bpb` worsened by `+0.00004098` vs fresh `eval_033`
+  - `val_bpb` worsened by `+0.00004207` vs promoted `eval_032`
 
 ## Interpretation
-This is a controlled negative refinement result for launcher bypass on the promoted `eval_031` `T=0.95` line.
-
-- Conclusion label: `negative`
-- Direct launch does not save enough top-level wallclock on this line to become the new legality/runtime baseline.
-- The launcher-path question is now effectively closed on this promoted line unless a genuinely different platform-side condition appears.
+- Classification: `runtime-only operational win`
+- The primary hypothesis is not supported as a quality-side promotion: the fourth TTT epoch still buys a small but real BPB gain on this line.
+- The run does satisfy the reviewed secondary operational success criterion, because the BPB regression stayed inside `±0.0001` while wallclock improved by about `70s`.
+- `TTT_EPOCHS=4` should remain the promoted quality default on the locked `T=0.95` PR809 legality line.
+- `TTT_EPOCHS=3` is worth remembering as a runtime-optimized operational variant when evaluation speed matters more than the last `~4.1e-5` BPB.
 
 ## Next Step
-Hold the promoted `EVAL_LOGIT_TEMP=0.95` setting fixed and stop spending immediate rounds on runner-vs-direct-launch path changes for this line. Move the next refinement round to a genuinely different single-variable question rather than another nearby launcher-path rerun.
+Close TTT epoch count on this line as follows:
+- quality default: keep `TTT_EPOCHS=4`
+- runtime-optimized variant: `TTT_EPOCHS=3`
+
+The next refinement round should move to a genuinely different single-variable question on the promoted `EVAL_LOGIT_TEMP=0.95` legality line rather than revisiting nearby epoch-count reruns.
